@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { ArrowLeft, BookOpen } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function SubmitManuscript() {
-  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,98 +24,130 @@ export default function SubmitManuscript() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleDataSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Step 1: Submit Manuscript Data
       await AuthorApi.submitManuscriptData(formData);
-      toast.success('Manuscript data submitted! Please finalize your account.');
-      setStep(2);
+      
+      // Step 2: Automatically finalize the account with the provided password
+      await AuthorApi.finalizeAccount({ email: formData.email, passwordPlain: formData.passwordPlain });
+      
+      toast.success('Account created successfully! Redirecting to your portal...', { duration: 3000 });
+      
+      // Redirect to login or portal
+      setTimeout(() => {
+        window.location.href = '/portal';
+      }, 1500);
     } catch (error) {
-      toast.error('Failed to submit manuscript data.');
+      toast.error('Failed to submit manuscript data or create account. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAccountFinalize = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await AuthorApi.finalizeAccount({ email: formData.email, passwordPlain: formData.passwordPlain });
-      toast.success('Account finalized! You can now log in to the Author Portal.');
-      // Redirect to login or portal
-      window.location.href = '/portal';
-    } catch (error) {
-      toast.error('Failed to finalize account.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const inputClasses = "w-full px-4 py-3 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors";
 
   return (
-    <div className="max-w-2xl mx-auto p-8 mt-10 bg-card border rounded-xl shadow-sm">
-      <h1 className="text-3xl font-bold mb-6 text-foreground">Submit Your Manuscript</h1>
-      
-      {step === 1 && (
-        <form onSubmit={handleDataSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Name</label>
-              <Input name="name" required value={formData.name} onChange={handleInputChange} />
+    <div className="min-h-screen bg-muted/30 py-20 lg:py-28">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 text-center"
+        >
+          <a
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-accent transition-colors mb-6"
+          >
+            <ArrowLeft size={14} /> Back to Home
+          </a>
+          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            Start Your <span className="text-accent">Publishing Journey</span>
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Tell us about your book and create your author account in one simple step to get started.
+          </p>
+        </motion.div>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-card border border-border rounded-3xl shadow-sm p-8 sm:p-12 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
+          
+          <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+            {/* Section: Author Details */}
+            <div>
+              <div className="flex items-center gap-2 text-lg font-bold text-foreground mb-5 border-b border-border/50 pb-3">
+                <span className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">1</span>
+                Author Details & Account
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Full Name <span className="text-accent">*</span></label>
+                  <input name="name" required value={formData.name} onChange={handleInputChange} className={inputClasses} placeholder="John Doe" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Email Address <span className="text-accent">*</span></label>
+                  <input name="email" type="email" required value={formData.email} onChange={handleInputChange} className={inputClasses} placeholder="john@example.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Phone Number <span className="text-accent">*</span></label>
+                  <input name="phone" required value={formData.phone} onChange={handleInputChange} className={inputClasses} placeholder="+1234567890" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Create Password <span className="text-accent">*</span></label>
+                  <input name="passwordPlain" type="password" required value={formData.passwordPlain} onChange={handleInputChange} className={inputClasses} placeholder="••••••••" minLength={6} />
+                  <p className="text-xs text-muted-foreground mt-1">You will use this to log into your Author Portal.</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
-              <Input name="email" type="email" required value={formData.email} onChange={handleInputChange} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Phone</label>
-            <Input name="phone" required value={formData.phone} onChange={handleInputChange} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Book Title</label>
-            <Input name="bookTitle" required value={formData.bookTitle} onChange={handleInputChange} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Genre</label>
-              <Input name="genre" required value={formData.genre} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Word Count</label>
-              <Input name="wordCount" type="number" required value={formData.wordCount} onChange={handleInputChange} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Book Description</label>
-            <Textarea name="bookDescription" required value={formData.bookDescription} onChange={handleInputChange} className="min-h-[100px]" />
-          </div>
-          <Button type="submit" className="w-full mt-4" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit Manuscript Data'}
-          </Button>
-        </form>
-      )}
 
-      {step === 2 && (
-        <form onSubmit={handleAccountFinalize} className="space-y-4">
-          <div className="bg-muted p-4 rounded-lg mb-6">
-            <h3 className="font-semibold mb-2">Almost there!</h3>
-            <p className="text-sm text-muted-foreground">Please create a password for your Author Portal account. You will use this to track your manuscript's progress.</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Email (Fixed)</label>
-            <Input name="email" value={formData.email} disabled />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Create Password</label>
-            <Input name="passwordPlain" type="password" required value={formData.passwordPlain} onChange={handleInputChange} />
-          </div>
-          <Button type="submit" className="w-full mt-4" disabled={loading}>
-            {loading ? 'Finalizing...' : 'Finalize Account & View Dashboard'}
-          </Button>
-        </form>
-      )}
+            {/* Section: Manuscript Details */}
+            <div>
+              <div className="flex items-center gap-2 text-lg font-bold text-foreground mb-5 border-b border-border/50 pb-3">
+                <span className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">2</span>
+                Manuscript Details
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-foreground mb-2">Book Title <span className="text-accent">*</span></label>
+                  <input name="bookTitle" required value={formData.bookTitle} onChange={handleInputChange} className={inputClasses} placeholder="The Great Story" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Genre <span className="text-accent">*</span></label>
+                  <input name="genre" required value={formData.genre} onChange={handleInputChange} className={inputClasses} placeholder="E.g. Business, Fiction, Memoir" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Word Count <span className="text-accent">*</span></label>
+                  <input name="wordCount" type="number" required value={formData.wordCount} onChange={handleInputChange} className={inputClasses} placeholder="E.g. 50000" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">Brief Book Description <span className="text-accent">*</span></label>
+                <textarea name="bookDescription" required value={formData.bookDescription} onChange={handleInputChange} className={`${inputClasses} min-h-[120px] resize-none`} placeholder="What is your book about? What is the core message?" />
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-accent text-accent-foreground font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Processing...' : (
+                  <>Submit Manuscript & Create Account <BookOpen size={18} /></>
+                )}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
     </div>
   );
 }
