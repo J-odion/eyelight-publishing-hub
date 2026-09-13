@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Referral, ReferralStatus } from './schemas/referral.schema.js';
-import { User } from '../users/schemas/user.schema.js';
+import { User, Role } from '../users/schemas/user.schema.js';
 import { EmailService } from '../email/email.service.js';
 import * as crypto from 'crypto';
 
@@ -68,10 +68,10 @@ export class ReferralsService {
       referrerId = existingRefByCode.referrer;
     } else {
       // Try to find the user whose ID starts with the code suffix
-      const allUsers = await this.userModel.find({ role: 'author' });
-      const matchingUser = allUsers.find(u => u._id.toString().substring(0, 8).toUpperCase() === userIdPrefix.toUpperCase());
+      const allUsers = await this.userModel.find({ role: Role.AUTHOR });
+      const matchingUser = allUsers.find((u: any) => u._id.toString().substring(0, 8).toUpperCase() === userIdPrefix.toUpperCase());
       if (!matchingUser) return null;
-      referrerId = matchingUser._id as Types.ObjectId;
+      referrerId = (matchingUser as any)._id as Types.ObjectId;
     }
 
     const referral = new this.referralModel({

@@ -12,7 +12,7 @@ export class PressService {
   }
 
   async findByType(type: string) {
-    return this.pressModel.find({ isPublished: true, type }).sort({ createdAt: -1 }).exec();
+    return this.pressModel.find({ isPublished: true, type: type as any }).sort({ createdAt: -1 }).exec();
   }
 
   async create(data: any) {

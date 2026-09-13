@@ -13,12 +13,12 @@ export class PaymentsService {
     private configService: ConfigService,
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
   ) {
-    this.paystackSecretKey = this.configService.get<string>('PAYSTACK_SECRET_KEY');
+    this.paystackSecretKey = this.configService.get<string>('PAYSTACK_SECRET_KEY') || '';
   }
 
   // Generate an authorization URL using Paystack API
   async initializeTransaction(userId: string, amount: number, email: string, purpose: string, projectId?: string) {
-    const reference = \`EYELIGHT-\${Date.now()}-\${Math.floor(Math.random() * 1000)}\`;
+    const reference = `EYELIGHT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     const payment = new this.paymentModel({
       user: userId,
@@ -31,7 +31,7 @@ export class PaymentsService {
 
     if (!this.paystackSecretKey) {
       this.logger.warn('PAYSTACK_SECRET_KEY not set. Mocking initialization.');
-      return { authorization_url: \`https://checkout.paystack.com/mock/\${reference}\`, reference };
+      return { authorization_url: `https://checkout.paystack.com/mock/${reference}`, reference };
     }
 
     try {
@@ -40,7 +40,7 @@ export class PaymentsService {
       const response = await fetch('https://api.paystack.co/transaction/initialize', {
         method: 'POST',
         headers: {
-          Authorization: \`Bearer \${this.paystackSecretKey}\`,
+          Authorization: `Bearer ${this.paystackSecretKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -75,9 +75,9 @@ export class PaymentsService {
     }
 
     try {
-      const response = await fetch(\`https://api.paystack.co/transaction/verify/\${reference}\`, {
+      const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
         headers: {
-          Authorization: \`Bearer \${this.paystackSecretKey}\`,
+          Authorization: `Bearer ${this.paystackSecretKey}`,
         },
       });
 
