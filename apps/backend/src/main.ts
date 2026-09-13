@@ -5,9 +5,9 @@ import { UsersService } from './users/users.service.js';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Allow requests from the frontend dev server
+  // Allow requests from any frontend (Local, Vercel, etc.)
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    origin: true,
     credentials: true,
   });
 
@@ -15,7 +15,9 @@ async function bootstrap() {
   const usersService = app.get(UsersService);
   await usersService.seedAdmin();
 
-  await app.listen(3000);
-  console.log('🚀 Eyelight API running on http://localhost:3000');
+  // Render dynamically assigns process.env.PORT
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Eyelight API running on port ${port}`);
 }
 bootstrap();
