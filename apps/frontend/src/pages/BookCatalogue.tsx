@@ -5,6 +5,23 @@ import { format } from 'date-fns';
 import { BookOpen, ShoppingCart } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import audacityOfFaith from "@/assets/books/audacity-of-faith.jpg";
+import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
+import expectedEnd from "@/assets/books/expected-end.jpg";
+import princesshood from "@/assets/books/princesshood.jpg";
+import bloom from "@/assets/books/bloom.jpg";
+import selfLeadership from "@/assets/books/self-leadership.jpg";
+import calledToCarryMen from "@/assets/books/called-to-carry-men.jpg";
+
+const staticBooks = [
+  { _id: 'sw1', title: "Audacity of Faith", author: "Apostle Femi Lazarus", description: "A compelling work that teaches that faith produces more than results but largely shapes character.", coverUrl: audacityOfFaith, purchaseLinks: { amazon: "https://www.instagram.com/thefemilazarusbooks?igsh=bjZleGR5bXJzc3Vy" } },
+  { _id: 'sw2', title: "Road to Bestseller", author: "Grace Akowe Apara", description: "A practical roadmap for aspiring writers.", coverUrl: roadToBestseller, purchaseLinks: { amazon: "http://graceapara.com/books" } },
+  { _id: 'sw3', title: "Expected End", author: "Barrister Peace Aaron", description: "A heartfelt memoir chronicling her life journey with honesty and inspiring vulnerability.", coverUrl: expectedEnd },
+  { _id: 'sw4', title: "Princesshood", author: "Sharon Adetola", description: "A powerful and inspiring book that explores the value of women in God's eyes.", coverUrl: princesshood },
+  { _id: 'sw5', title: "Bloom", author: "Margaret Ogbolu", description: "The Courage to Grow Beyond Survival.", coverUrl: bloom },
+  { _id: 'sw6', title: "This Thing Called Self-Leadership", author: "Grace Akowe Apara", description: "A compelling guide to self-discovery, responsibility, and purposeful living.", coverUrl: selfLeadership, purchaseLinks: { amazon: "http://graceapara.com/books" } },
+  { _id: 'sw7', title: "Called to Carry Men", author: "Femi Lazarus", description: "The Work, The Weight, The Discipline and The Wisdom of Pastoral Leadership.", coverUrl: calledToCarryMen },
+];
 
 export default function BookCatalogue() {
   const [books, setBooks] = useState<any[]>([]);
@@ -13,8 +30,11 @@ export default function BookCatalogue() {
 
   useEffect(() => {
     BooksApi.getAll()
-      .then(r => setBooks(r.data))
-      .catch(() => toast.error('Failed to load books'))
+      .then(r => setBooks([...staticBooks, ...r.data]))
+      .catch(() => {
+        toast.error('Failed to load books');
+        setBooks(staticBooks);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -22,7 +42,7 @@ export default function BookCatalogue() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="max-w-4xl mx-auto px-6 py-16">
+        <div className="max-w-4xl mx-auto px-6 pt-24 lg:pt-32 pb-16">
           <button onClick={() => setSelectedBook(null)} className="text-sm text-muted-foreground hover:text-accent mb-6 inline-block">
             ← Back to Catalogue
           </button>
@@ -117,7 +137,7 @@ export default function BookCatalogue() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="max-w-6xl mx-auto px-6 py-16">
+      <div className="max-w-6xl mx-auto px-6 pt-24 lg:pt-32 pb-16">
         <div className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold">Eyelight <span className="text-accent">Book Catalogue</span></h1>
           <p className="text-muted-foreground mt-2">Explore the works published by Eyelight Publishing.</p>

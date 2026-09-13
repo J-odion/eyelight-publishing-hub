@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select';
 import { format } from 'date-fns';
 import {
-  Mail, Users, BookOpen, LayoutDashboard, LogOut, Plus, RefreshCw
+  Mail, Users, BookOpen, LayoutDashboard, LogOut, Plus, RefreshCw, CalendarDays
 } from 'lucide-react';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
@@ -177,6 +177,58 @@ function LeadsTab() {
   );
 }
 
+function BookingsTab() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    LeadsApi.getAllLeads()
+      .then(r => setBookings(r.data.filter((l: any) => l.type === 'Consultation')))
+      .catch(() => toast.error('Failed to load bookings'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Bookings & Schedules</h2>
+        <span className="text-sm text-muted-foreground">{bookings.length} consultations</span>
+      </div>
+      <div className="bg-card border rounded-xl overflow-hidden">
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>Client Name</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Requested Date</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+            ) : bookings.length === 0 ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No bookings scheduled yet.</TableCell></TableRow>
+            ) : bookings.map((b: any) => (
+              <TableRow key={b._id}>
+                <TableCell className="font-medium">{b.name || '—'}</TableCell>
+                <TableCell>
+                  <div className="text-sm">{b.email}</div>
+                  <div className="text-xs text-muted-foreground">{b.phone || '—'}</div>
+                </TableCell>
+                <TableCell className="text-sm">
+                  {b.metadata?.date ? format(new Date(b.metadata.date), 'PP p') : (b.createdAt ? format(new Date(b.createdAt), 'PP') : '—')}
+                </TableCell>
+                <TableCell>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Pending Review</span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
 function ProductionTab() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -326,6 +378,7 @@ function AuthorsTab() {
 const TABS = [
   { id: 'email', label: 'Email Engine', icon: Mail },
   { id: 'leads', label: 'Audience & Leads', icon: Users },
+  { id: 'bookings', label: 'Bookings & Schedules', icon: CalendarDays },
   { id: 'production', label: 'Production Board', icon: BookOpen },
   { id: 'authors', label: 'Author Directory', icon: LayoutDashboard },
 ];
@@ -376,6 +429,7 @@ export default function AdminCRM() {
       <main className="flex-1 p-8 overflow-auto">
         {activeTab === 'email' && <EmailTab />}
         {activeTab === 'leads' && <LeadsTab />}
+        {activeTab === 'bookings' && <BookingsTab />}
         {activeTab === 'production' && <ProductionTab />}
         {activeTab === 'authors' && <AuthorsTab />}
       </main>

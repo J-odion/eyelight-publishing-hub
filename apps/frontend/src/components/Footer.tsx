@@ -61,6 +61,9 @@ const Footer = () => {
               <li><a href="/press" className="hover:opacity-100 transition-opacity">Press Room</a></li>
               <li><a href="/submit-manuscript" className="hover:opacity-100 transition-opacity">Submit Manuscript</a></li>
               <li><a href="/portal" className="hover:opacity-100 transition-opacity">Author Portal</a></li>
+              <li className="pt-2 mt-2 border-t border-background/10">
+                <a href="/help" className=" hover:text-white font-semibold transition-colors">Documentation</a>
+              </li>
             </ul>
           </div>
 
