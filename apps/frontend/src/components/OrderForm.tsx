@@ -3,6 +3,7 @@ import { services } from "./Services";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle, Mail, ArrowLeft, CalendarCheck } from "lucide-react";
 import ConsultationDialog from "./ConsultationDialog";
+import { LeadsApi } from "@/lib/api";
 
 const OrderForm = () => {
   const { toast } = useToast();
@@ -49,20 +50,14 @@ const OrderForm = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("https://eyelightpubmails.onrender.com/api/forms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: form.fullName.trim(),
-          email: form.email.trim(),
+      const response = await LeadsApi.submitInquiry({
+        name: form.fullName.trim(),
+        email: form.email.trim(),
+        metadata: {
           projectType: selectedService,
           projectDescription: form.projectDescription.trim(),
-        }),
+        },
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to send inquiry");
-      }
 
       toast({
         title: "Inquiry Sent! ✉️",

@@ -1,11 +1,32 @@
+import { useState } from "react";
 import { Mail, Phone } from "lucide-react";
+import { LeadsApi } from "@/lib/api";
+import { toast } from "sonner";
 import logo from "@/assets/logo.jpeg";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubmitting(true);
+    try {
+      await LeadsApi.submitNewsletter({ name: "", email: email.trim() });
+      toast.success("Welcome to the Eyelight newsletter!");
+      setEmail("");
+    } catch {
+      toast.error("Failed to subscribe. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <footer id="contact" className="bg-foreground text-background py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Company Info */}
           <div>
             <img src={logo} alt="Eyelight Publishing" className="h-10 mb-4 rounded" />
@@ -30,13 +51,16 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* About */}
+          {/* Quick Links */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-widest opacity-80">About</h4>
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-widest opacity-80">Quick Links</h4>
             <ul className="space-y-2 text-sm opacity-60">
               <li><a href="#about" className="hover:opacity-100 transition-opacity">About Us</a></li>
-              <li><a href="#how-it-works" className="hover:opacity-100 transition-opacity">How We Work</a></li>
-              <li><a href="#testimonials" className="hover:opacity-100 transition-opacity">Testimonials</a></li>
+              <li><a href="/catalogue" className="hover:opacity-100 transition-opacity">Book Catalogue</a></li>
+              <li><a href="/events" className="hover:opacity-100 transition-opacity">Events</a></li>
+              <li><a href="/press" className="hover:opacity-100 transition-opacity">Press Room</a></li>
+              <li><a href="/submit-manuscript" className="hover:opacity-100 transition-opacity">Submit Manuscript</a></li>
+              <li><a href="/portal" className="hover:opacity-100 transition-opacity">Author Portal</a></li>
             </ul>
           </div>
 
@@ -50,6 +74,29 @@ const Footer = () => {
               <li>Publishing & Distribution</li>
               <li>Book Marketing</li>
             </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-widest opacity-80">Join Our Newsletter</h4>
+            <p className="text-sm opacity-60 mb-4">Get publishing tips, updates, and exclusive resources.</p>
+            <form onSubmit={handleNewsletter} className="flex gap-2">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email"
+                required
+                className="flex-1 px-3 py-2 bg-background/10 border border-background/20 rounded-lg text-sm text-background placeholder:text-background/40 focus:outline-none focus:border-background/50"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-4 py-2 bg-accent text-accent-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {submitting ? "..." : "Join"}
+              </button>
+            </form>
           </div>
         </div>
 
