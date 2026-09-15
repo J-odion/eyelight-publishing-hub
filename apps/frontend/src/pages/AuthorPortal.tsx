@@ -25,6 +25,8 @@ function StageLabel({ status, stage }: { status: string; stage: string }) {
   return 'Upcoming';
 }
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+
 // Author Login subcomponent
 function AuthorLogin({ onLogin }: { onLogin: () => void }) {
   const [form, setForm] = useState({ email: '', passwordPlain: '' });
@@ -82,6 +84,9 @@ function PortalDashboard() {
   const [loading, setLoading] = useState(true);
   const [referralData, setReferralData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [uploadProjectId, setUploadProjectId] = useState<string | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const portalUser = JSON.parse(localStorage.getItem('portal_user') || '{}');
 
@@ -106,6 +111,46 @@ function PortalDashboard() {
     localStorage.removeItem('portal_user');
     navigate('/portal');
     window.location.reload();
+  };
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadFile || !uploadProjectId) return;
+    
+    // Validate file type
+    const fileExt = uploadFile.name.split('.').pop()?.toLowerCase();
+    if (fileExt !== 'doc' && fileExt !== 'docx') {
+      toast.error('Only .doc or .docx files are allowed.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`http://localhost:3000/users/upload-manuscript-file/${uploadProjectId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (!res.ok) throw new Error('Upload failed');
+      
+      toast.success('Manuscript version uploaded successfully!');
+      setUploadProjectId(null);
+      setUploadFile(null);
+      
+      // Refresh portal data
+      AuthorApi.getPortal().then(r => setData(r.data));
+    } catch (error) {
+      toast.error('Failed to upload manuscript.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) return (
@@ -191,6 +236,35 @@ function PortalDashboard() {
                 <p className="text-sm text-muted-foreground">{project.bookDescription}</p>
               </div>
             )}
+
+            {/* Manuscript Versions (Phase 1) */}
+            <div className="px-6 pb-6 border-t pt-6 bg-muted/30">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Manuscript Versions</h3>
+                <Button size="sm" variant="outline" onClick={() => setUploadProjectId(project._id)}>Upload New Version</Button>
+              </div>
+              
+              {project.versions && project.versions.length > 0 ? (
+                <div className="space-y-2">
+                  {project.versions.map((v: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between bg-background border p-3 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="w-5 h-5 text-accent" />
+                        <div>
+                          <p className="text-sm font-medium">Version {i + 1}</p>
+                          <p className="text-xs text-muted-foreground">Uploaded: {new Date(v.uploadedAt).toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="ghost" asChild>
+                        <a href={v.fileUrl} target="_blank" rel="noreferrer">Download</a>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center p-4 border border-dashed rounded-lg">No manuscript versions uploaded yet.</p>
+              )}
+            </div>
           </div>
         ))}
 
@@ -258,6 +332,28 @@ function PortalDashboard() {
           </div>
         )}
       </div>
+
+      {/* Upload Modal */}
+      <Dialog open={!!uploadProjectId} onOpenChange={(open) => !open && setUploadProjectId(null)}>
+        <DialogContent>
+          <form onSubmit={handleUpload}>
+            <DialogHeader>
+              <DialogTitle>Upload Manuscript Version</DialogTitle>
+            </DialogHeader>
+            <div className="py-6">
+              <label className="block text-sm font-medium mb-2">Select File (.doc or .docx)</label>
+              <Input type="file" accept=".doc,.docx" required onChange={(e) => setUploadFile(e.target.files?.[0] || null)} />
+              <p className="text-xs text-muted-foreground mt-2">This will not overwrite your previous versions. It will be added as a new version with today's date.</p>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setUploadProjectId(null)}>Cancel</Button>
+              <Button type="submit" disabled={!uploadFile || uploading}>
+                {uploading ? 'Uploading...' : 'Upload Version'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

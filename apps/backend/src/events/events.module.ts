@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { EventsService } from './events.service.js';
 import { EventsController } from './events.controller.js';
+import { EventsService } from './events.service.js';
 import { Event, EventSchema } from './schemas/event.schema.js';
 import { EmailModule } from '../email/email.module.js';
+import { CloudinaryService } from '../cloudinary.service.js';
 
 @Module({
   imports: [
@@ -11,6 +12,6 @@ import { EmailModule } from '../email/email.module.js';
     EmailModule,
   ],
   controllers: [EventsController],
-  providers: [EventsService],
+  providers: [EventsService, CloudinaryService],
 })
 export class EventsModule {}

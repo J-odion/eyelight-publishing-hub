@@ -1,9 +1,10 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, Role } from './schemas/user.schema.js';
 import { Manuscript, ProjectStatus } from './schemas/manuscript.schema.js';
 import { Payment } from '../payments/schemas/payment.schema.js';
+import { CloudinaryService } from '../cloudinary.service.js';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Manuscript.name) private manuscriptModel: Model<Manuscript>,
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
+    private cloudinary: CloudinaryService,
   ) {}
 
   // 1. First step of onboarding: submit manuscript data and basic info
@@ -69,6 +71,25 @@ export class UsersService {
     const projects = await this.manuscriptModel.find({ author: userId }).exec();
     const payments = await this.paymentModel.find({ user: userId }).exec();
     return { author, projects, payments };
+  }
+
+  async uploadManuscriptFileVersion(projectId: string, userId: string, file: Express.Multer.File) {
+    const project = await this.manuscriptModel.findById(projectId);
+    if (!project) throw new NotFoundException('Project not found');
+    if (project.author.toString() !== userId.toString()) {
+      throw new UnauthorizedException('You do not have permission to upload to this project');
+    }
+
+    // Live Cloudinary Upload for .doc / .docx
+    const result = await this.cloudinary.uploadFile(file, 'raw');
+
+    project.versions.push({
+      fileUrl: result.secure_url,
+      uploadedAt: new Date()
+    });
+
+    await project.save();
+    return project;
   }
 
   // === ADMIN CRM METHODS ===

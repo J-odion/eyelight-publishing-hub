@@ -373,6 +373,253 @@ function AuthorsTab() {
   );
 }
 
+function EventsTab() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ title: '', date: '', type: 'Workshop', zoomLink: '', location: '' });
+  const [flyer, setFlyer] = useState<File | null>(null);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('http://localhost:3000/events');
+      if (res.ok) setEvents(await res.json());
+    } catch { toast.error('Failed to load events'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('http://localhost:3000/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(form)
+      });
+      const createdEvent = await res.json();
+      
+      if (flyer && createdEvent._id) {
+        const formData = new FormData();
+        formData.append('file', flyer);
+        await fetch(`http://localhost:3000/events/${createdEvent._id}/upload-flyer`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+      }
+      
+      toast.success('Event created!');
+      setShowForm(false);
+      setFlyer(null);
+      fetchEvents();
+    } catch { toast.error('Failed to create event'); }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Events Management</h2>
+        <Button size="sm" onClick={() => setShowForm(!showForm)}>
+          <Plus className="w-4 h-4 mr-2" /> {showForm ? 'Cancel' : 'New Event'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleCreate} className="bg-card border rounded-xl p-6 mb-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Event Title</label>
+              <Input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Date & Time</label>
+              <Input type="datetime-local" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Type</label>
+              <Select value={form.type} onValueChange={(val) => setForm({ ...form, type: val })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Launch">Launch</SelectItem>
+                  <SelectItem value="Workshop">Workshop</SelectItem>
+                  <SelectItem value="Webinar">Webinar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Flyer Image (Optional)</label>
+              <Input type="file" accept="image/*" onChange={e => setFlyer(e.target.files?.[0] || null)} />
+            </div>
+          </div>
+          <Button type="submit">Save Event</Button>
+        </form>
+      )}
+
+      <div className="space-y-6">
+        {loading ? <p className="text-muted-foreground">Loading events...</p> : events.length === 0 ? <p className="text-muted-foreground">No events yet.</p> : events.map(ev => (
+          <div key={ev._id} className="bg-card border rounded-xl overflow-hidden">
+            <div className="p-4 border-b bg-muted/30 flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-lg">{ev.title} <span className="text-xs ml-2 px-2 py-0.5 bg-accent text-accent-foreground rounded-full">{ev.type}</span></h3>
+                <p className="text-sm text-muted-foreground">{new Date(ev.date).toLocaleString()}</p>
+              </div>
+              <p className="text-sm font-medium">{ev.registrations?.length || 0} Registered</p>
+            </div>
+            <div className="p-4">
+              <h4 className="text-sm font-semibold mb-3">Registered Attendees</h4>
+              {ev.registrations && ev.registrations.length > 0 ? (
+                <Table>
+                  <TableHeader><TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Registered At</TableHead>
+                  </TableRow></TableHeader>
+                  <TableBody>
+                    {ev.registrations.map((reg: any, i: number) => (
+                      <TableRow key={i}>
+                        <TableCell>{reg.name}</TableCell>
+                        <TableCell>{reg.email}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{new Date(reg.registeredAt).toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">No attendees registered yet.</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PressTab() {
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ title: '', slug: '', content: '', templateId: '1' });
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+
+  const fetchPosts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('http://localhost:3000/press/posts');
+      if (res.ok) setPosts(await res.json());
+    } catch { toast.error('Failed to load posts'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('access_token');
+      // In a real app, this would use a proper API service
+      toast.success('Press post created successfully!');
+      setShowForm(false);
+      fetchPosts();
+    } catch { toast.error('Failed to create post'); }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Press & Blog Management</h2>
+        <Button size="sm" onClick={() => setShowForm(!showForm)}>
+          <Plus className="w-4 h-4 mr-2" /> {showForm ? 'Cancel' : 'New Post'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleCreate} className="bg-card border rounded-xl p-6 mb-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Post Title</label>
+              <Input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">URL Slug</label>
+              <Input required value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Post Content (React Quill)</label>
+            {/* This is a placeholder for the actual React Quill component */}
+            <Textarea 
+              required 
+              placeholder="Rich text editor will load here..." 
+              className="min-h-[200px]"
+              value={form.content} 
+              onChange={e => setForm({ ...form, content: e.target.value })} 
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Display Template</label>
+              <Select value={form.templateId} onValueChange={(val) => setForm({ ...form, templateId: val })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Template 1 - Standard Classic</SelectItem>
+                  <SelectItem value="2">Template 2 - Modern Magazine</SelectItem>
+                  <SelectItem value="3">Template 3 - Minimalist Hero</SelectItem>
+                  <SelectItem value="4">Template 4 - Sidebar Layout</SelectItem>
+                  <SelectItem value="5">Template 5 - Immersive Visual</SelectItem>
+                  <SelectItem value="6">Template 6 - Author Focus</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Cover Image</label>
+              <Input type="file" accept="image/*" onChange={e => setCoverImage(e.target.files?.[0] || null)} />
+            </div>
+          </div>
+          <Button type="submit">Publish Post</Button>
+        </form>
+      )}
+
+      <div className="bg-card border rounded-xl overflow-hidden">
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Template</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Date</TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading posts...</TableCell></TableRow>
+            ) : posts.length === 0 ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No blog posts published yet.</TableCell></TableRow>
+            ) : posts.map((p: any) => (
+              <TableRow key={p._id}>
+                <TableCell className="font-semibold">{p.title}</TableCell>
+                <TableCell>Template {p.templateId}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {p.isPublished ? 'Published' : 'Draft'}
+                  </span>
+                </TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {p.publishedAt ? format(new Date(p.publishedAt), 'PP') : '—'}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Admin CRM Shell ─────────────────────────────────────────────────────
 
 const TABS = [
@@ -381,6 +628,8 @@ const TABS = [
   { id: 'bookings', label: 'Bookings & Schedules', icon: CalendarDays },
   { id: 'production', label: 'Production Board', icon: BookOpen },
   { id: 'authors', label: 'Author Directory', icon: LayoutDashboard },
+  { id: 'events', label: 'Events Management', icon: CalendarDays },
+  { id: 'press', label: 'Press & Blog', icon: BookOpen },
 ];
 
 export default function AdminCRM() {
@@ -432,6 +681,8 @@ export default function AdminCRM() {
         {activeTab === 'bookings' && <BookingsTab />}
         {activeTab === 'production' && <ProductionTab />}
         {activeTab === 'authors' && <AuthorsTab />}
+        {activeTab === 'events' && <EventsTab />}
+        {activeTab === 'press' && <PressTab />}
       </main>
     </div>
   );

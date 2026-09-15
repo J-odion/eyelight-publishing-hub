@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event } from './schemas/event.schema.js';
 import { EmailService } from '../email/email.service.js';
+import { CloudinaryService } from '../cloudinary.service.js';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectModel(Event.name) private eventModel: Model<Event>,
     private emailService: EmailService,
+    private cloudinary: CloudinaryService,
   ) {}
 
   async findAll() {
@@ -47,5 +49,18 @@ export class EventsService {
     );
 
     return { message: 'Registration successful', event: event.title };
+  }
+
+  async uploadFlyer(id: string, file: Express.Multer.File) {
+    const event = await this.eventModel.findById(id);
+    if (!event) throw new NotFoundException('Event not found');
+    
+    // Live Cloudinary Upload
+    const result = await this.cloudinary.uploadFile(file, 'image');
+    
+    event.flyerUrl = result.secure_url;
+    await event.save();
+    
+    return { flyerUrl: event.flyerUrl };
   }
 }

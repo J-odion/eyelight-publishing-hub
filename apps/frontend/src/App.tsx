@@ -11,6 +11,7 @@ import Book from "./pages/Book.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SubmitManuscript from "./pages/SubmitManuscript.tsx";
 import BookCatalogue from "./pages/BookCatalogue.tsx";
+import Storefront from "./pages/Storefront.tsx";
 import EventsPage from "./pages/EventsPage.tsx";
 import PressRoom from "./pages/PressRoom.tsx";
 import HelpDocumentation from "./pages/HelpDocumentation.tsx";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/book" element={<Book />} />
           <Route path="/submit-manuscript" element={<SubmitManuscript />} />
           <Route path="/catalogue" element={<BookCatalogue />} />
+          <Route path="/store" element={<Storefront />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/press" element={<PressRoom />} />
           <Route path="/help" element={<HelpDocumentation />} />

@@ -21,6 +21,9 @@ export class Event extends Document {
   @Prop()
   coverUrl: string;
 
+  @Prop()
+  flyerUrl: string; // Phase 2: Optional image upload for events flyer
+
   @Prop({ type: String, enum: ['Launch', 'Workshop', 'Webinar', 'BookClub', 'Masterclass'], default: 'Workshop' })
   type: string;
 

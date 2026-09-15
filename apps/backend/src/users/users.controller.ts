@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service.js';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard.js';
@@ -14,6 +15,18 @@ export class UsersController {
   @Post('submit-manuscript')
   submitManuscriptData(@Body() body: any) {
     return this.usersService.submitManuscriptData(body);
+  }
+
+  @Post('upload-manuscript-file/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('file'))
+  uploadManuscriptFile(
+    @Param('id') projectId: string,
+    @Req() req: any,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    // Basic file upload controller endpoint passing to service
+    return this.usersService.uploadManuscriptFileVersion(projectId, req.user._id, file);
   }
 
   @Post('finalize-account')

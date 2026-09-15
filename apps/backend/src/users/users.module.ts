@@ -5,6 +5,7 @@ import { UsersController } from './users.controller.js';
 import { User, UserSchema } from './schemas/user.schema.js';
 import { Manuscript, ManuscriptSchema } from './schemas/manuscript.schema.js';
 import { Payment, PaymentSchema } from '../payments/schemas/payment.schema.js';
+import { CloudinaryService } from '../cloudinary.service.js';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { Payment, PaymentSchema } from '../payments/schemas/payment.schema.js';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, CloudinaryService],
   exports: [UsersService, MongooseModule],
 })
 export class UsersModule {}

@@ -41,6 +41,9 @@ export class Manuscript extends Document {
   @Prop()
   manuscriptFileUrl: string;
 
+  @Prop([{ fileUrl: String, uploadedAt: Date }])
+  versions: { fileUrl: string; uploadedAt: Date }[];
+
   @Prop()
   coverFileUrl: string;
 

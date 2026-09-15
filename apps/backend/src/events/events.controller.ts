@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { EventsService } from './events.service.js';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard.js';
@@ -29,5 +30,13 @@ export class EventsController {
   @Roles(Role.ADMIN)
   create(@Body() body: any) {
     return this.eventsService.create(body);
+  }
+
+  @Post(':id/upload-flyer')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFlyer(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    return this.eventsService.uploadFlyer(id, file);
   }
 }
