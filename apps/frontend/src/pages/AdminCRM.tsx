@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi } from '../lib/api.js';
+import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi, EventsApi, PressApi } from '../lib/api.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,12 +11,16 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import {
-  Mail, Users, BookOpen, LayoutDashboard, LogOut, Plus, RefreshCw, CalendarDays
+  Mail, Users, BookOpen, LayoutDashboard, LogOut, Plus, RefreshCw, CalendarDays, ExternalLink
 } from 'lucide-react';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
+const PRESS_CATEGORIES = ['News', 'Author Spotlight', 'Release', 'Update'];
 
 const STATUS_COLORS: Record<string, string> = {
   Received: 'bg-gray-100 text-gray-700',
@@ -303,6 +307,17 @@ function ProductionTab() {
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {p.createdAt ? format(new Date(p.createdAt), 'PP') : '—'}
+                  {p.versions && p.versions.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs font-semibold text-foreground">Documents:</p>
+                      {p.versions.map((v: any, idx: number) => (
+                        <a key={idx} href={v.fileUrl} target="_blank" rel="noreferrer" className="flex items-center text-xs text-blue-600 hover:underline">
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                          Version {idx + 1}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -383,8 +398,8 @@ function EventsTab() {
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3000/events');
-      if (res.ok) setEvents(await res.json());
+      const res = await EventsApi.getAll();
+      setEvents(res.data);
     } catch { toast.error('Failed to load events'); }
     finally { setLoading(false); }
   }, []);
@@ -394,18 +409,20 @@ function EventsTab() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('http://localhost:3000/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(form)
-      });
-      const createdEvent = await res.json();
+      const payload = {
+        ...form,
+        date: form.date ? new Date(form.date).toISOString() : new Date().toISOString()
+      };
+      
+      const res = await EventsApi.create(payload);
+      const createdEvent = res.data;
       
       if (flyer && createdEvent._id) {
         const formData = new FormData();
         formData.append('file', flyer);
-        await fetch(`http://localhost:3000/events/${createdEvent._id}/upload-flyer`, {
+        
+        const token = localStorage.getItem('access_token');
+        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/events/${createdEvent._id}/upload-flyer`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: formData
@@ -416,7 +433,9 @@ function EventsTab() {
       setShowForm(false);
       setFlyer(null);
       fetchEvents();
-    } catch { toast.error('Failed to create event'); }
+    } catch (err: any) { 
+      toast.error(err.response?.data?.message || 'Failed to create event'); 
+    }
   };
 
   return (
@@ -503,29 +522,38 @@ function PressTab() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', slug: '', content: '', templateId: '1' });
+  const [showPreview, setShowPreview] = useState(false);
+  const [form, setForm] = useState({ title: '', slug: '', category: 'News', content: '', templateId: '1' });
   const [coverImage, setCoverImage] = useState<File | null>(null);
 
   const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3000/press/posts');
-      if (res.ok) setPosts(await res.json());
+      const res = await PressApi.getPosts();
+      setPosts(res.data);
     } catch { toast.error('Failed to load posts'); }
     finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreate = async (isPublished: boolean) => {
+    if (!form.title || !form.slug || !form.content) {
+      toast.error('Please fill all required fields');
+      return;
+    }
     try {
-      const token = localStorage.getItem('access_token');
-      // In a real app, this would use a proper API service
-      toast.success('Press post created successfully!');
+      await PressApi.createPost({ ...form, isPublished });
+      
+      // Cover image upload would happen here similarly to events
+      
+      toast.success(isPublished ? 'Post published successfully!' : 'Saved as draft!');
       setShowForm(false);
+      setForm({ title: '', slug: '', category: 'News', content: '', templateId: '1' });
       fetchPosts();
-    } catch { toast.error('Failed to create post'); }
+    } catch (err: any) { 
+      toast.error(err.response?.data?.message || 'Failed to create post'); 
+    }
   };
 
   return (
@@ -538,7 +566,7 @@ function PressTab() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-card border rounded-xl p-6 mb-6 space-y-6">
+        <div className="bg-card border rounded-xl p-6 mb-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Post Title</label>
@@ -550,19 +578,16 @@ function PressTab() {
             </div>
           </div>
           
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Post Content (React Quill)</label>
-            {/* This is a placeholder for the actual React Quill component */}
-            <Textarea 
-              required 
-              placeholder="Rich text editor will load here..." 
-              className="min-h-[200px]"
-              value={form.content} 
-              onChange={e => setForm({ ...form, content: e.target.value })} 
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Category</label>
+              <Select value={form.category} onValueChange={(val) => setForm({ ...form, category: val })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PRESS_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Display Template</label>
               <Select value={form.templateId} onValueChange={(val) => setForm({ ...form, templateId: val })}>
@@ -571,20 +596,50 @@ function PressTab() {
                   <SelectItem value="1">Template 1 - Standard Classic</SelectItem>
                   <SelectItem value="2">Template 2 - Modern Magazine</SelectItem>
                   <SelectItem value="3">Template 3 - Minimalist Hero</SelectItem>
-                  <SelectItem value="4">Template 4 - Sidebar Layout</SelectItem>
-                  <SelectItem value="5">Template 5 - Immersive Visual</SelectItem>
-                  <SelectItem value="6">Template 6 - Author Focus</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Cover Image</label>
-              <Input type="file" accept="image/*" onChange={e => setCoverImage(e.target.files?.[0] || null)} />
-            </div>
           </div>
-          <Button type="submit">Publish Post</Button>
-        </form>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Post Content (Rich Text)</label>
+            <Textarea 
+              required 
+              placeholder="Content..." 
+              className="min-h-[200px]"
+              value={form.content} 
+              onChange={e => setForm({ ...form, content: e.target.value })} 
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Cover Image</label>
+            <Input type="file" accept="image/*" onChange={e => setCoverImage(e.target.files?.[0] || null)} />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowPreview(true)}>Preview</Button>
+            <Button variant="secondary" onClick={() => handleCreate(false)}>Save as Draft</Button>
+            <Button onClick={() => handleCreate(true)}>Publish Live</Button>
+          </div>
+        </div>
       )}
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Post Preview</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 p-6 bg-white border rounded-xl shadow-sm">
+            <div className="text-sm font-medium text-blue-600 mb-2">{form.category}</div>
+            <h1 className="text-3xl font-bold mb-4">{form.title || 'Untitled Post'}</h1>
+            <div className="prose max-w-none whitespace-pre-wrap">{form.content || 'No content yet...'}</div>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowPreview(false)}>Close Preview</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="bg-card border rounded-xl overflow-hidden">
         <Table>
@@ -601,7 +656,10 @@ function PressTab() {
               <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No blog posts published yet.</TableCell></TableRow>
             ) : posts.map((p: any) => (
               <TableRow key={p._id}>
-                <TableCell className="font-semibold">{p.title}</TableCell>
+                <TableCell>
+                  <div className="font-semibold">{p.title}</div>
+                  <div className="text-xs text-muted-foreground">{p.category}</div>
+                </TableCell>
                 <TableCell>Template {p.templateId}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>

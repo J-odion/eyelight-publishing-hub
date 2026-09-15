@@ -13,6 +13,9 @@ export class Post extends Document {
   content: string; // HTML from React Quill
 
   @Prop()
+  category: string;
+
+  @Prop()
   coverImageUrl: string;
 
   @Prop({ required: true, min: 1, max: 6 })

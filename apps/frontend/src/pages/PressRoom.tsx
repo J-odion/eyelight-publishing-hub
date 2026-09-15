@@ -17,14 +17,21 @@ const ASSET_TYPES = [
 
 export default function PressRoom() {
   const [assets, setAssets] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('');
 
   useEffect(() => {
     setLoading(true);
-    PressApi.getAll(activeFilter || undefined)
-      .then(r => setAssets(r.data))
-      .catch(() => toast.error('Failed to load press assets'))
+    Promise.all([
+      PressApi.getAll(activeFilter || undefined),
+      PressApi.getPosts(true)
+    ])
+      .then(([assetsRes, postsRes]) => {
+        setAssets(assetsRes.data);
+        setPosts(postsRes.data);
+      })
+      .catch(() => toast.error('Failed to load press content'))
       .finally(() => setLoading(false));
   }, [activeFilter]);
 
@@ -115,6 +122,46 @@ export default function PressRoom() {
                   )}
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* Blog / Press Posts Section */}
+        <div className="mt-20 mb-8">
+          <h2 className="text-2xl font-bold">Latest Press Releases & News</h2>
+          <div className="w-12 h-1 bg-accent mt-2 rounded-full"></div>
+        </div>
+
+        {loading ? (
+          <p className="text-center text-muted-foreground py-10">Loading news...</p>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-10 border border-dashed rounded-xl">
+            <p className="text-muted-foreground">No published news or press releases yet.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {posts.map((post: any) => (
+              <article key={post._id} className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                <div className="p-6 md:p-8 flex flex-col h-full">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent uppercase tracking-wider">
+                      {post.category || 'News'}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {new Date(post.publishedAt || post.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold mb-3 hover:text-accent transition-colors leading-tight">
+                    {post.title}
+                  </h3>
+                  <div className="prose prose-sm max-w-none text-muted-foreground line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: post.content }} />
+                  <div className="mt-auto pt-4 border-t border-border">
+                    <button className="text-sm font-semibold text-accent hover:underline flex items-center gap-1">
+                      Read Full Article →
+                    </button>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
         )}

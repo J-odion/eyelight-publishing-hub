@@ -37,4 +37,34 @@ export class PressController {
   remove(@Param('id') id: string) {
     return this.pressService.remove(id);
   }
+
+  // === PRESS POSTS ===
+  @Get('posts')
+  findAllPosts(@Query('publishedOnly') publishedOnly?: string) {
+    if (publishedOnly === 'true') {
+      return this.pressService.findPublishedPosts();
+    }
+    return this.pressService.findAllPosts();
+  }
+
+  @Post('posts')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  createPost(@Body() body: any) {
+    return this.pressService.createPost(body);
+  }
+
+  @Patch('posts/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  updatePost(@Param('id') id: string, @Body() body: any) {
+    return this.pressService.updatePost(id, body);
+  }
+
+  @Delete('posts/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  removePost(@Param('id') id: string) {
+    return this.pressService.removePost(id);
+  }
 }

@@ -100,4 +100,9 @@ export const PressApi = {
   create: (data: any) => api.post('/press', data),
   update: (id: string, data: any) => api.patch(`/press/${id}`, data),
   remove: (id: string) => api.delete(`/press/${id}`),
+
+  getPosts: (publishedOnly?: boolean) => api.get('/press/posts', { params: publishedOnly ? { publishedOnly: 'true' } : {} }),
+  createPost: (data: any) => api.post('/press/posts', data),
+  updatePost: (id: string, data: any) => api.patch(`/press/posts/${id}`, data),
+  removePost: (id: string) => api.delete(`/press/posts/${id}`),
 };
