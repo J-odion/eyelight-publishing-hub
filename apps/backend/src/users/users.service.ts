@@ -73,7 +73,7 @@ export class UsersService {
     return { author, projects, payments };
   }
 
-  async uploadManuscriptFileVersion(projectId: string, userId: string, file: Express.Multer.File) {
+  async uploadManuscriptFileVersion(projectId: string, userId: string, file: any) {
     const project = await this.manuscriptModel.findById(projectId);
     if (!project) throw new NotFoundException('Project not found');
     if (project.author.toString() !== userId.toString()) {

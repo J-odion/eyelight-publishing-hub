@@ -23,7 +23,7 @@ export class UsersController {
   uploadManuscriptFile(
     @Param('id') projectId: string,
     @Req() req: any,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: any
   ) {
     // Basic file upload controller endpoint passing to service
     return this.usersService.uploadManuscriptFileVersion(projectId, req.user._id, file);

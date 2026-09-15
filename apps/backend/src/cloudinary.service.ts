@@ -8,12 +8,13 @@ export class CloudinaryService {
     // Cloudinary automatically picks up the CLOUDINARY_URL env variable
   }
 
-  uploadFile(file: Express.Multer.File, resourceType: 'auto' | 'raw' | 'image' | 'video' = 'auto'): Promise<UploadApiResponse> {
+  uploadFile(file: any, resourceType: 'auto' | 'raw' | 'image' | 'video' = 'auto'): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { resource_type: resourceType },
         (error, result) => {
           if (error) return reject(error);
+          if (!result) return reject(new Error('Cloudinary upload returned undefined result'));
           resolve(result);
         },
       );

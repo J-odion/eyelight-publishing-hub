@@ -51,7 +51,7 @@ export class EventsService {
     return { message: 'Registration successful', event: event.title };
   }
 
-  async uploadFlyer(id: string, file: Express.Multer.File) {
+  async uploadFlyer(id: string, file: any) {
     const event = await this.eventModel.findById(id);
     if (!event) throw new NotFoundException('Event not found');
     

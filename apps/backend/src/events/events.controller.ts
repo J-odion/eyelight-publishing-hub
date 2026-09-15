@@ -36,7 +36,7 @@ export class EventsController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
-  uploadFlyer(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+  uploadFlyer(@Param('id') id: string, @UploadedFile() file: any) {
     return this.eventsService.uploadFlyer(id, file);
   }
 }
