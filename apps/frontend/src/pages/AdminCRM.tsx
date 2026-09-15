@@ -380,6 +380,7 @@ function ProductionTab() {
   useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
   const handleStatusChange = async (id: string, status: string) => {
+    if (!window.confirm(`Are you sure you want to change the status to ${status}?`)) return;
     setUpdating(id);
     try {
       await ProjectsApi.updateStatus(id, status);
@@ -656,7 +657,13 @@ function EventsTab() {
                 <h3 className="font-bold text-lg">{ev.title} <span className="text-xs ml-2 px-2 py-0.5 bg-accent text-accent-foreground rounded-full">{ev.type}</span></h3>
                 <p className="text-sm text-muted-foreground">{new Date(ev.date).toLocaleString()}</p>
               </div>
-              <p className="text-sm font-medium">{ev.registrations?.length || 0} Registered</p>
+              <div className="flex items-center gap-4">
+                <p className="text-sm font-medium">{ev.registrations?.length || 0} Registered</p>
+                <div className="flex gap-2 border-l pl-4">
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(ev)}>Edit</Button>
+                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(ev._id)}>Delete</Button>
+                </div>
+              </div>
             </div>
             <div className="p-4">
               <h4 className="text-sm font-semibold mb-3">Registered Attendees</h4>
@@ -713,6 +720,8 @@ function PressTab() {
       toast.error('Please fill all required fields');
       return;
     }
+    if (isPublished && !window.confirm('Are you sure you want to publish this post live?')) return;
+    
     try {
       if (editId) {
         await PressApi.updatePost(editId, { ...form, isPublished });
@@ -774,7 +783,15 @@ function PressTab() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Post Title</label>
-              <Input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+              <Input 
+                required 
+                value={form.title} 
+                onChange={e => {
+                  const title = e.target.value;
+                  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                  setForm({ ...form, title, slug });
+                }} 
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">URL Slug</label>
