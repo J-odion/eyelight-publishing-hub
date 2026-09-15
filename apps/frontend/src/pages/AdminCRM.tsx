@@ -16,11 +16,17 @@ import {
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import {
-  Mail, Users, BookOpen, LayoutDashboard, LogOut, Plus, RefreshCw, CalendarDays, ExternalLink
+  Mail, Users, BookOpen, LayoutDashboard, LogOut, Plus, RefreshCw, CalendarDays, ExternalLink, Send
 } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
-const PRESS_CATEGORIES = ['News', 'Author Spotlight', 'Release', 'Update'];
+const PRESS_CATEGORIES = [
+  'News', 'Author Spotlight', 'Release', 'Update', 
+  'Press Release', 'Author Photo', 'Book Cover', 
+  'Author Bio', 'Media Kit', 'Brand Asset', 'Interview Request'
+];
 
 const STATUS_COLORS: Record<string, string> = {
   Received: 'bg-gray-100 text-gray-700',
@@ -36,6 +42,8 @@ function EmailTab() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ subject: '', content: '', audienceTags: '', scheduledFor: '' });
 
   const fetchCampaigns = useCallback(async () => {
@@ -52,38 +60,89 @@ function EmailTab() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await CrmApi.createCampaign({
+      const payload = {
         ...form,
         audienceTags: form.audienceTags.split(',').map(t => t.trim()).filter(Boolean),
         scheduledFor: form.scheduledFor ? new Date(form.scheduledFor) : undefined,
-      });
-      toast.success('Campaign saved!');
+      };
+      
+      if (editId) {
+        await CrmApi.updateCampaign(editId, payload);
+        toast.success('Campaign updated!');
+      } else {
+        await CrmApi.createCampaign(payload);
+        toast.success('Campaign saved!');
+      }
+      
       setShowForm(false);
+      setEditId(null);
       setForm({ subject: '', content: '', audienceTags: '', scheduledFor: '' });
       fetchCampaigns();
     } catch { toast.error('Failed to save campaign'); }
+  };
+
+  const handleEdit = (c: any) => {
+    setForm({
+      subject: c.subject,
+      content: c.content,
+      audienceTags: c.audienceTags ? c.audienceTags.join(', ') : '',
+      scheduledFor: c.scheduledFor ? new Date(c.scheduledFor).toISOString().slice(0, 16) : ''
+    });
+    setEditId(c._id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this campaign?')) return;
+    try {
+      await CrmApi.removeCampaign(id);
+      toast.success('Campaign deleted!');
+      fetchCampaigns();
+    } catch { toast.error('Failed to delete campaign'); }
+  };
+
+  const handleSendNow = async (id: string) => {
+    if (!window.confirm('Are you sure you want to send this campaign right now?')) return;
+    try {
+      await CrmApi.sendCampaignNow(id);
+      toast.success('Campaign dispatched successfully!');
+      fetchCampaigns();
+    } catch { toast.error('Failed to dispatch campaign'); }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Email Engine</h2>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
+        <Button size="sm" onClick={() => {
+          if (showForm) {
+            setShowForm(false);
+            setEditId(null);
+            setForm({ subject: '', content: '', audienceTags: '', scheduledFor: '' });
+          } else {
+            setShowForm(true);
+          }
+        }}>
           <Plus className="w-4 h-4 mr-2" /> {showForm ? 'Cancel' : 'New Email'}
         </Button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-card border rounded-xl p-6 mb-6 space-y-4">
+        <div className="bg-card border rounded-xl p-6 mb-6 space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Subject Line</label>
             <Input required value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Email Content (HTML)</label>
-            <Textarea required value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} className="min-h-[120px] font-mono text-sm" />
+            <label className="text-sm font-medium">Email Content</label>
+            <ReactQuill 
+              theme="snow" 
+              value={form.content} 
+              onChange={val => setForm({ ...form, content: val })} 
+              className="bg-white rounded-md mb-12 h-64"
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mt-12">
             <div className="space-y-2">
               <label className="text-sm font-medium">Audience (comma separated)</label>
               <Input placeholder="e.g. Author, Newsletter" value={form.audienceTags} onChange={e => setForm({ ...form, audienceTags: e.target.value })} />
@@ -93,9 +152,26 @@ function EmailTab() {
               <Input type="datetime-local" value={form.scheduledFor} onChange={e => setForm({ ...form, scheduledFor: e.target.value })} />
             </div>
           </div>
-          <Button type="submit">Save Campaign</Button>
-        </form>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowPreview(true)}>Preview</Button>
+            <Button onClick={handleCreate}>Save Campaign</Button>
+          </div>
+        </div>
       )}
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Email Preview</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 p-6 bg-white border rounded-xl shadow-sm">
+            <div className="text-sm text-muted-foreground border-b pb-4 mb-4">
+              <strong>Subject:</strong> {form.subject || '(No Subject)'}
+            </div>
+            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: form.content || '<em>Empty content...</em>' }} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="bg-card border rounded-xl overflow-hidden">
         <Table>
@@ -104,12 +180,13 @@ function EmailTab() {
             <TableHead>Status</TableHead>
             <TableHead>Audience</TableHead>
             <TableHead>Scheduled / Sent</TableHead>
+            <TableHead></TableHead>
           </TableRow></TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             ) : campaigns.length === 0 ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No campaigns yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No campaigns yet.</TableCell></TableRow>
             ) : campaigns.map((c: any) => (
               <TableRow key={c._id}>
                 <TableCell className="font-medium">{c.subject}</TableCell>
@@ -120,6 +197,17 @@ function EmailTab() {
                 <TableCell className="text-muted-foreground text-sm">
                   {c.status === 'Sent' && c.sentAt ? format(new Date(c.sentAt), 'PP p') :
                    c.status === 'Scheduled' && c.scheduledFor ? format(new Date(c.scheduledFor), 'PP p') : '—'}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(c)}>Edit</Button>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)}>Delete</Button>
+                    {c.status !== 'Sent' && (
+                      <Button variant="outline" size="sm" onClick={() => handleSendNow(c._id)} className="gap-2">
+                        <Send className="w-3 h-3" /> Send Now
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -133,20 +221,62 @@ function EmailTab() {
 function LeadsTab() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImport, setShowImport] = useState(false);
+  const [importCsv, setImportCsv] = useState('');
 
-  useEffect(() => {
-    LeadsApi.getAllLeads()
-      .then(r => setLeads(r.data))
-      .catch(() => toast.error('Failed to load leads'))
-      .finally(() => setLoading(false));
+  const fetchLeads = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await LeadsApi.getAllLeads();
+      setLeads(res.data);
+    } catch { toast.error('Failed to load leads'); }
+    finally { setLoading(false); }
   }, []);
+
+  useEffect(() => { fetchLeads(); }, [fetchLeads]);
+
+  const handleImport = async () => {
+    if (!importCsv.trim()) return;
+    try {
+      const lines = importCsv.trim().split('\n');
+      const newLeads = lines.map(line => {
+        const [name, email] = line.split(',').map(s => s.trim());
+        return { name: name || 'Unknown', email, type: 'Newsletter' };
+      }).filter(l => l.email);
+
+      await LeadsApi.importBulk(newLeads);
+      toast.success(`Successfully imported ${newLeads.length} leads!`);
+      setShowImport(false);
+      setImportCsv('');
+      fetchLeads();
+    } catch { toast.error('Failed to import leads'); }
+  };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Audience & Leads</h2>
-        <span className="text-sm text-muted-foreground">{leads.length} total</span>
+        <h2 className="text-xl font-semibold">Leads & Audience</h2>
+        <Button size="sm" onClick={() => setShowImport(!showImport)}>
+          <Plus className="w-4 h-4 mr-2" /> {showImport ? 'Cancel Import' : 'Import List'}
+        </Button>
       </div>
+
+      {showImport && (
+        <div className="bg-card border rounded-xl p-6 mb-6">
+          <h3 className="text-sm font-medium mb-2">Import CSV (Format: Name, Email)</h3>
+          <Textarea 
+            placeholder="John Doe, john@example.com&#10;Jane Smith, jane@example.com" 
+            className="min-h-[120px] mb-4 font-mono text-sm"
+            value={importCsv}
+            onChange={e => setImportCsv(e.target.value)}
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowImport(false)}>Cancel</Button>
+            <Button onClick={handleImport}>Import Leads</Button>
+          </div>
+        </div>
+      )}
+      <div className="text-sm text-muted-foreground mb-4">{leads.length} total</div>
       <div className="bg-card border rounded-xl overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -392,7 +522,8 @@ function EventsTab() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', date: '', type: 'Workshop', zoomLink: '', location: '' });
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState({ title: '', date: '', type: 'Workshop', zoomLink: '', location: '', description: '' });
   const [flyer, setFlyer] = useState<File | null>(null);
 
   const fetchEvents = useCallback(async () => {
@@ -414,8 +545,16 @@ function EventsTab() {
         date: form.date ? new Date(form.date).toISOString() : new Date().toISOString()
       };
       
-      const res = await EventsApi.create(payload);
-      const createdEvent = res.data;
+      let createdEvent;
+      if (editId) {
+        const res = await EventsApi.update(editId, payload);
+        createdEvent = res.data;
+        toast.success('Event updated!');
+      } else {
+        const res = await EventsApi.create(payload);
+        createdEvent = res.data;
+        toast.success('Event created!');
+      }
       
       if (flyer && createdEvent._id) {
         const formData = new FormData();
@@ -429,20 +568,51 @@ function EventsTab() {
         });
       }
       
-      toast.success('Event created!');
       setShowForm(false);
+      setEditId(null);
+      setForm({ title: '', date: '', type: 'Workshop', location: '', zoomLink: '', description: '' });
       setFlyer(null);
       fetchEvents();
     } catch (err: any) { 
-      toast.error(err.response?.data?.message || 'Failed to create event'); 
+      toast.error(err.response?.data?.message || 'Failed to save event'); 
     }
+  };
+
+  const handleEdit = (ev: any) => {
+    setForm({
+      title: ev.title,
+      date: ev.date ? new Date(ev.date).toISOString().slice(0, 16) : '',
+      type: ev.type || 'Workshop',
+      location: ev.location || '',
+      zoomLink: ev.zoomLink || '',
+      description: ev.description || '',
+    });
+    setEditId(ev._id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await EventsApi.remove(id);
+      toast.success('Event deleted!');
+      fetchEvents();
+    } catch { toast.error('Failed to delete event'); }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Events Management</h2>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
+        <h2 className="text-xl font-semibold">Events Manager</h2>
+        <Button size="sm" onClick={() => {
+          if (showForm) {
+            setShowForm(false);
+            setEditId(null);
+            setForm({ title: '', date: '', type: 'Workshop', location: '', zoomLink: '', description: '' });
+          } else {
+            setShowForm(true);
+          }
+        }}>
           <Plus className="w-4 h-4 mr-2" /> {showForm ? 'Cancel' : 'New Event'}
         </Button>
       </div>
@@ -523,6 +693,7 @@ function PressTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: '', slug: '', category: 'News', content: '', templateId: '1' });
   const [coverImage, setCoverImage] = useState<File | null>(null);
 
@@ -543,24 +714,57 @@ function PressTab() {
       return;
     }
     try {
-      await PressApi.createPost({ ...form, isPublished });
+      if (editId) {
+        await PressApi.updatePost(editId, { ...form, isPublished });
+        toast.success(isPublished ? 'Post updated and published!' : 'Draft updated!');
+      } else {
+        await PressApi.createPost({ ...form, isPublished });
+        toast.success(isPublished ? 'Post published successfully!' : 'Saved as draft!');
+      }
       
-      // Cover image upload would happen here similarly to events
-      
-      toast.success(isPublished ? 'Post published successfully!' : 'Saved as draft!');
       setShowForm(false);
+      setEditId(null);
       setForm({ title: '', slug: '', category: 'News', content: '', templateId: '1' });
       fetchPosts();
     } catch (err: any) { 
-      toast.error(err.response?.data?.message || 'Failed to create post'); 
+      toast.error(err.response?.data?.message || 'Failed to save post'); 
     }
+  };
+
+  const handleEdit = (p: any) => {
+    setForm({
+      title: p.title,
+      slug: p.slug,
+      category: p.category || 'News',
+      content: p.content,
+      templateId: String(p.templateId || '1')
+    });
+    setEditId(p._id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    try {
+      await PressApi.removePost(id);
+      toast.success('Post deleted!');
+      fetchPosts();
+    } catch { toast.error('Failed to delete post'); }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Press & Blog Management</h2>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
+        <Button size="sm" onClick={() => {
+          if (showForm) {
+            setShowForm(false);
+            setEditId(null);
+            setForm({ title: '', slug: '', category: 'News', content: '', templateId: '1' });
+          } else {
+            setShowForm(true);
+          }
+        }}>
           <Plus className="w-4 h-4 mr-2" /> {showForm ? 'Cancel' : 'New Post'}
         </Button>
       </div>
@@ -596,23 +800,25 @@ function PressTab() {
                   <SelectItem value="1">Template 1 - Standard Classic</SelectItem>
                   <SelectItem value="2">Template 2 - Modern Magazine</SelectItem>
                   <SelectItem value="3">Template 3 - Minimalist Hero</SelectItem>
+                  <SelectItem value="4">Template 4 - Sidebar Layout</SelectItem>
+                  <SelectItem value="5">Template 5 - Immersive Visual</SelectItem>
+                  <SelectItem value="6">Template 6 - Author Focus</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Post Content (Rich Text)</label>
-            <Textarea 
-              required 
-              placeholder="Content..." 
-              className="min-h-[200px]"
+            <label className="text-sm font-medium">Post Content</label>
+            <ReactQuill 
+              theme="snow" 
               value={form.content} 
-              onChange={e => setForm({ ...form, content: e.target.value })} 
+              onChange={val => setForm({ ...form, content: val })} 
+              className="bg-white rounded-md mb-12 h-[350px]"
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 mt-12">
             <label className="text-sm font-medium">Cover Image</label>
             <Input type="file" accept="image/*" onChange={e => setCoverImage(e.target.files?.[0] || null)} />
           </div>
@@ -644,16 +850,17 @@ function PressTab() {
       <div className="bg-card border rounded-xl overflow-hidden">
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Title</TableHead>
+            <TableHead>Post Details</TableHead>
             <TableHead>Template</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>Published / Created</TableHead>
+            <TableHead></TableHead>
           </TableRow></TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading posts...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading posts...</TableCell></TableRow>
             ) : posts.length === 0 ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No blog posts published yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No blog posts published yet.</TableCell></TableRow>
             ) : posts.map((p: any) => (
               <TableRow key={p._id}>
                 <TableCell>
@@ -667,7 +874,14 @@ function PressTab() {
                   </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {p.publishedAt ? format(new Date(p.publishedAt), 'PP') : '—'}
+                  {p.publishedAt ? format(new Date(p.publishedAt), 'PP p') : 
+                   p.createdAt ? format(new Date(p.createdAt), 'PP') : '—'}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(p)}>Edit</Button>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(p._id)}>Delete</Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

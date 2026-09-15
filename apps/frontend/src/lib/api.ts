@@ -39,6 +39,7 @@ export const LeadsApi = {
   submitInquiry: (data: any) =>
     api.post('/leads', { ...data, type: 'LeadMagnet' }),
   getAllLeads: () => api.get('/leads'),
+  importBulk: (leads: any[]) => api.post('/leads/bulk', { leads }),
 };
 
 // ─── Payments ────────────────────────────────────────────────
@@ -53,6 +54,9 @@ export const PaymentsApi = {
 export const CrmApi = {
   getCampaigns: () => api.get('/email'),
   createCampaign: (data: any) => api.post('/email', data),
+  updateCampaign: (id: string, data: any) => api.patch(`/email/${id}`, data),
+  removeCampaign: (id: string) => api.delete(`/email/${id}`),
+  sendCampaignNow: (id: string) => api.post(`/email/${id}/send`),
 };
 
 // ─── Admin: Production Board ─────────────────────────────────
@@ -84,6 +88,8 @@ export const EventsApi = {
   register: (id: string, data: { name: string; email: string; phone: string }) =>
     api.post(`/events/${id}/register`, data),
   create: (data: any) => api.post('/events', data),
+  update: (id: string, data: any) => api.patch(`/events/${id}`, data),
+  remove: (id: string) => api.delete(`/events/${id}`),
 };
 
 // ─── Referrals ───────────────────────────────────────────────

@@ -101,4 +101,53 @@ export class EmailService {
       this.logger.log(`Sent campaign "${campaign.subject}" to ${emails.length} recipients.`);
     }
   }
+
+  // Immediately send a campaign regardless of its schedule
+  async sendNow(id: string) {
+    const campaign = await this.emailModel.findById(id);
+    if (!campaign) throw new Error('Campaign not found');
+
+    let query = {};
+    if (campaign.audienceTags && campaign.audienceTags.length > 0) {
+      if (campaign.audienceTags.includes('Author')) {
+        query = { role: 'author' };
+      }
+    }
+    
+    const users = await this.userModel.find(query);
+    const emails = users.map(u => u.email);
+
+    if (emails.length > 0) {
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < emails.length; i += BATCH_SIZE) {
+        const batch = emails.slice(i, i + BATCH_SIZE);
+        await this.sendEmail(batch, campaign.subject, campaign.content);
+      }
+    }
+
+    campaign.status = EmailStatus.SENT;
+    campaign.sentAt = new Date();
+    await campaign.save();
+    
+    this.logger.log(`Manually sent campaign "${campaign.subject}" to ${emails.length} recipients.`);
+    return { success: true, recipients: emails.length };
+  }
+
+  async updateCampaign(id: string, data: any) {
+    // If updating scheduledFor, reset status accordingly
+    if (data.scheduledFor) {
+      data.status = EmailStatus.SCHEDULED;
+    } else if (data.status !== EmailStatus.SENT) {
+      data.status = EmailStatus.DRAFT;
+    }
+    const campaign = await this.emailModel.findByIdAndUpdate(id, data, { new: true });
+    if (!campaign) throw new NotFoundException('Campaign not found');
+    return campaign;
+  }
+
+  async removeCampaign(id: string) {
+    const campaign = await this.emailModel.findByIdAndDelete(id);
+    if (!campaign) throw new NotFoundException('Campaign not found');
+    return campaign;
+  }
 }

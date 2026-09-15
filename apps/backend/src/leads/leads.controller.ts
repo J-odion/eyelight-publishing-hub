@@ -22,4 +22,12 @@ export class LeadsController {
   findAll() {
     return this.leadsService.findAll();
   }
+
+  // Admin: Bulk import
+  @Post('bulk')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  bulkCreate(@Body() body: { leads: any[] }) {
+    return this.leadsService.bulkCreate(body.leads);
+  }
 }

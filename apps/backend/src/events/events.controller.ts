@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { EventsService } from './events.service.js';
 import { AuthGuard } from '@nestjs/passport';
@@ -38,5 +38,19 @@ export class EventsController {
   @UseInterceptors(FileInterceptor('file'))
   uploadFlyer(@Param('id') id: string, @UploadedFile() file: any) {
     return this.eventsService.uploadFlyer(id, file);
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  update(@Param('id') id: string, @Body() body: any) {
+    return this.eventsService.update(id, body);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.eventsService.remove(id);
   }
 }

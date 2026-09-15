@@ -36,4 +36,12 @@ export class LeadsService {
   async findAll() {
     return this.leadModel.find().exec();
   }
+
+  async bulkCreate(leads: any[]) {
+    const documents = leads.map(l => ({
+      ...l,
+      type: l.type || LeadType.NEWSLETTER,
+    }));
+    return this.leadModel.insertMany(documents);
+  }
 }

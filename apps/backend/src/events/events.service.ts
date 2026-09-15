@@ -63,4 +63,16 @@ export class EventsService {
     
     return { flyerUrl: event.flyerUrl };
   }
+
+  async update(id: string, data: any) {
+    const event = await this.eventModel.findByIdAndUpdate(id, data, { new: true });
+    if (!event) throw new NotFoundException('Event not found');
+    return event;
+  }
+
+  async remove(id: string) {
+    const event = await this.eventModel.findByIdAndDelete(id);
+    if (!event) throw new NotFoundException('Event not found');
+    return event;
+  }
 }
