@@ -6,6 +6,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Resend } from 'resend';
 import { EmailCampaign, EmailStatus } from './schemas/email.schema.js';
 import { User } from '../users/schemas/user.schema.js';
+import { Contact, ContactDocument } from '../crm/schemas/contact.schema.js';
+import { SendJob, SendJobDocument } from './schemas/send-job.schema.js';
 
 @Injectable()
 export class EmailService {
@@ -16,6 +18,8 @@ export class EmailService {
     private configService: ConfigService,
     @InjectModel(EmailCampaign.name) private emailModel: Model<EmailCampaign>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Contact.name) private contactModel: Model<ContactDocument>,
+    @InjectModel(SendJob.name) private sendJobModel: Model<SendJobDocument>,
   ) {
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
     if (resendApiKey) {
@@ -60,10 +64,51 @@ export class EmailService {
     return this.emailModel.find().sort({ createdAt: -1 }).exec();
   }
 
-  // Cron job runs every hour to check for scheduled emails
-  @Cron(CronExpression.EVERY_HOUR)
+  private async enqueueCampaign(campaign: EmailCampaign) {
+    // Task 3: resolve its audience
+    const query: any = { status: 'subscribed' };
+    if (campaign.audienceTags && campaign.audienceTags.length > 0) {
+      query.tags = { $in: campaign.audienceTags };
+    } else {
+      // If no tags, we should arguably not send to anyone to prevent accidents,
+      // but spec says "never fall back to querying all users".
+      // Let's ensure if no tags are selected, we find 0 contacts.
+      this.logger.warn(`Campaign ${campaign._id} has no audience tags, skipping...`);
+      campaign.status = EmailStatus.SENT;
+      await campaign.save();
+      return { success: true, queued: 0 };
+    }
+    
+    const contacts = await this.contactModel.find(query);
+    if (contacts.length === 0) {
+      this.logger.warn(`Campaign ${campaign._id} found 0 contacts to send to.`);
+      campaign.status = EmailStatus.SENT;
+      await campaign.save();
+      return { success: true, queued: 0 };
+    }
+
+    // Insert one SendJob per resolved contact
+    const jobs = contacts.map(c => ({
+      contactId: c._id,
+      campaignId: campaign._id,
+      status: 'queued',
+      nextAttemptAt: new Date()
+    }));
+
+    await this.sendJobModel.insertMany(jobs);
+
+    campaign.status = EmailStatus.SENDING;
+    campaign.stats = { queued: jobs.length, sent: 0, failed: 0 };
+    await campaign.save();
+    
+    this.logger.log(`Enqueued campaign "${campaign.subject}" to ${jobs.length} contacts.`);
+    return { success: true, queued: jobs.length };
+  }
+
+  // Cron job runs frequently to check for scheduled emails
+  @Cron('*/30 * * * * *') // Every 30 seconds
   async handleScheduledEmails() {
-    this.logger.log('Checking for scheduled emails...');
+    // Only log if something is found to avoid spam
     const now = new Date();
     
     const scheduledCampaigns = await this.emailModel.find({
@@ -71,66 +116,12 @@ export class EmailService {
       scheduledFor: { $lte: now }
     });
 
-    for (const campaign of scheduledCampaigns) {
-      // Find users matching audience tags
-      // For simplicity, we just fetch all users for now if audience is empty,
-      // or filter based on role/tags.
-      let query = {};
-      if (campaign.audienceTags && campaign.audienceTags.length > 0) {
-        if (campaign.audienceTags.includes('Author')) {
-          query = { role: 'author' };
-        }
-      }
-      
-      const users = await this.userModel.find(query);
-      const emails = users.map(u => u.email);
-
-      if (emails.length > 0) {
-        // Chunk emails to avoid hitting limits (Resend limit is typically 50 per batch)
-        const BATCH_SIZE = 50;
-        for (let i = 0; i < emails.length; i += BATCH_SIZE) {
-          const batch = emails.slice(i, i + BATCH_SIZE);
-          await this.sendEmail(batch, campaign.subject, campaign.content);
-        }
-      }
-
-      campaign.status = EmailStatus.SENT;
-      campaign.sentAt = new Date();
-      await campaign.save();
-      
-      this.logger.log(`Sent campaign "${campaign.subject}" to ${emails.length} recipients.`);
-    }
-  }
-
-  // Immediately send a campaign regardless of its schedule
-  async sendNow(id: string) {
-    const campaign = await this.emailModel.findById(id);
-    if (!campaign) throw new Error('Campaign not found');
-
-    let query = {};
-    if (campaign.audienceTags && campaign.audienceTags.length > 0) {
-      if (campaign.audienceTags.includes('Author')) {
-        query = { role: 'author' };
+    if (scheduledCampaigns.length > 0) {
+      this.logger.log(`Found ${scheduledCampaigns.length} scheduled campaigns ready to send...`);
+      for (const campaign of scheduledCampaigns) {
+        await this.enqueueCampaign(campaign);
       }
     }
-    
-    const users = await this.userModel.find(query);
-    const emails = users.map(u => u.email);
-
-    if (emails.length > 0) {
-      const BATCH_SIZE = 50;
-      for (let i = 0; i < emails.length; i += BATCH_SIZE) {
-        const batch = emails.slice(i, i + BATCH_SIZE);
-        await this.sendEmail(batch, campaign.subject, campaign.content);
-      }
-    }
-
-    campaign.status = EmailStatus.SENT;
-    campaign.sentAt = new Date();
-    await campaign.save();
-    
-    this.logger.log(`Manually sent campaign "${campaign.subject}" to ${emails.length} recipients.`);
-    return { success: true, recipients: emails.length };
   }
 
   async updateCampaign(id: string, data: any) {

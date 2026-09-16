@@ -56,7 +56,11 @@ export const CrmApi = {
   createCampaign: (data: any) => api.post('/email', data),
   updateCampaign: (id: string, data: any) => api.patch(`/email/${id}`, data),
   removeCampaign: (id: string) => api.delete(`/email/${id}`),
-  sendCampaignNow: (id: string) => api.post(`/email/${id}/send`),
+
+  // Automations
+  getAutomations: () => api.get('/automations'),
+  upsertAutomation: (triggerEvent: string, data: any) => api.post(`/automations/${triggerEvent}`, data),
+  removeAutomation: (id: string) => api.delete(`/automations/${id}`),
 
   // Contacts & Lists
   getContacts: (params?: { tag?: string; list?: string; search?: string }) => api.get('/crm/contacts', { params }),

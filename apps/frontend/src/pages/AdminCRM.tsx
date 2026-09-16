@@ -113,12 +113,12 @@ function EmailTab() {
   };
 
   const handleSendNow = async (id: string) => {
-    if (!window.confirm('Are you sure you want to send this campaign right now?')) return;
+    if (!window.confirm('Are you sure you want to send this campaign now?')) return;
     try {
-      await CrmApi.sendCampaignNow(id);
-      toast.success('Campaign dispatched successfully!');
-      fetchCampaigns();
-    } catch { toast.error('Failed to dispatch campaign'); }
+      await CrmApi.updateCampaign(id, { scheduledFor: new Date().toISOString() });
+      toast.success('Campaign scheduled for immediate send!');
+      fetchCampaignsAndTags();
+    } catch { toast.error('Failed to send campaign'); }
   };
 
   return (
@@ -207,21 +207,40 @@ function EmailTab() {
             <TableHead>Subject</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Audience</TableHead>
+            <TableHead>Progress & Stats</TableHead>
             <TableHead>Scheduled / Sent</TableHead>
             <TableHead></TableHead>
           </TableRow></TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             ) : campaigns.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No campaigns yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No campaigns yet.</TableCell></TableRow>
             ) : campaigns.map((c: any) => (
               <TableRow key={c._id}>
                 <TableCell className="font-medium">{c.subject}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.status === 'Sent' ? 'bg-green-100 text-green-700' : c.status === 'Scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>{c.status}</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.status === 'Sent' ? 'bg-green-100 text-green-700' : c.status === 'Sending' ? 'bg-yellow-100 text-yellow-700' : c.status === 'Scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>{c.status}</span>
                 </TableCell>
-                <TableCell>{c.audienceTags?.join(', ') || 'All'}</TableCell>
+                <TableCell>{c.audienceTags?.join(', ') || 'None'}</TableCell>
+                <TableCell>
+                  {c.stats ? (
+                    <div className="flex flex-col gap-1 text-xs">
+                      <div className="flex gap-2">
+                        <span className="text-green-600 font-medium">{c.stats.sent || 0} sent</span>
+                        <span className="text-red-600 font-medium">{c.stats.failed || 0} failed</span>
+                        <span className="text-blue-600 font-medium">{c.stats.queued || 0} queued</span>
+                      </div>
+                      <div className="flex gap-2 text-muted-foreground mt-1 border-t pt-1 border-gray-100">
+                        <span>{c.stats.delivered || 0} delivered</span>
+                        <span>{c.stats.opened || 0} opened</span>
+                        <span>{c.stats.clicked || 0} clicked</span>
+                        <span className="text-red-400">{c.stats.bounced || 0} bounced</span>
+                        <span className="text-orange-400">{c.stats.complained || 0} spam</span>
+                      </div>
+                    </div>
+                  ) : '—'}
+                </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {c.status === 'Sent' && c.sentAt ? format(new Date(c.sentAt), 'PP p') :
                    c.status === 'Scheduled' && c.scheduledFor ? format(new Date(c.scheduledFor), 'PP p') : '—'}
@@ -230,11 +249,151 @@ function EmailTab() {
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(c)}>Edit</Button>
                     <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)}>Delete</Button>
-                    {c.status !== 'Sent' && (
+                    {(c.status === 'Draft' || c.status === 'Scheduled') && (
                       <Button variant="outline" size="sm" onClick={() => handleSendNow(c._id)} className="gap-2">
                         <Send className="w-3 h-3" /> Send Now
                       </Button>
                     )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+function AutomationsTab() {
+  const [automations, setAutomations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ triggerEvent: '', subject: '', content: '', isActive: true });
+  const [isEditing, setIsEditing] = useState(false);
+
+  const TRIGGERS = [
+    { id: 'user.registered', label: 'User Registered' },
+    { id: 'payment.completed', label: 'Payment Completed' },
+    { id: 'manuscript.submitted', label: 'Manuscript Submitted' },
+    { id: 'project.status_changed', label: 'Project Status Changed' },
+    { id: 'consultation.booked', label: 'Consultation Booked' },
+  ];
+
+  const fetchAutomations = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await CrmApi.getAutomations();
+      setAutomations(res.data);
+    } catch { toast.error('Failed to load automations'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchAutomations(); }, [fetchAutomations]);
+
+  const handleSave = async () => {
+    if (!form.triggerEvent || !form.subject || !form.content) return toast.error('Missing required fields');
+    try {
+      await CrmApi.upsertAutomation(form.triggerEvent, form);
+      toast.success('Automation saved!');
+      setShowForm(false);
+      fetchAutomations();
+    } catch { toast.error('Failed to save automation'); }
+  };
+
+  const handleEdit = (auto: any) => {
+    setForm({ triggerEvent: auto.triggerEvent, subject: auto.subject, content: auto.content, isActive: auto.isActive });
+    setIsEditing(true);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Delete this automation?')) return;
+    try {
+      await CrmApi.removeAutomation(id);
+      toast.success('Automation deleted');
+      fetchAutomations();
+    } catch { toast.error('Failed to delete automation'); }
+  };
+
+  return (
+    <div className="space-y-6 max-w-5xl">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Automations</h2>
+          <p className="text-muted-foreground">Set up event-driven emails that fire automatically.</p>
+        </div>
+        <Button onClick={() => { setForm({ triggerEvent: '', subject: '', content: '', isActive: true }); setIsEditing(false); setShowForm(!showForm); }}>
+          {showForm ? 'Cancel' : <><Plus className="w-4 h-4 mr-2" /> New Automation</>}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="bg-muted/30 p-6 rounded-xl border space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Trigger Event</label>
+              <Select value={form.triggerEvent} onValueChange={val => setForm({ ...form, triggerEvent: val })} disabled={isEditing}>
+                <SelectTrigger className="bg-white"><SelectValue placeholder="Select an event..." /></SelectTrigger>
+                <SelectContent>
+                  {TRIGGERS.map(t => <SelectItem key={t.id} value={t.id}>{t.label} ({t.id})</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Subject Line</label>
+              <Input 
+                className="bg-white" 
+                placeholder="Subject (e.g. Welcome {{firstName}}!)" 
+                value={form.subject}
+                onChange={e => setForm({ ...form, subject: e.target.value })}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="text-sm font-medium">Email Content</label>
+              <span className="text-xs text-muted-foreground">Available tags: {'{{firstName}}'}, {'{{lastName}}'}</span>
+            </div>
+            <ReactQuill theme="snow" value={form.content} onChange={val => setForm({ ...form, content: val })} className="bg-white rounded-md mb-12 h-[200px]" />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-12">
+            <Button onClick={handleSave}>Save Automation</Button>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-card border rounded-xl overflow-hidden">
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>Trigger</TableHead>
+            <TableHead>Subject</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead></TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+            ) : automations.length === 0 ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No automations configured.</TableCell></TableRow>
+            ) : automations.map((a: any) => (
+              <TableRow key={a._id}>
+                <TableCell className="font-medium">
+                  {TRIGGERS.find(t => t.id === a.triggerEvent)?.label || a.triggerEvent}
+                  <div className="text-xs text-muted-foreground">{a.triggerEvent}</div>
+                </TableCell>
+                <TableCell>{a.subject}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                    {a.isActive ? 'Active' : 'Disabled'}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(a)}>Edit</Button>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(a._id)}>Delete</Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -952,6 +1111,7 @@ function PressTab() {
 
 const TABS = [
   { id: 'email', label: 'Email Engine', icon: Mail },
+  { id: 'automations', label: 'Automations', icon: Send },
   { id: 'leads', label: 'Audience & Leads', icon: Users },
   { id: 'bookings', label: 'Bookings & Schedules', icon: CalendarDays },
   { id: 'production', label: 'Production Board', icon: BookOpen },
@@ -1005,6 +1165,7 @@ export default function AdminCRM() {
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto">
         {activeTab === 'email' && <EmailTab />}
+        {activeTab === 'automations' && <AutomationsTab />}
         {activeTab === 'leads' && <LeadsTab />}
         {activeTab === 'bookings' && <BookingsTab />}
         {activeTab === 'production' && <ProductionTab />}

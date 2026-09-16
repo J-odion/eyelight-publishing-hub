@@ -23,13 +23,6 @@ export class EmailController {
     return this.emailService.createCampaign(body);
   }
 
-  @Post(':id/send')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
-  sendNow(@Param('id') id: string) {
-    return this.emailService.sendNow(id);
-  }
-
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)

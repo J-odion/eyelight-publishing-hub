@@ -1,6 +1,7 @@
 import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { User, Role } from './schemas/user.schema.js';
 import { Manuscript, ProjectStatus } from './schemas/manuscript.schema.js';
 import { Payment } from '../payments/schemas/payment.schema.js';
@@ -14,6 +15,7 @@ export class UsersService {
     @InjectModel(Manuscript.name) private manuscriptModel: Model<Manuscript>,
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
     private cloudinary: CloudinaryService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   // 1. First step of onboarding: submit manuscript data and basic info
@@ -44,6 +46,9 @@ export class UsersService {
     });
 
     await manuscript.save();
+    
+    this.eventEmitter.emit('manuscript.submitted', { email: user.email, userId: user._id });
+    
     return { user, manuscript };
   }
 
@@ -57,6 +62,9 @@ export class UsersService {
     user.password = await bcrypt.hash(passwordPlain, salt);
     user.isAuthorOnboarded = true;
     await user.save();
+    
+    this.eventEmitter.emit('user.registered', { email: user.email, userId: user._id });
+    
     return user;
   }
 
@@ -105,10 +113,17 @@ export class UsersService {
 
   // Update a project's production status
   async updateProjectStatus(id: string, status: ProjectStatus) {
-    const manuscript = await this.manuscriptModel.findById(id);
+    const manuscript = await this.manuscriptModel.findById(id).populate('author');
     if (!manuscript) throw new NotFoundException('Project not found');
     manuscript.status = status;
-    return manuscript.save();
+    await manuscript.save();
+    
+    const author: any = manuscript.author;
+    if (author && author.email) {
+      this.eventEmitter.emit('project.status_changed', { email: author.email, userId: author._id, data: { status } });
+    }
+    
+    return manuscript;
   }
 
   // Get all authors list

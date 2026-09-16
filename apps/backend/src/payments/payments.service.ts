@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Payment, PaymentStatus } from './schemas/payment.schema.js';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class PaymentsService {
   constructor(
     private configService: ConfigService,
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
+    private eventEmitter: EventEmitter2,
   ) {
     this.paystackSecretKey = this.configService.get<string>('PAYSTACK_SECRET_KEY') || '';
   }
@@ -70,7 +72,12 @@ export class PaymentsService {
         { reference },
         { status: PaymentStatus.SUCCESS },
         { new: true }
-      );
+      ).populate('user');
+      
+      const user: any = payment?.user;
+      if (user && user.email) {
+        this.eventEmitter.emit('payment.completed', { email: user.email, userId: user._id, data: { amount: payment?.amount, purpose: payment?.purpose } });
+      }
       return payment;
     }
 
@@ -87,7 +94,12 @@ export class PaymentsService {
           { reference },
           { status: PaymentStatus.SUCCESS },
           { new: true }
-        );
+        ).populate('user');
+        
+        const user: any = payment?.user;
+        if (user && user.email) {
+          this.eventEmitter.emit('payment.completed', { email: user.email, userId: user._id, data: { amount: payment?.amount, purpose: payment?.purpose } });
+        }
         return payment;
       } else {
         await this.paymentModel.findOneAndUpdate(

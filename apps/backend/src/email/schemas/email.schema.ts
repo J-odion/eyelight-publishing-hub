@@ -4,6 +4,7 @@ import { Document } from 'mongoose';
 export enum EmailStatus {
   DRAFT = 'Draft',
   SCHEDULED = 'Scheduled',
+  SENDING = 'Sending',
   SENT = 'Sent'
 }
 
@@ -26,6 +27,9 @@ export class EmailCampaign extends Document {
 
   @Prop({ type: Date })
   sentAt: Date;
+
+  @Prop({ type: Object, default: { queued: 0, sent: 0, failed: 0 } })
+  stats: { queued: number; sent: number; failed: number };
 }
 
 export const EmailCampaignSchema = SchemaFactory.createForClass(EmailCampaign);
