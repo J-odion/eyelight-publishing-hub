@@ -4,9 +4,11 @@ import 'grapesjs/dist/css/grapes.min.css';
 import gjsPresetNewsletter from 'grapesjs-preset-newsletter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Monitor, Smartphone, LayoutTemplate } from 'lucide-react';
+import { Send, Monitor, Smartphone, LayoutTemplate, Code } from 'lucide-react';
 import { CrmApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 interface TemplateEditorProps {
   initialSubject?: string;
@@ -30,6 +32,8 @@ export default function TemplateEditor({
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [previewMode, setPreviewMode] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importHtml, setImportHtml] = useState('');
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -141,6 +145,14 @@ export default function TemplateEditor({
     editor.setDevice(mode === 'mobile' ? 'Mobile portrait' : 'Desktop');
   };
 
+  const handleImportHtml = () => {
+    if (!editor || !importHtml.trim()) return;
+    editor.setComponents(importHtml);
+    setShowImportModal(false);
+    setImportHtml('');
+    toast.success('HTML snippet imported successfully!');
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header Toolbar */}
@@ -179,6 +191,10 @@ export default function TemplateEditor({
             </Button>
           </div>
 
+          <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
+            <Code className="w-4 h-4 mr-2" /> Import HTML
+          </Button>
+
           <Button variant="outline" size="sm" onClick={handleTestPreview} disabled={isSendingTest}>
             {isSendingTest ? 'Sending...' : 'Send Test'}
           </Button>
@@ -193,6 +209,29 @@ export default function TemplateEditor({
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 h-full" ref={editorRef} />
       </div>
+
+      <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Import Custom HTML</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Paste your raw HTML snippet here. This will replace the current template contents. You can then use the builder to edit the layout and text.
+            </p>
+            <Textarea
+              value={importHtml}
+              onChange={(e) => setImportHtml(e.target.value)}
+              className="min-h-[300px] font-mono text-sm"
+              placeholder="<html><body>...</body></html>"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportModal(false)}>Cancel</Button>
+            <Button onClick={handleImportHtml}>Import & Replace</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
