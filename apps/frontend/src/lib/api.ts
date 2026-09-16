@@ -57,6 +57,15 @@ export const CrmApi = {
   updateCampaign: (id: string, data: any) => api.patch(`/email/${id}`, data),
   removeCampaign: (id: string) => api.delete(`/email/${id}`),
   sendCampaignNow: (id: string) => api.post(`/email/${id}/send`),
+
+  // Contacts & Lists
+  getContacts: (params?: { tag?: string; list?: string; search?: string }) => api.get('/crm/contacts', { params }),
+  getTags: () => api.get('/crm/contacts/tags'),
+  getLists: () => api.get('/crm/lists'),
+  createList: (data: any) => api.post('/crm/lists', data),
+  importContacts: (formData: FormData) => api.post('/crm/contacts/import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 // ─── Admin: Production Board ─────────────────────────────────

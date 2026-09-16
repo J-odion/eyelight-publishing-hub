@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi, EventsApi, PressApi } from '../lib/api.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { 
+  Users, Mail, BookOpen, CalendarDays, LayoutDashboard, Send,
+  Settings, LogOut, Search, Filter, Plus, ChevronDown, Check,
+  X, CheckCircle, Clock, Copy, Download, Upload
+} from 'lucide-react';
+import { format } from 'date-fns';
+import Papa from 'papaparse';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -40,29 +47,33 @@ const STATUS_COLORS: Record<string, string> = {
 
 function EmailTab() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ subject: '', content: '', audienceTags: '', scheduledFor: '' });
+  const [form, setForm] = useState({ subject: '', content: '', audienceTags: [] as string[], scheduledFor: '' });
 
-  const fetchCampaigns = useCallback(async () => {
+  const fetchCampaignsAndTags = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await CrmApi.getCampaigns();
-      setCampaigns(res.data);
-    } catch { toast.error('Failed to load campaigns'); }
+      const [campRes, tagsRes] = await Promise.all([
+        CrmApi.getCampaigns(),
+        CrmApi.getTags()
+      ]);
+      setCampaigns(campRes.data);
+      setAvailableTags(tagsRes.data || []);
+    } catch { toast.error('Failed to load campaigns data'); }
     finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchCampaigns(); }, [fetchCampaigns]);
+  useEffect(() => { fetchCampaignsAndTags(); }, [fetchCampaignsAndTags]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const payload = {
         ...form,
-        audienceTags: form.audienceTags.split(',').map(t => t.trim()).filter(Boolean),
         scheduledFor: form.scheduledFor ? new Date(form.scheduledFor) : undefined,
       };
       
@@ -76,8 +87,8 @@ function EmailTab() {
       
       setShowForm(false);
       setEditId(null);
-      setForm({ subject: '', content: '', audienceTags: '', scheduledFor: '' });
-      fetchCampaigns();
+      setForm({ subject: '', content: '', audienceTags: [], scheduledFor: '' });
+      fetchCampaignsAndTags();
     } catch { toast.error('Failed to save campaign'); }
   };
 
@@ -85,7 +96,7 @@ function EmailTab() {
     setForm({
       subject: c.subject,
       content: c.content,
-      audienceTags: c.audienceTags ? c.audienceTags.join(', ') : '',
+      audienceTags: c.audienceTags || [],
       scheduledFor: c.scheduledFor ? new Date(c.scheduledFor).toISOString().slice(0, 16) : ''
     });
     setEditId(c._id);
@@ -97,7 +108,7 @@ function EmailTab() {
     try {
       await CrmApi.removeCampaign(id);
       toast.success('Campaign deleted!');
-      fetchCampaigns();
+      fetchCampaignsAndTags();
     } catch { toast.error('Failed to delete campaign'); }
   };
 
@@ -118,7 +129,7 @@ function EmailTab() {
           if (showForm) {
             setShowForm(false);
             setEditId(null);
-            setForm({ subject: '', content: '', audienceTags: '', scheduledFor: '' });
+            setForm({ subject: '', content: '', audienceTags: [], scheduledFor: '' });
           } else {
             setShowForm(true);
           }
@@ -144,8 +155,25 @@ function EmailTab() {
           </div>
           <div className="grid grid-cols-2 gap-4 mt-12">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Audience (comma separated)</label>
-              <Input placeholder="e.g. Author, Newsletter" value={form.audienceTags} onChange={e => setForm({ ...form, audienceTags: e.target.value })} />
+              <label className="text-sm font-medium">Audience (Tags)</label>
+              <div className="flex flex-wrap gap-2 border rounded-md p-3 min-h-[40px]">
+                {availableTags.length === 0 && <span className="text-muted-foreground text-sm">No tags found.</span>}
+                {availableTags.map(tag => (
+                  <label key={tag} className="flex items-center space-x-2 text-sm bg-muted px-2 py-1 rounded-md cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={form.audienceTags.includes(tag)}
+                      onChange={e => {
+                        const newTags = e.target.checked 
+                          ? [...form.audienceTags, tag] 
+                          : form.audienceTags.filter(t => t !== tag);
+                        setForm({ ...form, audienceTags: newTags });
+                      }}
+                    />
+                    <span>{tag}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Schedule For (blank = draft)</label>
@@ -219,89 +247,100 @@ function EmailTab() {
 }
 
 function LeadsTab() {
-  const [leads, setLeads] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
-  const [importCsv, setImportCsv] = useState('');
+  const [tagInput, setTagInput] = useState('');
+  const [file, setFile] = useState<File | null>(null);
 
-  const fetchLeads = useCallback(async () => {
+  const fetchContacts = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await LeadsApi.getAllLeads();
-      setLeads(res.data);
-    } catch { toast.error('Failed to load leads'); }
+      const res = await CrmApi.getContacts();
+      setContacts(res.data.data);
+    } catch { toast.error('Failed to load contacts'); }
     finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchLeads(); }, [fetchLeads]);
+  useEffect(() => { fetchContacts(); }, [fetchContacts]);
 
   const handleImport = async () => {
-    if (!importCsv.trim()) return;
+    if (!file) {
+      toast.error('Please select a CSV file');
+      return;
+    }
     try {
-      const lines = importCsv.trim().split('\n');
-      const newLeads = lines.map(line => {
-        const [name, email] = line.split(',').map(s => s.trim());
-        return { name: name || 'Unknown', email, type: 'Newsletter' };
-      }).filter(l => l.email);
-
-      await LeadsApi.importBulk(newLeads);
-      toast.success(`Successfully imported ${newLeads.length} leads!`);
+      const formData = new FormData();
+      formData.append('file', file);
+      if (tagInput) formData.append('tag', tagInput);
+      
+      const res = await CrmApi.importContacts(formData);
+      toast.success(`Imported! Added: ${res.data.added}, Updated: ${res.data.updated}, Skipped: ${res.data.skipped}`);
       setShowImport(false);
-      setImportCsv('');
-      fetchLeads();
-    } catch { toast.error('Failed to import leads'); }
+      setFile(null);
+      setTagInput('');
+      fetchContacts();
+    } catch { toast.error('Failed to import contacts'); }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Leads & Audience</h2>
+        <h2 className="text-xl font-semibold">CRM Contacts (Audience)</h2>
         <Button size="sm" onClick={() => setShowImport(!showImport)}>
-          <Plus className="w-4 h-4 mr-2" /> {showImport ? 'Cancel Import' : 'Import List'}
+          <Upload className="w-4 h-4 mr-2" /> {showImport ? 'Cancel Import' : 'Import CSV'}
         </Button>
       </div>
 
       {showImport && (
         <div className="bg-card border rounded-xl p-6 mb-6">
-          <h3 className="text-sm font-medium mb-2">Import CSV (Format: Name, Email)</h3>
-          <Textarea 
-            placeholder="John Doe, john@example.com&#10;Jane Smith, jane@example.com" 
-            className="min-h-[120px] mb-4 font-mono text-sm"
-            value={importCsv}
-            onChange={e => setImportCsv(e.target.value)}
-          />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowImport(false)}>Cancel</Button>
-            <Button onClick={handleImport}>Import Leads</Button>
+          <h3 className="text-sm font-medium mb-4">Import Contacts via CSV</h3>
+          <div className="space-y-4 max-w-md">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Select CSV File</label>
+              <Input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Tag (Optional, e.g. imported-substack)</label>
+              <Input value={tagInput} onChange={e => setTagInput(e.target.value)} placeholder="imported-substack" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowImport(false)}>Cancel</Button>
+              <Button onClick={handleImport}>Upload & Import</Button>
+            </div>
           </div>
         </div>
       )}
-      <div className="text-sm text-muted-foreground mb-4">{leads.length} total</div>
+      <div className="text-sm text-muted-foreground mb-4">{contacts.length} total contacts</div>
       <div className="bg-card border rounded-xl overflow-hidden">
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
+            <TableHead>Tags</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Source</TableHead>
           </TableRow></TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-            ) : leads.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No leads captured yet.</TableCell></TableRow>
-            ) : leads.map((l: any) => (
-              <TableRow key={l._id}>
-                <TableCell className="font-medium">{l.name || '—'}</TableCell>
-                <TableCell>{l.email}</TableCell>
-                <TableCell>{l.phone || '—'}</TableCell>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+            ) : contacts.length === 0 ? (
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No contacts yet.</TableCell></TableRow>
+            ) : contacts.map((c: any) => (
+              <TableRow key={c._id}>
+                <TableCell className="font-medium">{c.email}</TableCell>
+                <TableCell>{c.firstName || '—'}</TableCell>
+                <TableCell>{c.lastName || '—'}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${l.type === 'Newsletter' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{l.type}</span>
+                  {c.tags?.map((t: string) => (
+                    <span key={t} className="px-2 py-0.5 rounded-full text-xs bg-muted mr-1">{t}</span>
+                  ))}
                 </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {l.createdAt ? format(new Date(l.createdAt), 'PP') : '—'}
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.status === 'subscribed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{c.status}</span>
                 </TableCell>
+                <TableCell className="text-muted-foreground text-xs uppercase">{c.source}</TableCell>
               </TableRow>
             ))}
           </TableBody>
