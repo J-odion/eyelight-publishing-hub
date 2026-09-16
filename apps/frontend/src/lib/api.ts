@@ -56,6 +56,7 @@ export const CrmApi = {
   createCampaign: (data: any) => api.post('/email', data),
   updateCampaign: (id: string, data: any) => api.patch(`/email/${id}`, data),
   removeCampaign: (id: string) => api.delete(`/email/${id}`),
+  sendTestPreview: (data: { subject: string, html: string }) => api.post('/email/test-preview', data),
 
   // Automations
   getAutomations: () => api.get('/automations'),

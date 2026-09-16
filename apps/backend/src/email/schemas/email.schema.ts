@@ -30,6 +30,9 @@ export class EmailCampaign extends Document {
 
   @Prop({ type: Object, default: { queued: 0, sent: 0, failed: 0 } })
   stats: { queued: number; sent: number; failed: number };
+
+  @Prop({ type: Object, default: null })
+  builderData: any; // Raw GrapesJS state
 }
 
 export const EmailCampaignSchema = SchemaFactory.createForClass(EmailCampaign);

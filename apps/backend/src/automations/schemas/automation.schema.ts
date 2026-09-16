@@ -24,6 +24,9 @@ export class Automation {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ type: Object, default: null })
+  builderData: any; // Raw GrapesJS state
 }
 
 export const AutomationSchema = SchemaFactory.createForClass(Automation);

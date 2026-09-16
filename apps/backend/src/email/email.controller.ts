@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { EmailService } from './email.service.js';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard.js';
@@ -35,5 +35,12 @@ export class EmailController {
   @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
     return this.emailService.removeCampaign(id);
+  }
+
+  @Post('test-preview')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  async sendTestPreview(@Req() req: any, @Body() body: { subject: string, html: string }) {
+    return this.emailService.sendTestPreview(req.user.email, body.subject, body.html);
   }
 }

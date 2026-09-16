@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import TemplateEditor from '@/components/TemplateEditor';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
 const PRESS_CATEGORIES = [
@@ -50,9 +51,10 @@ function EmailTab() {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ subject: '', content: '', audienceTags: [] as string[], scheduledFor: '' });
+  const [form, setForm] = useState({ subject: '', content: '', builderData: null as any, audienceTags: [] as string[], scheduledFor: '' });
 
   const fetchCampaignsAndTags = useCallback(async () => {
     try {
@@ -87,7 +89,7 @@ function EmailTab() {
       
       setShowForm(false);
       setEditId(null);
-      setForm({ subject: '', content: '', audienceTags: [], scheduledFor: '' });
+      setForm({ subject: '', content: '', builderData: null, audienceTags: [], scheduledFor: '' });
       fetchCampaignsAndTags();
     } catch { toast.error('Failed to save campaign'); }
   };
@@ -146,12 +148,23 @@ function EmailTab() {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Email Content</label>
-            <ReactQuill 
-              theme="snow" 
-              value={form.content} 
-              onChange={val => setForm({ ...form, content: val })} 
-              className="bg-white rounded-md mb-12 h-64"
-            />
+            <div className="border rounded-md p-6 bg-muted/50 flex flex-col items-center justify-center space-y-3">
+              <p className="text-sm text-muted-foreground text-center">Use the drag-and-drop builder to design your email.</p>
+              <Button type="button" onClick={() => setShowEditor(true)}>Open Builder</Button>
+            </div>
+            
+            {showEditor && (
+              <TemplateEditor 
+                initialSubject={form.subject}
+                initialBuilderData={form.builderData}
+                initialHtml={form.content}
+                onClose={() => setShowEditor(false)}
+                onSave={async (sub, html, bData) => {
+                  setForm(f => ({ ...f, subject: sub, content: html, builderData: bData }));
+                  setShowEditor(false);
+                }}
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4 mt-12">
             <div className="space-y-2">
@@ -269,7 +282,8 @@ function AutomationsTab() {
   const [automations, setAutomations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ triggerEvent: '', subject: '', content: '', isActive: true });
+  const [form, setForm] = useState({ triggerEvent: '', subject: '', content: '', builderData: null as any, isActive: true });
+  const [showEditor, setShowEditor] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const TRIGGERS = [
@@ -302,7 +316,7 @@ function AutomationsTab() {
   };
 
   const handleEdit = (auto: any) => {
-    setForm({ triggerEvent: auto.triggerEvent, subject: auto.subject, content: auto.content, isActive: auto.isActive });
+    setForm({ triggerEvent: auto.triggerEvent, subject: auto.subject, content: auto.content, builderData: auto.builderData || null, isActive: auto.isActive });
     setIsEditing(true);
     setShowForm(true);
   };
@@ -323,7 +337,7 @@ function AutomationsTab() {
           <h2 className="text-2xl font-bold tracking-tight">Automations</h2>
           <p className="text-muted-foreground">Set up event-driven emails that fire automatically.</p>
         </div>
-        <Button onClick={() => { setForm({ triggerEvent: '', subject: '', content: '', isActive: true }); setIsEditing(false); setShowForm(!showForm); }}>
+        <Button onClick={() => { setForm({ triggerEvent: '', subject: '', content: '', builderData: null as any, isActive: true }); setIsEditing(false); setShowForm(!showForm); }}>
           {showForm ? 'Cancel' : <><Plus className="w-4 h-4 mr-2" /> New Automation</>}
         </Button>
       </div>
@@ -354,9 +368,24 @@ function AutomationsTab() {
           <div className="space-y-2">
             <div className="flex justify-between">
               <label className="text-sm font-medium">Email Content</label>
-              <span className="text-xs text-muted-foreground">Available tags: {'{{firstName}}'}, {'{{lastName}}'}</span>
             </div>
-            <ReactQuill theme="snow" value={form.content} onChange={val => setForm({ ...form, content: val })} className="bg-white rounded-md mb-12 h-[200px]" />
+            <div className="border rounded-md p-6 bg-muted/50 flex flex-col items-center justify-center space-y-3">
+              <p className="text-sm text-muted-foreground text-center">Use the drag-and-drop builder to design your automation.</p>
+              <Button type="button" onClick={() => setShowEditor(true)}>Open Builder</Button>
+            </div>
+            
+            {showEditor && (
+              <TemplateEditor 
+                initialSubject={form.subject}
+                initialBuilderData={form.builderData}
+                initialHtml={form.content}
+                onClose={() => setShowEditor(false)}
+                onSave={async (sub, html, bData) => {
+                  setForm(f => ({ ...f, subject: sub, content: html, builderData: bData }));
+                  setShowEditor(false);
+                }}
+              />
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-12">

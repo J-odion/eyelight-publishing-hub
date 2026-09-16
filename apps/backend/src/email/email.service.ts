@@ -1,4 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import juice from 'juice';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -51,6 +52,9 @@ export class EmailService {
   }
 
   async createCampaign(data: any) {
+    if (data.content) {
+      data.content = juice(data.content);
+    }
     const campaign = new this.emailModel({
       ...data,
       status: data.scheduledFor ? EmailStatus.SCHEDULED : EmailStatus.DRAFT
@@ -123,6 +127,9 @@ export class EmailService {
   }
 
   async updateCampaign(id: string, data: any) {
+    if (data.content) {
+      data.content = juice(data.content);
+    }
     // If updating scheduledFor, reset status accordingly
     if (data.scheduledFor) {
       data.status = EmailStatus.SCHEDULED;
@@ -138,5 +145,28 @@ export class EmailService {
     const campaign = await this.emailModel.findByIdAndDelete(id);
     if (!campaign) throw new NotFoundException('Campaign not found');
     return campaign;
+  }
+
+  async sendTestPreview(adminEmail: string, subject: string, rawHtml: string) {
+    let contact = await this.contactModel.findOne({ email: adminEmail });
+    if (!contact) {
+      contact = new this.contactModel({
+        email: adminEmail,
+        firstName: 'Admin',
+        lastName: 'User',
+      });
+    }
+
+    let html = juice(rawHtml);
+    html = html.replace(/\{\{firstName\}\}/g, contact.firstName || 'Admin');
+    html = html.replace(/\{\{lastName\}\}/g, contact.lastName || 'User');
+    html = html.replace(/\{\{unsubscribeUrl\}\}/g, 'https://eyelight.com/unsubscribe?mock=1');
+
+    let finalSubject = subject;
+    finalSubject = finalSubject.replace(/\{\{firstName\}\}/g, contact.firstName || 'Admin');
+    finalSubject = finalSubject.replace(/\{\{lastName\}\}/g, contact.lastName || 'User');
+
+    await this.sendEmail(adminEmail, `[TEST] ${finalSubject}`, html);
+    return { success: true };
   }
 }

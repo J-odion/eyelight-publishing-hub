@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import juice from 'juice';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Automation, AutomationDocument, AutomationEvent } from './schemas/automation.schema.js';
@@ -18,6 +19,9 @@ export class AutomationsService {
   }
 
   async upsertAutomation(triggerEvent: string, data: Partial<Automation>) {
+    if (data.content) {
+      data.content = juice(data.content);
+    }
     return this.automationModel.findOneAndUpdate(
       { triggerEvent: triggerEvent as AutomationEvent },
       { $set: data },
