@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Resend } from 'resend';
 import { EmailCampaign, EmailStatus } from './schemas/email.schema.js';
-import { User } from '../users/schemas/user.schema.js';
 import { Contact, ContactDocument } from '../crm/schemas/contact.schema.js';
 import { SendJob, SendJobDocument } from './schemas/send-job.schema.js';
 
@@ -17,7 +16,6 @@ export class EmailService {
   constructor(
     private configService: ConfigService,
     @InjectModel(EmailCampaign.name) private emailModel: Model<EmailCampaign>,
-    @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Contact.name) private contactModel: Model<ContactDocument>,
     @InjectModel(SendJob.name) private sendJobModel: Model<SendJobDocument>,
   ) {
