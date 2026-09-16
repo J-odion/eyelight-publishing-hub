@@ -13,6 +13,7 @@ import { BooksModule } from './books/books.module.js';
 import { EventsModule } from './events/events.module.js';
 import { ReferralsModule } from './referrals/referrals.module.js';
 import { PressModule } from './press/press.module.js';
+import { BookingsModule } from './bookings/bookings.module.js';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PressModule } from './press/press.module.js';
     EventsModule,
     ReferralsModule,
     PressModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
