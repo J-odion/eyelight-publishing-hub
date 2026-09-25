@@ -155,7 +155,7 @@ export class UsersService {
     const password = await bcrypt.hash('Admin@Eyelight2025', salt);
 
     const admin = new this.userModel({
-      email: 'admin@eyelight.com',
+      email: 'admin@eyelightpublishers.com',
       name: 'Eyelight Admin',
       phone: '',
       role: Role.ADMIN,
@@ -163,6 +163,6 @@ export class UsersService {
       password,
     });
     await admin.save();
-    console.log('✅ Admin user seeded: admin@eyelight.com / Admin@Eyelight2025');
+    console.log('✅ Admin user seeded: admin@eyelightpublishers.com / Admin@Eyelight2025');
   }
 }

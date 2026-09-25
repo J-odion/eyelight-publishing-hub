@@ -58,6 +58,10 @@ export class CrmService {
     return this.contactModel.distinct('tags');
   }
 
+  async getContactByEmail(email: string) {
+    return this.contactModel.findOne({ email: email.toLowerCase() });
+  }
+
   async createContact(data: any) {
     const existing = await this.contactModel.findOne({ email: data.email?.toLowerCase() });
     if (existing) {

@@ -67,7 +67,7 @@ export default function AdminLogin() {
         </form>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          Default: admin@eyelight.com / Admin@Eyelight2025
+          Default: admin@eyelightpublishers.com / Admin@Eyelight2025
         </p>
       </div>
     </div>

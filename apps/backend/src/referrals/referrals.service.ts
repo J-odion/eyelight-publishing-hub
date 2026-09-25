@@ -35,7 +35,7 @@ export class ReferralsService {
 
     return {
       code,
-      referralLink: `https://eyelightpublishing.com/submit-manuscript?ref=${code}`,
+      referralLink: `https://eyelightpublishers.com/submit-manuscript?ref=${code}`,
       stats: {
         totalReferred,
         completed,

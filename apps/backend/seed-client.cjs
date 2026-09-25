@@ -13,9 +13,9 @@ const seedClient = async () => {
     const projectsCollection = db.collection('projects');
 
     // Check if user already exists
-    const existingUser = await usersCollection.findOne({ email: 'client@eyelight.com' });
+    const existingUser = await usersCollection.findOne({ email: 'client@eyelightpublishers.com' });
     if (existingUser) {
-      console.log('Client already exists! Email: client@eyelight.com / Password: Password123');
+      console.log('Client already exists! Email: client@eyelightpublishers.com / Password: Password123');
       process.exit(0);
     }
 
@@ -24,7 +24,7 @@ const seedClient = async () => {
 
     await usersCollection.insertOne({
       _id: userId,
-      email: 'client@eyelight.com',
+      email: 'client@eyelightpublishers.com',
       password: hashedPassword,
       name: 'Test Client',
       role: 'author',
@@ -46,7 +46,7 @@ const seedClient = async () => {
     });
 
     console.log('Client seeded successfully!');
-    console.log('Email: client@eyelight.com');
+    console.log('Email: client@eyelightpublishers.com');
     console.log('Password: Password123');
 
     process.exit(0);
