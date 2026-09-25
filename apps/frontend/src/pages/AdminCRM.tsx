@@ -1571,46 +1571,54 @@ export default function AdminCRM() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <aside className="w-60 border-r bg-card flex flex-col shrink-0">
-        <div className="p-6 border-b">
-          <h1 className="font-bold text-lg text-foreground">Eyelight CRM</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">{admin.name || 'Admin'}</p>
-          <p className="text-xs text-muted-foreground font-mono truncate">services@eyelightpublishers.com</p>
+    <div className="min-h-screen bg-white flex text-[#111]">
+      {/* Sidebar - Resend Dark Mode */}
+      <aside className="w-[240px] border-r border-[#222] bg-black text-[#888] flex flex-col shrink-0">
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+              <div className="w-2.5 h-2.5 bg-black rounded-sm" />
+            </div>
+            <h1 className="font-semibold text-white tracking-tight text-lg">Eyelight</h1>
+          </div>
+          <div className="mt-4 text-[11px] font-mono text-gray-400 bg-[#111] p-2 rounded-md border border-[#333] truncate">
+             services@eyelightpublishers.com
+          </div>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 px-3 space-y-0.5">
           {TABS.map(tab => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.id ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${activeTab === tab.id ? 'bg-[#222] text-white shadow-sm' : 'hover:text-white hover:bg-[#111]'}`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4" strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                 {tab.label}
               </button>
             );
           })}
         </nav>
-        <div className="p-4 border-t">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+        <div className="p-4 border-t border-[#222]">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium hover:text-white hover:bg-[#111] transition-colors">
             <LogOut className="w-4 h-4" /> Logout
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-auto">
-        {activeTab === 'email' && <EmailTab />}
-        {activeTab === 'automations' && <AutomationsTab />}
-        {activeTab === 'leads' && <LeadsTab />}
-        {activeTab === 'bookings' && <BookingsTab />}
-        {activeTab === 'production' && <ProductionTab />}
-        {activeTab === 'authors' && <AuthorsTab />}
-        {activeTab === 'events' && <EventsTab />}
-        {activeTab === 'press' && <PressTab />}
+      <main className="flex-1 overflow-auto bg-[#FAFAFA]">
+        <div className="max-w-[1200px] mx-auto p-10">
+          {activeTab === 'email' && <EmailTab />}
+          {activeTab === 'automations' && <AutomationsTab />}
+          {activeTab === 'leads' && <LeadsTab />}
+          {activeTab === 'bookings' && <BookingsTab />}
+          {activeTab === 'production' && <ProductionTab />}
+          {activeTab === 'authors' && <AuthorsTab />}
+          {activeTab === 'events' && <EventsTab />}
+          {activeTab === 'press' && <PressTab />}
+        </div>
       </main>
     </div>
   );

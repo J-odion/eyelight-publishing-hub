@@ -44,6 +44,13 @@ export class EmailController {
     return this.emailService.sendNow(id);
   }
 
+  @Get(':id/stats')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  getCampaignStats(@Param('id') id: string) {
+    return this.emailService.getCampaignStats(id);
+  }
+
   @Post('send-direct')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)

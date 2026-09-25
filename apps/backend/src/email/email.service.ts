@@ -138,6 +138,41 @@ export class EmailService {
     }
   }
 
+  async getCampaignStats(id: string) {
+    const campaign = await this.emailModel.findById(id);
+    if (!campaign) throw new NotFoundException('Campaign not found');
+
+    if (!campaign.resendBroadcastId) {
+      return {
+        stats: campaign.stats || { queued: 0, sent: 0, failed: 0 },
+        message: 'No Resend Broadcast ID found (maybe a legacy campaign)'
+      };
+    }
+
+    try {
+      // Fetch live analytics from Resend
+      const { data, error } = await this.resendClient.client.broadcasts.get(campaign.resendBroadcastId);
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to fetch stats from Resend');
+      }
+
+      // We can also fetch clicked links specifically
+      // const { data: clicks } = await this.resendClient.client.broadcasts.clickedLinks(campaign.resendBroadcastId);
+
+      return {
+        success: true,
+        stats: {
+          sent: data.status === 'sent' ? 1 : 0, // Resend doesn't expose raw counts directly in get() unless it's available? Broadcast API just gives status. Let's return raw data.
+          status: data.status,
+          resendData: data
+        }
+      };
+    } catch (e: any) {
+      this.logger.error(`Failed to fetch stats for broadcast ${campaign.resendBroadcastId}: ${e.message}`);
+      return { success: false, message: e.message };
+    }
+  }
+
   // Used for "compose & send now" direct sends from the UI (Transactional loop)
   async sendDirect(to: string[], subject: string, html: string) {
     const inlinedHtml = juice(html);

@@ -1,237 +1,132 @@
-import React, { useEffect, useRef, useState } from 'react';
-import grapesjs, { Editor } from 'grapesjs';
-import 'grapesjs/dist/css/grapes.min.css';
-import gjsPresetNewsletter from 'grapesjs-preset-newsletter';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Monitor, Smartphone, LayoutTemplate, Code } from 'lucide-react';
+import { Send, Eye, X, Check } from 'lucide-react';
 import { CrmApi } from '@/lib/api';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface TemplateEditorProps {
   initialSubject?: string;
-  initialBuilderData?: any; // the JSON representation from GrapesJS
+  initialBuilderData?: any; // We ignore this now since we dropped GrapesJS
   initialHtml?: string;
   onSave: (subject: string, html: string, builderData: any) => Promise<void>;
   onClose: () => void;
 }
 
+const QUILL_MODULES = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['link', 'image'],
+    ['clean']
+  ],
+};
+
 export default function TemplateEditor({
   initialSubject = '',
-  initialBuilderData = null,
   initialHtml = '',
   onSave,
   onClose
 }: TemplateEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [editor, setEditor] = useState<Editor | null>(null);
   const [subject, setSubject] = useState(initialSubject);
+  const [html, setHtml] = useState(initialHtml);
   const [isSaving, setIsSaving] = useState(false);
   const [isSendingTest, setIsSendingTest] = useState(false);
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
-  const [previewMode, setPreviewMode] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importHtml, setImportHtml] = useState('');
-
-  useEffect(() => {
-    if (!editorRef.current) return;
-
-    const e = grapesjs.init({
-      container: editorRef.current,
-      fromElement: false,
-      height: '100%',
-      width: '100%',
-      storageManager: false, // We handle storage manually
-      plugins: [gjsPresetNewsletter],
-      pluginsOpts: {
-        [gjsPresetNewsletter as any]: {
-          modalTitleImport: 'Import template',
-        },
-      },
-    });
-
-    // Add merge tags block
-    e.BlockManager.add('merge-tags', {
-      label: 'Merge Tag',
-      content: '<span data-gjs-type="text"> {{firstName}} </span>',
-      category: 'Basic',
-      attributes: { class: 'fa fa-tag' }
-    });
-
-    // Custom block for footer (locked unsubscribe)
-    e.BlockManager.add('footer-unsubscribe', {
-      label: 'Footer',
-      content: `
-        <table width="100%" style="margin-top:20px; border-top: 1px solid #eee; padding-top:20px; font-family: sans-serif; font-size: 12px; color: #888; text-align: center;">
-          <tr>
-            <td>
-              <p>You received this email because you are subscribed to Eyelight Publishing.</p>
-              <p><a href="{{unsubscribeUrl}}" style="color: #888; text-decoration: underline;">Unsubscribe here</a></p>
-            </td>
-          </tr>
-        </table>
-      `,
-      category: 'Basic',
-      attributes: { class: 'fa fa-file-text-o' }
-    });
-
-    // Load initial data
-    if (initialBuilderData && Object.keys(initialBuilderData).length > 0) {
-      e.loadProjectData(initialBuilderData);
-    } else if (initialHtml) {
-      e.setComponents(initialHtml);
-    } else {
-      // Default initial layout
-      e.setComponents(`
-        <table width="100%" style="font-family: sans-serif; padding: 20px;">
-          <tr>
-            <td align="center">
-              <h1>Hello {{firstName}}!</h1>
-              <p>Start building your email here.</p>
-            </td>
-          </tr>
-        </table>
-      `);
-    }
-
-    setEditor(e);
-
-    return () => {
-      e.destroy();
-    };
-  }, []);
 
   const handleSave = async () => {
-    if (!editor) return;
     setIsSaving(true);
     try {
-      const html = editor.getHtml();
-      const css = editor.getCss();
-      const fullHtml = `<style>${css}</style>${html}`;
-      const builderData = editor.getProjectData();
-      
-      await onSave(subject, fullHtml, builderData);
+      // Wrap content in a clean email container
+      const fullHtml = `
+        <div style="font-family: Inter, sans-serif; max-w: 600px; margin: 0 auto; color: #111;">
+          ${html}
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaeaea; font-size: 12px; color: #888;">
+            <p>You received this email because you are subscribed to Eyelight Publishing.</p>
+            <p><a href="{{unsubscribeUrl}}" style="color: #888; text-decoration: underline;">Unsubscribe here</a></p>
+          </div>
+        </div>
+      `;
+      await onSave(subject, fullHtml, null);
       toast.success('Template saved successfully!');
     } catch (err: any) {
-      toast.error('Failed to save template', { description: err.message });
+      toast.error('Failed to save template');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleTestPreview = async () => {
-    if (!editor) return;
     setIsSendingTest(true);
     try {
-      const html = editor.getHtml();
-      const css = editor.getCss();
-      const fullHtml = `<style>${css}</style>${html}`;
-      
+      const fullHtml = `
+        <div style="font-family: Inter, sans-serif; max-w: 600px; margin: 0 auto; color: #111;">
+          ${html}
+        </div>
+      `;
       await CrmApi.sendTestPreview({ subject: subject || 'Test Preview', html: fullHtml });
       toast.success('Test email sent successfully!');
     } catch (err: any) {
-      toast.error('Failed to send test email', { description: err.message });
+      toast.error('Failed to send test email');
     } finally {
       setIsSendingTest(false);
     }
   };
 
-  const toggleDevice = (mode: 'desktop' | 'mobile') => {
-    if (!editor) return;
-    setDevice(mode);
-    const targetWidth = mode === 'mobile' ? '320px' : '';
-    editor.setDevice(mode === 'mobile' ? 'Mobile portrait' : 'Desktop');
-  };
-
-  const handleImportHtml = () => {
-    if (!editor || !importHtml.trim()) return;
-    editor.setComponents(importHtml);
-    setShowImportModal(false);
-    setImportHtml('');
-    toast.success('HTML snippet imported successfully!');
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      {/* Header Toolbar */}
-      <header className="h-14 border-b flex items-center justify-between px-4 bg-card shrink-0">
+    <div className="fixed inset-0 z-[100] bg-white flex flex-col font-sans">
+      {/* Sleek Header */}
+      <header className="h-16 border-b border-[#eaeaea] flex items-center justify-between px-6 bg-white shrink-0">
         <div className="flex items-center gap-4 flex-1">
-          <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
-          <div className="h-4 w-px bg-border" />
-          <div className="flex-1 max-w-md flex items-center gap-2">
-            <span className="text-sm font-medium whitespace-nowrap">Subject:</span>
-            <Input 
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+          <div className="h-5 w-px bg-gray-200" />
+          <div className="flex-1 max-w-xl flex items-center">
+            <input 
               value={subject} 
               onChange={e => setSubject(e.target.value)}
-              placeholder="e.g. Hello {{firstName}}"
-              className="h-8"
+              placeholder="Email Subject..."
+              className="w-full text-lg font-medium border-none outline-none focus:ring-0 px-2 placeholder:text-gray-300"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-md border p-0.5 bg-muted">
-            <Button
-              variant={device === 'desktop' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="h-7 px-2"
-              onClick={() => toggleDevice('desktop')}
-            >
-              <Monitor className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={device === 'mobile' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="h-7 px-2"
-              onClick={() => toggleDevice('mobile')}
-            >
-              <Smartphone className="w-4 h-4" />
-            </Button>
-          </div>
-
-          <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
-            <Code className="w-4 h-4 mr-2" /> Import HTML
-          </Button>
-
-          <Button variant="outline" size="sm" onClick={handleTestPreview} disabled={isSendingTest}>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={handleTestPreview} disabled={isSendingTest} className="border-[#eaeaea] shadow-sm text-sm h-9 px-4">
             {isSendingTest ? 'Sending...' : 'Send Test'}
           </Button>
-          
-          <Button size="sm" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save Template'}
+          <Button size="sm" onClick={handleSave} disabled={isSaving} className="bg-black text-white hover:bg-[#222] shadow-sm text-sm h-9 px-4">
+            {isSaving ? 'Saving...' : 'Save template'}
           </Button>
         </div>
       </header>
 
       {/* Editor Canvas */}
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 h-full" ref={editorRef} />
+      <div className="flex-1 overflow-auto bg-[#FAFAFA] flex justify-center py-10">
+        <div className="w-[700px] bg-white border border-[#eaeaea] rounded-xl shadow-sm overflow-hidden flex flex-col h-fit min-h-[600px]">
+          {/* Custom styles for ReactQuill to make it look like a seamless block editor */}
+          <style dangerouslySetInnerHTML={{__html: `
+            .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #eaeaea !important; padding: 12px 16px !important; background: #fff; }
+            .ql-container.ql-snow { border: none !important; font-family: inherit !important; font-size: 15px !important; }
+            .ql-editor { min-height: 500px; padding: 32px 40px !important; line-height: 1.6; color: #111; }
+            .ql-editor p { margin-bottom: 1em; }
+            .ql-editor h1 { font-size: 1.5em; font-weight: 600; margin-bottom: 0.5em; }
+            .ql-editor h2 { font-size: 1.25em; font-weight: 600; margin-bottom: 0.5em; }
+            .ql-editor a { color: #000; text-decoration: underline; }
+          `}} />
+          <ReactQuill 
+            theme="snow"
+            value={html}
+            onChange={setHtml}
+            modules={QUILL_MODULES}
+            placeholder="Start writing your email... Use {{firstName}} for personalization."
+            className="flex-1 flex flex-col"
+          />
+        </div>
       </div>
-
-      <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Import Custom HTML</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Paste your raw HTML snippet here. This will replace the current template contents. You can then use the builder to edit the layout and text.
-            </p>
-            <Textarea
-              value={importHtml}
-              onChange={(e) => setImportHtml(e.target.value)}
-              className="min-h-[300px] font-mono text-sm"
-              placeholder="<html><body>...</body></html>"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowImportModal(false)}>Cancel</Button>
-            <Button onClick={handleImportHtml}>Import & Replace</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
