@@ -57,6 +57,7 @@ export const CrmApi = {
   createCampaign: (data: any) => api.post('/email', data),
   updateCampaign: (id: string, data: any) => api.patch(`/email/${id}`, data),
   removeCampaign: (id: string) => api.delete(`/email/${id}`),
+  getCampaignStats: (id: string) => api.get(`/email/${id}/stats`),
   sendNow: (id: string) => api.post(`/email/${id}/send-now`),
   sendDirect: (data: { to: string[]; subject: string; html: string }) =>
     api.post('/email/send-direct', data),

@@ -95,9 +95,15 @@ export class EmailService {
       campaign.status = EmailStatus.SENDING;
       await campaign.save();
 
-      const audienceId = this.configService.get<string>('RESEND_AUDIENCE_ID');
+      let audienceId = this.configService.get<string>('RESEND_AUDIENCE_ID');
+      
+      // If not configured, auto-fetch the default audience from Resend
       if (!audienceId) {
-        throw new Error('RESEND_AUDIENCE_ID is not configured. Cannot create broadcast.');
+        const { data: audiences, error: audError } = await this.resendClient.client.audiences.list();
+        if (audError || !audiences || audiences.data.length === 0) {
+          throw new Error('No Audience found in Resend, and RESEND_AUDIENCE_ID is not configured.');
+        }
+        audienceId = audiences.data[0].id;
       }
 
       // 1. Create the broadcast in Resend
@@ -134,6 +140,11 @@ export class EmailService {
 
     } catch (e: any) {
       this.logger.error(`Error sending broadcast: ${e.message}`);
+      
+      // Revert status so it doesn't get stuck in SENDING forever
+      campaign.status = EmailStatus.FAILED;
+      await campaign.save();
+
       return { success: false, message: e.message };
     }
   }

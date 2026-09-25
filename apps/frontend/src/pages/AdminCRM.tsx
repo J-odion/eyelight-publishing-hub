@@ -59,6 +59,8 @@ function EmailTab() {
   const [audienceMode, setAudienceMode] = useState<AudienceMode>('tags');
   const [showEditor, setShowEditor] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showMetrics, setShowMetrics] = useState(false);
+  const [metricsData, setMetricsData] = useState<any>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
@@ -179,6 +181,19 @@ function EmailTab() {
       toast.success('Campaign deleted');
       fetchAll();
     } catch { toast.error('Failed to delete campaign'); }
+  };
+
+  const handleViewMetrics = async (id: string) => {
+    try {
+      setMetricsData(null);
+      setShowMetrics(true);
+      const res = await CrmApi.getCampaignStats(id);
+      if (res.data.success) {
+        setMetricsData(res.data.stats);
+      } else {
+        toast.error(res.data.message || 'Failed to fetch metrics');
+      }
+    } catch { toast.error('Failed to load metrics'); }
   };
 
   const handleEdit = (c: any) => {
@@ -484,6 +499,49 @@ function EmailTab() {
         </DialogContent>
       </Dialog>
 
+      {/* Metrics Dialog */}
+      <Dialog open={showMetrics} onOpenChange={setShowMetrics}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Campaign Metrics</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            {!metricsData ? (
+              <p className="text-center text-muted-foreground py-8">Loading metrics...</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted/30 border rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Status</div>
+                  <div className="text-lg font-semibold capitalize">{metricsData.status || 'Unknown'}</div>
+                </div>
+                <div className="bg-muted/30 border rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Sent</div>
+                  <div className="text-lg font-semibold">{metricsData.sent || 0}</div>
+                </div>
+                <div className="bg-muted/30 border rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Open Rate (est)</div>
+                  <div className="text-lg font-semibold">
+                    {metricsData.resendData?.opens_count || 0} opens
+                  </div>
+                </div>
+                <div className="bg-muted/30 border rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Clicks (est)</div>
+                  <div className="text-lg font-semibold">
+                    {metricsData.resendData?.clicks_count || 0} clicks
+                  </div>
+                </div>
+                <div className="bg-muted/30 border rounded-lg p-4 col-span-2">
+                  <div className="text-xs text-muted-foreground mb-1">Bounces & Complaints</div>
+                  <div className="text-sm font-medium">
+                    {metricsData.resendData?.bounces_count || 0} bounces, {metricsData.resendData?.complaints_count || 0} complaints
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Campaigns List */}
       <div className="bg-card border rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
@@ -535,9 +593,14 @@ function EmailTab() {
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(c)}><Edit2 className="w-3.5 h-3.5" /></Button>
                     <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)}><Trash2 className="w-3.5 h-3.5" /></Button>
-                    {(c.status === 'Draft' || c.status === 'Scheduled') && (
+                    {(c.status === 'Draft' || c.status === 'Scheduled' || c.status === 'Failed') && (
                       <Button variant="outline" size="sm" onClick={() => handleSendNow(c._id)} className="h-7 text-xs gap-1">
                         <Send className="w-3 h-3" /> Send Now
+                      </Button>
+                    )}
+                    {c.status === 'Sent' && (
+                      <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1">
+                        <Eye className="w-3 h-3" /> Metrics
                       </Button>
                     )}
                   </div>
