@@ -11,7 +11,6 @@ export class ResendContactsService {
     try {
       // Create or update the contact in Resend
       const { data, error } = await this.resend.client.contacts.create({
-        audienceId: process.env.RESEND_AUDIENCE_ID || '', // We need to handle audiences eventually, but global works if no audience ID is explicitly enforced by their newest API
         email: contact.email,
         firstName: contact.firstName,
         lastName: contact.lastName,
