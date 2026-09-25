@@ -18,6 +18,7 @@ import { BookingsModule } from './bookings/bookings.module.js';
 import { CrmModule } from './crm/crm.module.js';
 import { AutomationsModule } from './automations/automations.module.js';
 import { WebhooksModule } from './webhooks/webhooks.module.js';
+import { MailModule } from './mail/mail.module.js';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { WebhooksModule } from './webhooks/webhooks.module.js';
     CrmModule,
     AutomationsModule,
     WebhooksModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
