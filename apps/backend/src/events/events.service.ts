@@ -36,8 +36,8 @@ export class EventsService {
     await event.save();
 
     // Send confirmation email
-    await this.emailService.sendEmail(
-      body.email,
+    await this.emailService.sendDirect(
+      [body.email],
       `You're registered: ${event.title}`,
       `<p>Hi ${body.name},</p>
        <p>You have successfully registered for <strong>${event.title}</strong>.</p>

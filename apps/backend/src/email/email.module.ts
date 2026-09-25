@@ -2,25 +2,18 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EmailController } from './email.controller.js';
 import { EmailService } from './email.service.js';
-import { SendWorkerService } from './send-worker.service.js';
 import { EmailCampaign, EmailCampaignSchema } from './schemas/email.schema.js';
-import { SendJob, SendJobSchema } from './schemas/send-job.schema.js';
-import { Contact, ContactSchema } from '../crm/schemas/contact.schema.js';
-import { List, ListSchema } from '../crm/schemas/list.schema.js';
-import { Automation, AutomationSchema } from '../automations/schemas/automation.schema.js';
+import { MailModule } from '../mail/mail.module.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: EmailCampaign.name, schema: EmailCampaignSchema },
-      { name: SendJob.name, schema: SendJobSchema },
-      { name: Contact.name, schema: ContactSchema },
-      { name: List.name, schema: ListSchema },
-      { name: Automation.name, schema: AutomationSchema }
-    ])
+    ]),
+    MailModule, // Exposes ResendClient
   ],
   controllers: [EmailController],
-  providers: [EmailService, SendWorkerService],
+  providers: [EmailService],
   exports: [EmailService]
 })
 export class EmailModule {}

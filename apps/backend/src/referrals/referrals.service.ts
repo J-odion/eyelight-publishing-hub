@@ -87,8 +87,8 @@ export class ReferralsService {
     // Notify the referrer
     const referrerUser = await this.userModel.findById(referrerId);
     if (referrerUser) {
-      await this.emailService.sendEmail(
-        referrerUser.email,
+      await this.emailService.sendDirect(
+        [referrerUser.email],
         'Someone signed up through your referral! 🎉',
         `<p>Hi ${referrerUser.name},</p>
          <p>Great news! <strong>${referredEmail}</strong> just signed up for Eyelight Publishing using your referral link.</p>

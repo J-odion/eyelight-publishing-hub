@@ -39,6 +39,9 @@ export class EmailCampaign extends Document {
 
   @Prop({ type: Object, default: null })
   builderData: any; // Raw GrapesJS state
+
+  @Prop({ type: String })
+  resendBroadcastId?: string; // The ID of the broadcast in Resend
 }
 
 export const EmailCampaignSchema = SchemaFactory.createForClass(EmailCampaign);

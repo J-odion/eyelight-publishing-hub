@@ -2,9 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import juice from 'juice';
 import { AutomationEvent, AutomationDocument, Automation } from './schemas/automation.schema.js';
-import { SendJob, SendJobDocument } from '../email/schemas/send-job.schema.js';
 import { Contact, ContactDocument } from '../crm/schemas/contact.schema.js';
+import { MailService } from '../mail/mail.service.js';
 
 @Injectable()
 export class AutomationListener {
@@ -12,8 +13,8 @@ export class AutomationListener {
 
   constructor(
     @InjectModel(Automation.name) private automationModel: Model<AutomationDocument>,
-    @InjectModel(SendJob.name) private sendJobModel: Model<SendJobDocument>,
     @InjectModel(Contact.name) private contactModel: Model<ContactDocument>,
+    private readonly mailService: MailService,
   ) {}
 
   @OnEvent('**')
@@ -52,16 +53,21 @@ export class AutomationListener {
         return;
       }
 
-      // Enqueue SendJob
-      const job = new this.sendJobModel({
-        contactId: contact._id,
-        automationId: (automation as any)._id,
-        status: 'queued',
-        nextAttemptAt: new Date(),
+      // Instead of queueing a SendJob locally, send immediately via MailService
+      let html = juice(automation.content);
+      html = html.replace(/\{\{firstName\}\}/g, contact.firstName || '');
+      html = html.replace(/\{\{lastName\}\}/g, contact.lastName || '');
+
+      let subject = automation.subject;
+      subject = subject.replace(/\{\{firstName\}\}/g, contact.firstName || '');
+
+      await this.mailService.send({
+        to: contact.email,
+        subject,
+        html,
       });
 
-      await job.save();
-      this.logger.log(`Enqueued automation email for ${payload.email} on event ${eventName}`);
+      this.logger.log(`Sent automation email for ${payload.email} on event ${eventName}`);
     } catch (error) {
       this.logger.error(`Error processing automation event ${eventName}`, error);
     }

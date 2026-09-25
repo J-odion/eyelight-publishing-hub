@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { parse } from 'csv-parse';
 import { Contact, ContactDocument } from './schemas/contact.schema.js';
 import { List, ListDocument } from './schemas/list.schema.js';
+import { ResendContactsService } from '../mail/resend.contacts.service.js';
 import * as fs from 'fs';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class CrmService {
   constructor(
     @InjectModel(Contact.name) private contactModel: Model<ContactDocument>,
     @InjectModel(List.name) private listModel: Model<ListDocument>,
+    private readonly resendContacts: ResendContactsService,
   ) {}
 
   // ─── List Management ───────────────────────────────────────────────────────
@@ -65,19 +67,44 @@ export class CrmService {
         existing.tags = merged;
         await existing.save();
       }
+      // Sync update to Resend
+      await this.resendContacts.updateContact(existing.email, {
+        firstName: existing.firstName,
+        lastName: existing.lastName,
+        unsubscribed: existing.status !== 'subscribed',
+      });
       return existing;
     }
-    return this.contactModel.create({
+    
+    const created = await this.contactModel.create({
       ...data,
       email: data.email?.toLowerCase(),
       status: data.status || 'subscribed',
       source: data.source || 'manual',
     });
+
+    // Sync new contact to Resend
+    await this.resendContacts.syncContact({
+      email: created.email,
+      firstName: created.firstName,
+      lastName: created.lastName,
+      unsubscribed: created.status !== 'subscribed',
+    });
+
+    return created;
   }
 
   async updateContact(id: string, data: any) {
     const contact = await this.contactModel.findByIdAndUpdate(id, data, { new: true });
     if (!contact) throw new NotFoundException('Contact not found');
+    
+    // Sync update to Resend
+    await this.resendContacts.updateContact(contact.email, {
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      unsubscribed: contact.status !== 'subscribed',
+    });
+
     return contact;
   }
 
@@ -124,6 +151,12 @@ export class CrmService {
                 }
                 existing.source = 'import';
                 await existing.save();
+                // Sync update
+                await this.resendContacts.updateContact(existing.email, {
+                  firstName: existing.firstName,
+                  lastName: existing.lastName,
+                  unsubscribed: existing.status !== 'subscribed',
+                });
                 updated++;
               } else {
                 await this.contactModel.create({
@@ -133,6 +166,13 @@ export class CrmService {
                   tags: tag ? [tag] : [],
                   source: 'import',
                   status: 'subscribed'
+                });
+                // Sync new
+                await this.resendContacts.syncContact({
+                  email,
+                  firstName,
+                  lastName,
+                  unsubscribed: false,
                 });
                 added++;
               }
