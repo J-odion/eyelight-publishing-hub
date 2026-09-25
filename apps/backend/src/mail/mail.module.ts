@@ -25,6 +25,7 @@ import { ResendContactsService } from './resend.contacts.service.js';
     PasswordResetEmailService,
     AccountNotificationEmailService,
     ResendContactsService,
+    ResendClient,
   ],
 })
 export class MailModule {}
