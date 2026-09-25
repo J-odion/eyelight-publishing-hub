@@ -17,7 +17,7 @@ export class EmailService {
     private readonly resendClient: ResendClient,
     @InjectModel(EmailCampaign.name) private emailModel: Model<EmailCampaign>,
   ) {
-    this.fromAddress = this.configService.get<string>('RESEND_FROM_EMAIL') || 'Eyelight Publishing <services@eyelightpublishers.com>';
+    this.fromAddress = this.configService.get<string>('RESEND_FROM_EMAIL') || 'Grace From EyelightPublishers <services@eyelightpublishers.com>';
   }
 
   async createCampaign(data: any) {

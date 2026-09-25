@@ -25,9 +25,21 @@ const QUILL_MODULES = {
   ],
 };
 
+const DEFAULT_HTML = `
+  <div style="text-align: center; margin-bottom: 30px;">
+    <img src="https://res.cloudinary.com/wl57snga/image/upload/v1727299000/eyelight-logo-placeholder.png" alt="Eyelight Publishers" style="max-width: 180px; height: auto;" />
+  </div>
+  <h1 style="text-align: center; font-size: 24px; color: #111; margin-bottom: 20px;">Welcome to Eyelight</h1>
+  <p style="font-size: 16px; color: #444; line-height: 1.6;">Hi {{firstName}},</p>
+  <p style="font-size: 16px; color: #444; line-height: 1.6;">Start writing your amazing content here. We have set up a clean, modern template for you to use. You can replace this image or add new ones using the toolbar above.</p>
+  <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+    <a href="#" style="background-color: #111; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 15px;">Call to Action</a>
+  </div>
+`;
+
 export default function TemplateEditor({
   initialSubject = '',
-  initialHtml = '',
+  initialHtml = DEFAULT_HTML,
   onSave,
   onClose
 }: TemplateEditorProps) {

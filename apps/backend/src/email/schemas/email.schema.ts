@@ -5,7 +5,8 @@ export enum EmailStatus {
   DRAFT = 'Draft',
   SCHEDULED = 'Scheduled',
   SENDING = 'Sending',
-  SENT = 'Sent'
+  SENT = 'Sent',
+  FAILED = 'Failed'
 }
 
 @Schema({ timestamps: true })

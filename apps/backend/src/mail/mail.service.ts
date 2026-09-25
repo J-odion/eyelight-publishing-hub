@@ -23,7 +23,7 @@ export class MailService {
     replyTo?: string;
   }) {
     // Defaulting to the known valid email for now to avoid crashes if RESEND_FROM_EMAIL is missing in this env
-    const from = this.configService.get<string>('RESEND_FROM_EMAIL') || 'Eyelight Publishing <services@eyelightpublishers.com>';
+    const from = this.configService.get<string>('RESEND_FROM_EMAIL') || 'Grace From EyelightPublishers <services@eyelightpublishers.com>';
     
     const { data, error } = await this.resend.client.emails.send({
       from,

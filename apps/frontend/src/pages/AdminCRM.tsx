@@ -60,6 +60,7 @@ function EmailTab() {
   const [showEditor, setShowEditor] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
+  const [showOverallMetrics, setShowOverallMetrics] = useState(false);
   const [metricsData, setMetricsData] = useState<any>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
@@ -234,9 +235,14 @@ function EmailTab() {
             Send campaigns, direct emails, and schedule broadcasts — from <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">services@eyelightpublishers.com</span>
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setShowCompose(true); }}>
-          <Plus className="w-4 h-4 mr-2" /> Compose Email
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setShowOverallMetrics(true)}>
+            <Eye className="w-4 h-4 mr-2" /> View Metrics
+          </Button>
+          <Button onClick={() => { resetForm(); setShowCompose(true); }}>
+            <Plus className="w-4 h-4 mr-2" /> Compose Email
+          </Button>
+        </div>
       </div>
 
       {/* Compose Dialog */}
@@ -491,7 +497,7 @@ function EmailTab() {
           </DialogHeader>
           <div className="mt-2 p-5 bg-white border rounded-xl shadow-sm">
             <div className="text-sm text-muted-foreground border-b pb-3 mb-4 space-y-1">
-              <div><strong>From:</strong> Eyelight Publishing &lt;services@eyelightpublishers.com&gt;</div>
+              <div><strong>From:</strong> Grace From EyelightPublishers &lt;services@eyelightpublishers.com&gt;</div>
               <div><strong>Subject:</strong> {form.subject || '(No Subject)'}</div>
             </div>
             <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: form.content || '<em>No content yet...</em>' }} />
@@ -538,6 +544,110 @@ function EmailTab() {
                 </div>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Overall Metrics Dialog */}
+      <Dialog open={showOverallMetrics} onOpenChange={setShowOverallMetrics}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Overall Email Metrics</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-muted/30 border rounded-lg p-4">
+                <div className="text-xs text-muted-foreground mb-1">Total Campaigns Sent</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {campaigns.filter(c => c.status === 'Sent').length}
+                </div>
+              </div>
+              <div className="bg-muted/30 border rounded-lg p-4">
+                <div className="text-xs text-muted-foreground mb-1">Total Scheduled</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {campaigns.filter(c => c.status === 'Scheduled').length}
+                </div>
+              </div>
+              <div className="bg-muted/30 border rounded-lg p-4">
+                <div className="text-xs text-muted-foreground mb-1">Drafts</div>
+                <div className="text-2xl font-bold text-gray-600">
+                  {campaigns.filter(c => c.status === 'Draft').length}
+                </div>
+              </div>
+            </div>
+            
+            <div className="border rounded-lg overflow-hidden">
+              <div className="bg-muted/50 p-3 font-semibold text-sm border-b">Recent Campaign Performance</div>
+              <div className="divide-y max-h-60 overflow-y-auto">
+                {campaigns.filter(c => c.status === 'Sent').slice(0, 5).map(c => (
+                  <div key={c._id} className="p-3 flex justify-between items-center">
+                    <div className="font-medium text-sm truncate max-w-[200px]">{c.subject}</div>
+                    <div className="flex gap-4 text-xs">
+                      <span className="text-green-600">{c.stats?.sent || 0} Sent</span>
+                      <span className="text-red-600">{c.stats?.failed || 0} Failed</span>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => { setShowOverallMetrics(false); handleViewMetrics(c._id); }}>
+                      View Details
+                    </Button>
+                  </div>
+                ))}
+                {campaigns.filter(c => c.status === 'Sent').length === 0 && (
+                  <div className="p-4 text-center text-sm text-muted-foreground">No sent campaigns yet.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Overall Metrics Dialog */}
+      <Dialog open={showOverallMetrics} onOpenChange={setShowOverallMetrics}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Overall Email Metrics</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-muted/30 border rounded-lg p-4">
+                <div className="text-xs text-muted-foreground mb-1">Total Campaigns Sent</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {campaigns.filter(c => c.status === 'Sent').length}
+                </div>
+              </div>
+              <div className="bg-muted/30 border rounded-lg p-4">
+                <div className="text-xs text-muted-foreground mb-1">Total Scheduled</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {campaigns.filter(c => c.status === 'Scheduled').length}
+                </div>
+              </div>
+              <div className="bg-muted/30 border rounded-lg p-4">
+                <div className="text-xs text-muted-foreground mb-1">Drafts</div>
+                <div className="text-2xl font-bold text-gray-600">
+                  {campaigns.filter(c => c.status === 'Draft').length}
+                </div>
+              </div>
+            </div>
+            
+            <div className="border rounded-lg overflow-hidden">
+              <div className="bg-muted/50 p-3 font-semibold text-sm border-b">Recent Campaign Performance</div>
+              <div className="divide-y max-h-60 overflow-y-auto">
+                {campaigns.filter(c => c.status === 'Sent').slice(0, 5).map(c => (
+                  <div key={c._id} className="p-3 flex justify-between items-center">
+                    <div className="font-medium text-sm truncate max-w-[200px]">{c.subject}</div>
+                    <div className="flex gap-4 text-xs">
+                      <span className="text-green-600">{c.stats?.sent || 0} Sent</span>
+                      <span className="text-red-600">{c.stats?.failed || 0} Failed</span>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => { setShowOverallMetrics(false); handleViewMetrics(c._id); }}>
+                      View Details
+                    </Button>
+                  </div>
+                ))}
+                {campaigns.filter(c => c.status === 'Sent').length === 0 && (
+                  <div className="p-4 text-center text-sm text-muted-foreground">No sent campaigns yet.</div>
+                )}
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
