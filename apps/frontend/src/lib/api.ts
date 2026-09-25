@@ -50,27 +50,43 @@ export const PaymentsApi = {
     api.get(`/payments/verify/${reference}`),
 };
 
-// ─── Admin: Email Campaigns ──────────────────────────────────
+// ─── Admin: Email Campaigns & Email Center ───────────────────
 export const CrmApi = {
+  // Campaigns
   getCampaigns: () => api.get('/email'),
   createCampaign: (data: any) => api.post('/email', data),
   updateCampaign: (id: string, data: any) => api.patch(`/email/${id}`, data),
   removeCampaign: (id: string) => api.delete(`/email/${id}`),
-  sendTestPreview: (data: { subject: string, html: string }) => api.post('/email/test-preview', data),
+  sendNow: (id: string) => api.post(`/email/${id}/send-now`),
+  sendDirect: (data: { to: string[]; subject: string; html: string }) =>
+    api.post('/email/send-direct', data),
+  sendTestPreview: (data: { subject: string, html: string }) =>
+    api.post('/email/test-preview', data),
 
   // Automations
   getAutomations: () => api.get('/automations'),
-  upsertAutomation: (triggerEvent: string, data: any) => api.post(`/automations/${triggerEvent}`, data),
+  upsertAutomation: (triggerEvent: string, data: any) =>
+    api.post(`/automations/${triggerEvent}`, data),
   removeAutomation: (id: string) => api.delete(`/automations/${id}`),
 
-  // Contacts & Lists
-  getContacts: (params?: { tag?: string; list?: string; search?: string }) => api.get('/crm/contacts', { params }),
+  // Contacts
+  getContacts: (params?: { tag?: string; list?: string; search?: string; limit?: number; skip?: number }) =>
+    api.get('/crm/contacts', { params }),
   getTags: () => api.get('/crm/contacts/tags'),
+  createContact: (data: any) => api.post('/crm/contacts', data),
+  updateContact: (id: string, data: any) => api.patch(`/crm/contacts/${id}`, data),
+  addContactToList: (contactId: string, listId: string) =>
+    api.post(`/crm/contacts/${contactId}/add-to-list`, { listId }),
+  importContacts: (formData: FormData) =>
+    api.post('/crm/contacts/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+
+  // Lists / Groups
   getLists: () => api.get('/crm/lists'),
-  createList: (data: any) => api.post('/crm/lists', data),
-  importContacts: (formData: FormData) => api.post('/crm/contacts/import', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  createList: (data: { name: string; type: string; query?: any }) =>
+    api.post('/crm/lists', data),
+  deleteList: (id: string) => api.delete(`/crm/lists/${id}`),
 };
 
 // ─── Admin: Production Board ─────────────────────────────────

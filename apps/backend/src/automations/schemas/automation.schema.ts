@@ -4,6 +4,7 @@ import { Document } from 'mongoose';
 export type AutomationDocument = Automation & Document;
 
 export enum AutomationEvent {
+  NEWSLETTER_SUBSCRIBED = 'newsletter.subscribed',
   USER_REGISTERED = 'user.registered',
   PAYMENT_COMPLETED = 'payment.completed',
   MANUSCRIPT_SUBMITTED = 'manuscript.submitted',

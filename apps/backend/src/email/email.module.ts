@@ -6,6 +6,7 @@ import { SendWorkerService } from './send-worker.service.js';
 import { EmailCampaign, EmailCampaignSchema } from './schemas/email.schema.js';
 import { SendJob, SendJobSchema } from './schemas/send-job.schema.js';
 import { Contact, ContactSchema } from '../crm/schemas/contact.schema.js';
+import { List, ListSchema } from '../crm/schemas/list.schema.js';
 import { Automation, AutomationSchema } from '../automations/schemas/automation.schema.js';
 
 @Module({
@@ -14,6 +15,7 @@ import { Automation, AutomationSchema } from '../automations/schemas/automation.
       { name: EmailCampaign.name, schema: EmailCampaignSchema },
       { name: SendJob.name, schema: SendJobSchema },
       { name: Contact.name, schema: ContactSchema },
+      { name: List.name, schema: ListSchema },
       { name: Automation.name, schema: AutomationSchema }
     ])
   ],
@@ -22,3 +24,4 @@ import { Automation, AutomationSchema } from '../automations/schemas/automation.
   exports: [EmailService]
 })
 export class EmailModule {}
+

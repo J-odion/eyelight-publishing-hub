@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export enum EmailStatus {
   DRAFT = 'Draft',
@@ -18,6 +18,12 @@ export class EmailCampaign extends Document {
 
   @Prop([String])
   audienceTags: string[]; // e.g. ['Newsletter', 'Author']
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Contact' }], default: [] })
+  audienceContactIds: Types.ObjectId[]; // individual contacts
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'List' }], default: [] })
+  audienceListIds: Types.ObjectId[]; // saved lists/groups
 
   @Prop({ type: String, enum: EmailStatus, default: EmailStatus.DRAFT })
   status: EmailStatus;

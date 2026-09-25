@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { AutomationEvent, AutomationDocument, Automation } from './schemas/automation.schema.js';
 import { SendJob, SendJobDocument } from '../email/schemas/send-job.schema.js';
 import { Contact, ContactDocument } from '../crm/schemas/contact.schema.js';
@@ -32,7 +32,21 @@ export class AutomationListener {
         return;
       }
 
-      const contact = await this.contactModel.findOne({ email: payload.email });
+      let contact = await this.contactModel.findOne({ email: payload.email });
+
+      // For newsletter.subscribed, auto-create the contact if they don't exist in CRM yet
+      if (!contact && eventName === AutomationEvent.NEWSLETTER_SUBSCRIBED) {
+        contact = await this.contactModel.create({
+          email: payload.email,
+          firstName: payload.data?.name?.split(' ')[0] || '',
+          lastName: payload.data?.name?.split(' ').slice(1).join(' ') || '',
+          tags: ['newsletter'],
+          source: 'signup',
+          status: 'subscribed',
+        });
+        this.logger.log(`Auto-created CRM contact for newsletter subscriber: ${payload.email}`);
+      }
+
       if (!contact || contact.status !== 'subscribed') {
         this.logger.log(`Contact not found or not subscribed for email ${payload.email}. Skipping automation.`);
         return;

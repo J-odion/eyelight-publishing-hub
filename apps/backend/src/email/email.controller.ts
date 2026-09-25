@@ -37,6 +37,20 @@ export class EmailController {
     return this.emailService.removeCampaign(id);
   }
 
+  @Post(':id/send-now')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  sendNow(@Param('id') id: string) {
+    return this.emailService.sendNow(id);
+  }
+
+  @Post('send-direct')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  async sendDirect(@Body() body: { to: string[]; subject: string; html: string }) {
+    return this.emailService.sendDirect(body.to, body.subject, body.html);
+  }
+
   @Post('test-preview')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)

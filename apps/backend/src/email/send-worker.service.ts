@@ -111,7 +111,7 @@ export class SendWorkerService {
 
       // Send ONE CONTACT AT A TIME
       const { data, error } = await this.resend.emails.send({
-        from: 'Eyelight Publishing <hello@eyelight.com>', // Replace with real domain later
+        from: 'Eyelight Publishing <services@eyelightpublishers.com>',
         to: contact.email,
         subject: finalSubject,
         html: finalHtml,

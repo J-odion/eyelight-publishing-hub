@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { parse } from 'csv-parse';
 import { Contact, ContactDocument } from './schemas/contact.schema.js';
 import { List, ListDocument } from './schemas/list.schema.js';
@@ -15,7 +15,8 @@ export class CrmService {
     @InjectModel(List.name) private listModel: Model<ListDocument>,
   ) {}
 
-  // List Management
+  // ─── List Management ───────────────────────────────────────────────────────
+
   async getLists() {
     return this.listModel.find().exec();
   }
@@ -25,11 +26,18 @@ export class CrmService {
     return list.save();
   }
 
-  // Contact Management
+  async deleteList(id: string) {
+    const list = await this.listModel.findByIdAndDelete(id);
+    if (!list) throw new NotFoundException('List not found');
+    return list;
+  }
+
+  // ─── Contact Management ────────────────────────────────────────────────────
+
   async getContacts(tag?: string, listId?: string, search?: string, limit = 50, skip = 0) {
     const filter: any = {};
     if (tag) filter.tags = tag;
-    if (listId) filter.listIds = listId;
+    if (listId) filter.listIds = new Types.ObjectId(listId);
     if (search) {
       filter.$or = [
         { email: { $regex: search, $options: 'i' } },
@@ -45,11 +53,47 @@ export class CrmService {
   }
 
   async getTags() {
-    // Return unique tags used across contacts
     return this.contactModel.distinct('tags');
   }
 
-  // CSV Import
+  async createContact(data: any) {
+    const existing = await this.contactModel.findOne({ email: data.email?.toLowerCase() });
+    if (existing) {
+      // Merge tags if provided
+      if (data.tags && data.tags.length > 0) {
+        const merged = [...new Set([...existing.tags, ...data.tags])];
+        existing.tags = merged;
+        await existing.save();
+      }
+      return existing;
+    }
+    return this.contactModel.create({
+      ...data,
+      email: data.email?.toLowerCase(),
+      status: data.status || 'subscribed',
+      source: data.source || 'manual',
+    });
+  }
+
+  async updateContact(id: string, data: any) {
+    const contact = await this.contactModel.findByIdAndUpdate(id, data, { new: true });
+    if (!contact) throw new NotFoundException('Contact not found');
+    return contact;
+  }
+
+  async addContactToList(contactId: string, listId: string) {
+    const contact = await this.contactModel.findById(contactId);
+    if (!contact) throw new NotFoundException('Contact not found');
+    const listObjectId = new Types.ObjectId(listId);
+    if (!contact.listIds.some(id => id.toString() === listObjectId.toString())) {
+      contact.listIds.push(listObjectId);
+      await contact.save();
+    }
+    return contact;
+  }
+
+  // ─── CSV Import ───────────────────────────────────────────────────────────
+
   async importContacts(filePath: string, tag: string) {
     return new Promise((resolve, reject) => {
       const results: any[] = [];
@@ -63,7 +107,6 @@ export class CrmService {
         .on('end', async () => {
           try {
             for (const row of results) {
-              // Map standard headers (email, firstName, name, etc.)
               const email = (row.email || row.Email || row.EMAIL || '').toLowerCase();
               if (!email) {
                 skipped++;
@@ -76,7 +119,6 @@ export class CrmService {
               const existing = await this.contactModel.findOne({ email });
 
               if (existing) {
-                // Update
                 if (tag && !existing.tags.includes(tag)) {
                   existing.tags.push(tag);
                 }
@@ -84,7 +126,6 @@ export class CrmService {
                 await existing.save();
                 updated++;
               } else {
-                // Insert
                 await this.contactModel.create({
                   email,
                   firstName,
@@ -97,7 +138,7 @@ export class CrmService {
               }
             }
             // Clean up file
-            fs.unlinkSync(filePath);
+            try { fs.unlinkSync(filePath); } catch {}
             resolve({ added, updated, skipped });
           } catch (error) {
             this.logger.error('Error processing CSV rows', error);

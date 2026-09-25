@@ -19,7 +19,7 @@ export class LeadsService {
 
     // Trigger automated response based on lead type
     if (lead.type === LeadType.NEWSLETTER) {
-      // Future: emit newsletter.subscribed or similar if needed. 
+      this.eventEmitter.emit('newsletter.subscribed', { email: lead.email, data: { name: lead.name } });
     } else if (lead.type === LeadType.CONSULTATION) {
       this.eventEmitter.emit('consultation.booked', { email: lead.email, data: { name: lead.name } });
     }

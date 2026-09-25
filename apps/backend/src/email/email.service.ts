@@ -2,12 +2,15 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import juice from 'juice';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Model, Types } from 'mongoose';
+import { Cron } from '@nestjs/schedule';
 import { Resend } from 'resend';
 import { EmailCampaign, EmailStatus } from './schemas/email.schema.js';
 import { Contact, ContactDocument } from '../crm/schemas/contact.schema.js';
 import { SendJob, SendJobDocument } from './schemas/send-job.schema.js';
+import { List, ListDocument } from '../crm/schemas/list.schema.js';
+
+const FROM_ADDRESS = 'Eyelight Publishing <services@eyelightpublishers.com>';
 
 @Injectable()
 export class EmailService {
@@ -19,6 +22,7 @@ export class EmailService {
     @InjectModel(EmailCampaign.name) private emailModel: Model<EmailCampaign>,
     @InjectModel(Contact.name) private contactModel: Model<ContactDocument>,
     @InjectModel(SendJob.name) private sendJobModel: Model<SendJobDocument>,
+    @InjectModel(List.name) private listModel: Model<ListDocument>,
   ) {
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
     if (resendApiKey) {
@@ -36,7 +40,7 @@ export class EmailService {
 
     try {
       const { data, error } = await this.resend.emails.send({
-        from: 'Eyelight Publishing <hello@eyelight.com>', // Update this with verified domain later
+        from: FROM_ADDRESS,
         to: Array.isArray(to) ? to : [to],
         subject,
         html,
@@ -49,6 +53,44 @@ export class EmailService {
     } catch (e) {
       this.logger.error('Exception while sending email', e);
     }
+  }
+
+  /**
+   * Send directly to a list of email addresses without going through the job queue.
+   * Used for "compose & send now" to individuals.
+   */
+  async sendDirect(to: string[], subject: string, html: string) {
+    if (!this.resend) {
+      this.logger.log(`Mock Direct Send to ${to.join(', ')} - Subject: ${subject}`);
+      return { success: true, mock: true, count: to.length };
+    }
+
+    const inlinedHtml = juice(html);
+    let successCount = 0;
+    let failCount = 0;
+    const errors: string[] = [];
+
+    for (const email of to) {
+      try {
+        const { error } = await this.resend.emails.send({
+          from: FROM_ADDRESS,
+          to: [email],
+          subject,
+          html: inlinedHtml,
+        });
+        if (error) {
+          failCount++;
+          errors.push(`${email}: ${error.message}`);
+        } else {
+          successCount++;
+        }
+      } catch (e: any) {
+        failCount++;
+        errors.push(`${email}: ${e.message}`);
+      }
+    }
+
+    return { success: true, sent: successCount, failed: failCount, errors };
   }
 
   async createCampaign(data: any) {
@@ -66,22 +108,78 @@ export class EmailService {
     return this.emailModel.find().sort({ createdAt: -1 }).exec();
   }
 
-  private async enqueueCampaign(campaign: EmailCampaign) {
-    // Task 3: resolve its audience
-    const query: any = { status: 'subscribed' };
+  private async resolveAudience(campaign: EmailCampaign): Promise<ContactDocument[]> {
+    const contactIdSet = new Set<string>();
+    const allContacts: ContactDocument[] = [];
+
+    // 1. Resolve by tags
     if (campaign.audienceTags && campaign.audienceTags.length > 0) {
-      query.tags = { $in: campaign.audienceTags };
-    } else {
-      // If no tags, we should arguably not send to anyone to prevent accidents,
-      // but spec says "never fall back to querying all users".
-      // Let's ensure if no tags are selected, we find 0 contacts.
-      this.logger.warn(`Campaign ${campaign._id} has no audience tags, skipping...`);
-      campaign.status = EmailStatus.SENT;
-      await campaign.save();
-      return { success: true, queued: 0 };
+      const tagContacts = await this.contactModel.find({
+        status: 'subscribed',
+        tags: { $in: campaign.audienceTags }
+      });
+      for (const c of tagContacts) {
+        if (!contactIdSet.has(c._id.toString())) {
+          contactIdSet.add(c._id.toString());
+          allContacts.push(c);
+        }
+      }
     }
-    
-    const contacts = await this.contactModel.find(query);
+
+    // 2. Resolve by list IDs
+    if (campaign.audienceListIds && campaign.audienceListIds.length > 0) {
+      // For static lists: find contacts that have these listIds
+      const listContacts = await this.contactModel.find({
+        status: 'subscribed',
+        listIds: { $in: campaign.audienceListIds }
+      });
+      for (const c of listContacts) {
+        if (!contactIdSet.has(c._id.toString())) {
+          contactIdSet.add(c._id.toString());
+          allContacts.push(c);
+        }
+      }
+
+      // For dynamic lists: execute their query
+      const dynamicLists = await this.listModel.find({
+        _id: { $in: campaign.audienceListIds },
+        type: 'dynamic',
+        query: { $ne: null }
+      });
+      for (const list of dynamicLists) {
+        const dynContacts = await this.contactModel.find({
+          status: 'subscribed',
+          ...(list.query || {})
+        });
+        for (const c of dynContacts) {
+          if (!contactIdSet.has(c._id.toString())) {
+            contactIdSet.add(c._id.toString());
+            allContacts.push(c);
+          }
+        }
+      }
+    }
+
+    // 3. Resolve by individual contact IDs
+    if (campaign.audienceContactIds && campaign.audienceContactIds.length > 0) {
+      const individuals = await this.contactModel.find({
+        _id: { $in: campaign.audienceContactIds },
+        status: 'subscribed'
+      });
+      for (const c of individuals) {
+        if (!contactIdSet.has(c._id.toString())) {
+          contactIdSet.add(c._id.toString());
+          allContacts.push(c);
+        }
+      }
+    }
+
+    return allContacts;
+  }
+
+  private async enqueueCampaign(campaign: any) {
+    const contacts = await this.resolveAudience(campaign);
+
     if (contacts.length === 0) {
       this.logger.warn(`Campaign ${campaign._id} found 0 contacts to send to.`);
       campaign.status = EmailStatus.SENT;
@@ -110,7 +208,6 @@ export class EmailService {
   // Cron job runs frequently to check for scheduled emails
   @Cron('*/30 * * * * *') // Every 30 seconds
   async handleScheduledEmails() {
-    // Only log if something is found to avoid spam
     const now = new Date();
     
     const scheduledCampaigns = await this.emailModel.find({
@@ -130,7 +227,6 @@ export class EmailService {
     if (data.content) {
       data.content = juice(data.content);
     }
-    // If updating scheduledFor, reset status accordingly
     if (data.scheduledFor) {
       data.status = EmailStatus.SCHEDULED;
     } else if (data.status !== EmailStatus.SENT) {
@@ -139,6 +235,15 @@ export class EmailService {
     const campaign = await this.emailModel.findByIdAndUpdate(id, data, { new: true });
     if (!campaign) throw new NotFoundException('Campaign not found');
     return campaign;
+  }
+
+  async sendNow(id: string) {
+    const campaign = await this.emailModel.findById(id);
+    if (!campaign) throw new NotFoundException('Campaign not found');
+    if (campaign.status === EmailStatus.SENT || campaign.status === EmailStatus.SENDING) {
+      return { success: false, message: 'Campaign already sent or sending' };
+    }
+    return this.enqueueCampaign(campaign);
   }
 
   async removeCampaign(id: string) {
@@ -160,7 +265,7 @@ export class EmailService {
     let html = juice(rawHtml);
     html = html.replace(/\{\{firstName\}\}/g, contact.firstName || 'Admin');
     html = html.replace(/\{\{lastName\}\}/g, contact.lastName || 'User');
-    html = html.replace(/\{\{unsubscribeUrl\}\}/g, 'https://eyelight.com/unsubscribe?mock=1');
+    html = html.replace(/\{\{unsubscribeUrl\}\}/g, 'https://eyelightpublishers.com/unsubscribe?mock=1');
 
     let finalSubject = subject;
     finalSubject = finalSubject.replace(/\{\{firstName\}\}/g, contact.firstName || 'Admin');
