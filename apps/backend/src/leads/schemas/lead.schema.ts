@@ -4,7 +4,8 @@ import { Document } from 'mongoose';
 export enum LeadType {
   CONSULTATION = 'Consultation',
   NEWSLETTER = 'Newsletter',
-  LEAD_MAGNET = 'LeadMagnet'
+  LEAD_MAGNET = 'LeadMagnet',
+  COURSE_REGISTRATION = 'CourseRegistration'
 }
 
 @Schema({ timestamps: true })

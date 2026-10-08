@@ -38,6 +38,8 @@ export const LeadsApi = {
     api.post('/leads', { ...data, type: 'Consultation' }),
   submitInquiry: (data: any) =>
     api.post('/leads', { ...data, type: 'LeadMagnet' }),
+  submitCourseRegistration: (data: any) =>
+    api.post('/leads', { ...data, type: 'CourseRegistration' }),
   getAllLeads: () => api.get('/leads'),
   importBulk: (leads: any[]) => api.post('/leads/bulk', { leads }),
 };

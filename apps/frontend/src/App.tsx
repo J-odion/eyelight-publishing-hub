@@ -15,6 +15,7 @@ import Storefront from "./pages/Storefront.tsx";
 import EventsPage from "./pages/EventsPage.tsx";
 import PressRoom from "./pages/PressRoom.tsx";
 import HelpDocumentation from "./pages/HelpDocumentation.tsx";
+import EditorSchool from "./pages/EditorSchool.tsx";
 
 // Author Portal
 import AuthorPortal from "./pages/AuthorPortal.tsx";
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/events" element={<EventsPage />} />
           <Route path="/press" element={<PressRoom />} />
           <Route path="/help" element={<HelpDocumentation />} />
+          <Route path="/editor-school" element={<EditorSchool />} />
 
           {/* Author Portal */}
           <Route path="/portal" element={<AuthorPortal />} />

@@ -14,14 +14,29 @@ export class LeadsService {
   ) {}
 
   async create(createLeadDto: any) {
-    const lead = new this.leadModel(createLeadDto);
-    await lead.save();
+    const existingLead = await this.leadModel.findOne({ email: createLeadDto.email });
+    
+    let lead;
+    if (existingLead) {
+      // Merge new data
+      Object.assign(existingLead, createLeadDto);
+      // Ensure metadata is merged if it exists in both
+      if (existingLead.metadata && createLeadDto.metadata) {
+        existingLead.metadata = { ...existingLead.metadata, ...createLeadDto.metadata };
+      }
+      lead = await existingLead.save();
+    } else {
+      lead = new this.leadModel(createLeadDto);
+      await lead.save();
+    }
 
-    // Trigger automated response based on lead type
-    if (lead.type === LeadType.NEWSLETTER) {
-      this.eventEmitter.emit('newsletter.subscribed', { email: lead.email, data: { name: lead.name } });
-    } else if (lead.type === LeadType.CONSULTATION) {
-      this.eventEmitter.emit('consultation.booked', { email: lead.email, data: { name: lead.name } });
+    // Trigger automated response based on lead type (only if newly created or specifically requested)
+    if (!existingLead) {
+      if (lead.type === LeadType.NEWSLETTER) {
+        this.eventEmitter.emit('newsletter.subscribed', { email: lead.email, data: { name: lead.name } });
+      } else if (lead.type === LeadType.CONSULTATION) {
+        this.eventEmitter.emit('consultation.booked', { email: lead.email, data: { name: lead.name } });
+      }
     }
 
     return lead;
