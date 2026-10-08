@@ -1,13 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { UsersService } from './users/users.service.js';
+import helmet from 'helmet';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Allow requests from any frontend (Local, Vercel, etc.)
+  // Security Headers
+  app.use(helmet());
+
+  // Input Validation & Sanitization
+  app.useGlobalPipes(new ValidationPipe({ 
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true 
+  }));
+
+  // Restrict CORS (ideally read from env in production, e.g., process.env.FRONTEND_URL)
   app.enableCors({
-    origin: true,
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Add production URLs here later
     credentials: true,
   });
 

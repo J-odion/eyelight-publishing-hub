@@ -19,10 +19,19 @@ import { CrmModule } from './crm/crm.module.js';
 import { AutomationsModule } from './automations/automations.module.js';
 import { WebhooksModule } from './webhooks/webhooks.module.js';
 import { MailModule } from './mail/mail.module.js';
+import { DealsModule } from './deals/deals.module.js';
+import { ActivitiesModule } from './activities/activities.module.js';
+import { AnalyticsModule } from './analytics/analytics.module.js';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -46,8 +55,17 @@ import { MailModule } from './mail/mail.module.js';
     AutomationsModule,
     WebhooksModule,
     MailModule,
+    DealsModule,
+    ActivitiesModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -16,6 +16,7 @@ import Papa from 'papaparse';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import DOMPurify from 'dompurify';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -25,6 +26,9 @@ import {
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import TemplateEditor from '@/components/TemplateEditor';
+import DealsPipeline from './DealsPipeline.js';
+import CrmAnalytics from './CrmAnalytics.js';
+import CrmActivities from './CrmActivities.js';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
 const PRESS_CATEGORIES = [
@@ -500,7 +504,7 @@ function EmailTab() {
               <div><strong>From:</strong> Grace From EyelightPublishers &lt;services@eyelightpublishers.com&gt;</div>
               <div><strong>Subject:</strong> {form.subject || '(No Subject)'}</div>
             </div>
-            <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: form.content || '<em>No content yet...</em>' }} />
+            <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.content) || '<em>No content yet...</em>' }} />
           </div>
         </DialogContent>
       </Dialog>
@@ -911,7 +915,7 @@ function AutomationsTab() {
               <div><strong>Subject:</strong> {form.subject || '(No Subject)'}</div>
               <div><strong>Trigger:</strong> {selectedTrigger?.label || form.triggerEvent}</div>
             </div>
-            <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: form.content || '<em>No content yet...</em>' }} />
+            <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.content) || '<em>No content yet...</em>' }} />
           </div>
         </DialogContent>
       </Dialog>
@@ -965,6 +969,7 @@ function AutomationsTab() {
 // ─── Audience & Leads Tab ─────────────────────────────────────────────────────
 
 function LeadsTab() {
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState<any[]>([]);
   const [lists, setLists] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -976,7 +981,7 @@ function LeadsTab() {
   const [file, setFile] = useState<File | null>(null);
   const [search, setSearch] = useState('');
   const [listForm, setListForm] = useState({ name: '', type: 'static' });
-  const [contactForm, setContactForm] = useState({ email: '', firstName: '', lastName: '', tags: '' });
+  const [contactForm, setContactForm] = useState({ email: '', firstName: '', lastName: '', tags: '', phone: '', company: '', jobTitle: '', address: '' });
 
   const fetchAll = useCallback(async () => {
     try {
@@ -991,6 +996,15 @@ function LeadsTab() {
     } catch { toast.error('Failed to load audience'); }
     finally { setLoading(false); }
   }, [search]);
+
+  const handleIncrementScore = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    try {
+      await CrmApi.updateLeadScore(id, 10);
+      toast.success('Lead score increased by 10!');
+      fetchAll();
+    } catch { toast.error('Failed to update lead score'); }
+  };
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -1027,7 +1041,7 @@ function LeadsTab() {
       await CrmApi.createContact({ ...contactForm, tags });
       toast.success('Contact added!');
       setShowAddContact(false);
-      setContactForm({ email: '', firstName: '', lastName: '', tags: '' });
+      setContactForm({ email: '', firstName: '', lastName: '', tags: '', phone: '', company: '', jobTitle: '', address: '' });
       fetchAll();
     } catch { toast.error('Failed to add contact'); }
   };
@@ -1118,6 +1132,22 @@ function LeadsTab() {
                 <Input value={contactForm.lastName} onChange={e => setContactForm({ ...contactForm, lastName: e.target.value })} />
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-sm font-medium mb-1 block">Phone</label>
+                <Input value={contactForm.phone} onChange={e => setContactForm({ ...contactForm, phone: e.target.value })} placeholder="+1234567890" />
+              </div>
+              <div><label className="text-sm font-medium mb-1 block">Company</label>
+                <Input value={contactForm.company} onChange={e => setContactForm({ ...contactForm, company: e.target.value })} placeholder="Acme Corp" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-sm font-medium mb-1 block">Job Title</label>
+                <Input value={contactForm.jobTitle} onChange={e => setContactForm({ ...contactForm, jobTitle: e.target.value })} placeholder="CEO" />
+              </div>
+              <div><label className="text-sm font-medium mb-1 block">Address</label>
+                <Input value={contactForm.address} onChange={e => setContactForm({ ...contactForm, address: e.target.value })} placeholder="123 Main St" />
+              </div>
+            </div>
             <div><label className="text-sm font-medium mb-1 block">Tags (comma-separated)</label>
               <Input value={contactForm.tags} onChange={e => setContactForm({ ...contactForm, tags: e.target.value })} placeholder="newsletter, vip" />
             </div>
@@ -1173,17 +1203,18 @@ function LeadsTab() {
               <TableHead>Email</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Tags</TableHead>
+              <TableHead>Score</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Source</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             ) : contacts.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No contacts found.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No contacts found.</TableCell></TableRow>
             ) : contacts.map((c: any) => (
-              <TableRow key={c._id}>
+              <TableRow key={c._id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/crm/contacts/${c._id}`)}>
                 <TableCell className="font-medium text-sm">{c.email}</TableCell>
                 <TableCell className="text-sm">{[c.firstName, c.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
                 <TableCell>
@@ -1191,6 +1222,14 @@ function LeadsTab() {
                     {c.tags?.map((t: string) => (
                       <span key={t} className="px-1.5 py-0.5 rounded text-xs bg-muted">{t}</span>
                     ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">{c.leadScore || 0}</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full" onClick={(e) => handleIncrementScore(e, c._id)}>
+                      <Plus className="w-3 h-3" />
+                    </Button>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -1670,7 +1709,7 @@ function PressTab() {
           <div className="mt-4 p-6 bg-white border rounded-xl shadow-sm">
             <div className="text-sm font-medium text-blue-600 mb-2">{form.category}</div>
             <h1 className="text-3xl font-bold mb-4">{form.title || 'Untitled Post'}</h1>
-            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: form.content || 'No content yet...' }} />
+            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.content) || 'No content yet...' }} />
           </div>
         </DialogContent>
       </Dialog>
@@ -1730,6 +1769,9 @@ const TABS = [
   { id: 'authors', label: 'Author Directory', icon: LayoutDashboard },
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'press', label: 'Press & Blog', icon: BookOpen },
+  { id: 'pipeline', label: 'Sales Pipeline', icon: Send },
+  { id: 'analytics', label: 'CRM Analytics', icon: LayoutDashboard },
+  { id: 'activities', label: 'Activity Log', icon: ListIcon },
 ];
 
 export default function AdminCRM() {
@@ -1791,6 +1833,9 @@ export default function AdminCRM() {
           {activeTab === 'authors' && <AuthorsTab />}
           {activeTab === 'events' && <EventsTab />}
           {activeTab === 'press' && <PressTab />}
+          {activeTab === 'pipeline' && <div className="-m-10"><DealsPipeline /></div>}
+          {activeTab === 'analytics' && <div className="-m-10"><CrmAnalytics /></div>}
+          {activeTab === 'activities' && <CrmActivities />}
         </div>
       </main>
     </div>

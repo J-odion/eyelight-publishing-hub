@@ -73,6 +73,7 @@ export const CrmApi = {
   // Contacts
   getContacts: (params?: { tag?: string; list?: string; search?: string; limit?: number; skip?: number }) =>
     api.get('/crm/contacts', { params }),
+  getContactById: (id: string) => api.get(`/crm/contacts/${id}`),
   getTags: () => api.get('/crm/contacts/tags'),
   createContact: (data: any) => api.post('/crm/contacts', data),
   updateContact: (id: string, data: any) => api.patch(`/crm/contacts/${id}`, data),
@@ -88,6 +89,35 @@ export const CrmApi = {
   createList: (data: { name: string; type: string; query?: any }) =>
     api.post('/crm/lists', data),
   deleteList: (id: string) => api.delete(`/crm/lists/${id}`),
+
+  // Lead Scoring
+  updateLeadScore: (id: string, scoreIncrement: number) =>
+    api.patch(`/crm/contacts/${id}/score`, { scoreIncrement }),
+};
+
+// ─── Deals & Pipelines ───────────────────────────────────────
+export const DealsApi = {
+  createPipeline: (data: any) => api.post('/deals/pipelines', data),
+  getPipelines: () => api.get('/deals/pipelines'),
+  updatePipeline: (id: string, data: any) => api.patch(`/deals/pipelines/${id}`, data),
+  createDeal: (data: any) => api.post('/deals', data),
+  getDeals: (params?: { pipelineId?: string; ownerId?: string; contactId?: string }) => api.get('/deals', { params }),
+  updateDeal: (id: string, data: any) => api.patch(`/deals/${id}`, data),
+  updateDealStage: (id: string, stage: string) => api.patch(`/deals/${id}/stage`, { stage }),
+};
+
+// ─── Activities ──────────────────────────────────────────────
+export const ActivitiesApi = {
+  createActivity: (data: any) => api.post('/activities', data),
+  getActivities: (params?: { contactId?: string; dealId?: string; ownerId?: string }) =>
+    api.get('/activities', { params }),
+  updateActivity: (id: string, data: any) => api.patch(`/activities/${id}`, data),
+  deleteActivity: (id: string) => api.delete(`/activities/${id}`),
+};
+
+// ─── Analytics ───────────────────────────────────────────────
+export const AnalyticsApi = {
+  getDashboardMetrics: () => api.get('/analytics/dashboard'),
 };
 
 // ─── Admin: Production Board ─────────────────────────────────

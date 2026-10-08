@@ -28,6 +28,27 @@ export class Contact {
 
   @Prop({ required: true, enum: ['signup', 'import', 'manuscript', 'payment', 'manual'], default: 'manual' })
   source: string;
+
+  @Prop()
+  phone: string;
+
+  @Prop()
+  company: string;
+
+  @Prop()
+  jobTitle: string;
+
+  @Prop()
+  address: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  ownerId: Types.ObjectId | null;
+
+  @Prop({ type: Number, default: 0 })
+  leadScore: number;
+
+  @Prop({ type: Object, default: {} })
+  customAttributes: Record<string, any>;
 }
 
 export const ContactSchema = SchemaFactory.createForClass(Contact);

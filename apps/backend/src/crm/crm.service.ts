@@ -58,6 +58,12 @@ export class CrmService {
     return this.contactModel.distinct('tags');
   }
 
+  async getContactById(id: string) {
+    const contact = await this.contactModel.findById(id).exec();
+    if (!contact) throw new NotFoundException('Contact not found');
+    return contact;
+  }
+
   async getContactByEmail(email: string) {
     return this.contactModel.findOne({ email: email.toLowerCase() });
   }
@@ -121,6 +127,13 @@ export class CrmService {
       await contact.save();
     }
     return contact;
+  }
+
+  async updateLeadScore(contactId: string, scoreIncrement: number) {
+    const contact = await this.contactModel.findById(contactId);
+    if (!contact) throw new NotFoundException('Contact not found');
+    contact.leadScore = (contact.leadScore || 0) + scoreIncrement;
+    return contact.save();
   }
 
   // ─── CSV Import ───────────────────────────────────────────────────────────

@@ -23,6 +23,9 @@ import AuthorPortal from "./pages/AuthorPortal.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminCRM from "./pages/AdminCRM.tsx";
 import AuthorProfile from "./pages/AuthorProfile.tsx";
+import DealsPipeline from "./pages/DealsPipeline.tsx";
+import CrmAnalytics from "./pages/CrmAnalytics.tsx";
+import ContactProfile from "./pages/ContactProfile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +53,9 @@ const App = () => (
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/crm" element={<AdminCRM />} />
+          <Route path="/admin/crm/pipeline" element={<DealsPipeline />} />
+          <Route path="/admin/crm/analytics" element={<CrmAnalytics />} />
+          <Route path="/admin/crm/contacts/:id" element={<ContactProfile />} />
           <Route path="/admin/authors/:id" element={<AuthorProfile />} />
 
           {/* Catch-all */}

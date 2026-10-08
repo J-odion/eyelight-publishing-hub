@@ -46,6 +46,11 @@ export class CrmController {
     return this.crmService.getTags();
   }
 
+  @Get('contacts/:id')
+  getContactById(@Param('id') id: string) {
+    return this.crmService.getContactById(id);
+  }
+
   @Post('contacts')
   createContact(@Body() body: any) {
     return this.crmService.createContact(body);
@@ -59,6 +64,11 @@ export class CrmController {
   @Post('contacts/:id/add-to-list')
   addContactToList(@Param('id') id: string, @Body() body: { listId: string }) {
     return this.crmService.addContactToList(id, body.listId);
+  }
+
+  @Patch('contacts/:id/score')
+  updateLeadScore(@Param('id') id: string, @Body('scoreIncrement') scoreIncrement: number) {
+    return this.crmService.updateLeadScore(id, scoreIncrement);
   }
 
   @Post('contacts/import')

@@ -5,6 +5,8 @@ export enum Role {
   USER = 'user',
   AUTHOR = 'author',
   ADMIN = 'admin',
+  SALES_REP = 'sales_rep',
+  SALES_MANAGER = 'sales_manager',
 }
 
 @Schema({ timestamps: true })

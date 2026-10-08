@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Download, Image, FileText, User, BookOpen, Briefcase, Newspaper } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import DOMPurify from 'dompurify';
 
 const ASSET_TYPES = [
   { id: '', label: 'All', icon: Briefcase },
@@ -154,7 +155,7 @@ export default function PressRoom() {
                   <h3 className="text-xl md:text-2xl font-bold mb-3 hover:text-accent transition-colors leading-tight">
                     {post.title}
                   </h3>
-                  <div className="prose prose-sm max-w-none text-muted-foreground line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: post.content }} />
+                  <div className="prose prose-sm max-w-none text-muted-foreground line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
                   <div className="mt-auto pt-4 border-t border-border">
                     <button className="text-sm font-semibold text-accent hover:underline flex items-center gap-1">
                       Read Full Article →

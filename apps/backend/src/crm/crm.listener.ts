@@ -26,6 +26,40 @@ export class CrmListener {
     }
   }
 
+  @OnEvent('newsletter.subscribed')
+  async handleNewsletterSubscribed(payload: { email: string; data: any }) {
+    try {
+      const contact = await this.crmService.createContact({
+        email: payload.email,
+        firstName: payload.data?.name?.split(' ')[0] || '',
+        lastName: payload.data?.name?.split(' ').slice(1).join(' ') || '',
+        tags: ['newsletter'],
+        source: 'newsletter',
+      });
+      await this.crmService.updateLeadScore(contact._id.toString(), 5);
+      this.logger.log(`Added 5 points to ${payload.email} for newsletter signup`);
+    } catch (e: any) {
+      this.logger.error(`Failed to handle newsletter for ${payload.email}`, e.message);
+    }
+  }
+
+  @OnEvent('consultation.booked')
+  async handleConsultationBooked(payload: { email: string; data: any }) {
+    try {
+      const contact = await this.crmService.createContact({
+        email: payload.email,
+        firstName: payload.data?.name?.split(' ')[0] || '',
+        lastName: payload.data?.name?.split(' ').slice(1).join(' ') || '',
+        tags: ['consultation'],
+        source: 'consultation',
+      });
+      await this.crmService.updateLeadScore(contact._id.toString(), 15);
+      this.logger.log(`Added 15 points to ${payload.email} for consultation booking`);
+    } catch (e: any) {
+      this.logger.error(`Failed to handle consultation for ${payload.email}`, e.message);
+    }
+  }
+
   @OnEvent('resend.webhook')
   async handleResendWebhook(payload: { eventType: string; data: any }) {
     const { eventType, data } = payload;
