@@ -14,6 +14,8 @@ import CTA from "@/components/CTA";
 import ConsultationBanner from "@/components/ConsultationBanner";
 import Footer from "@/components/Footer";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
+import CourseBanner from "@/components/CourseBanner";
+import EditorSchoolPromo from "@/components/EditorSchoolPromo";
 
 const Index = () => {
   return (
@@ -25,6 +27,7 @@ const Index = () => {
       <Differentiator />
       <WhyAuthors />
       <Services />
+      <EditorSchoolPromo />
       <ConsultationBanner />
       <HowItWorks />
       <Testimonials />
@@ -34,6 +37,7 @@ const Index = () => {
       <CTA />
       <Footer />
       <WhatsAppWidget />
+      <CourseBanner />
     </div>
   );
 };
