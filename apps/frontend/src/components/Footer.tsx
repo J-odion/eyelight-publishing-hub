@@ -55,10 +55,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4 text-sm uppercase tracking-widest opacity-80">Quick Links</h4>
             <ul className="space-y-2 text-sm opacity-60">
-              <li><a href="#about" className="hover:opacity-100 transition-opacity">About Us</a></li>
-              <li><a href="/catalogue" className="hover:opacity-100 transition-opacity">Book Catalogue</a></li>
-              <li><a href="/events" className="hover:opacity-100 transition-opacity">Events</a></li>
-              <li><a href="/press" className="hover:opacity-100 transition-opacity">Press Room</a></li>
+              <li><a href="/#about" className="hover:opacity-100 transition-opacity">About Us</a></li>
+              <li><a href="/catalogue" className="hover:opacity-100 transition-opacity">Books</a></li>
+              <li><a href="/store" className="hover:opacity-100 transition-opacity">Store</a></li>
+              <li><a href="/editor-school" className="hover:opacity-100 transition-opacity">Editor School</a></li>
               <li><a href="/submit-manuscript" className="hover:opacity-100 transition-opacity">Submit Manuscript</a></li>
               <li><a href="/portal" className="hover:opacity-100 transition-opacity">Author Portal</a></li>
               <li className="pt-2 mt-2 border-t border-background/10">

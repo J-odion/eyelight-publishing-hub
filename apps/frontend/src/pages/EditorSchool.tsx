@@ -39,6 +39,13 @@ const ZoomCarousel = ({ images }: { images: string[] }) => {
   const next = () => setIndex((i) => (i + 1) % images.length);
   const prev = () => setIndex((i) => (i - 1 + images.length) % images.length);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
   return (
     <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden py-10">
       <div className="flex items-center justify-center relative w-full h-full max-w-5xl mx-auto">
@@ -97,43 +104,51 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
     });
   };
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      dealNext();
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div 
-      className="relative w-full max-w-sm mx-auto h-[480px] cursor-pointer"
-      onClick={dealNext}
-    >
-      <AnimatePresence>
-        {cards.map((src, i) => {
-          if (i > 3) return null;
-          
-          return (
-            <motion.div
-              key={src}
-              layout
-              initial={{ scale: 0.8, opacity: 0, y: -50 }}
-              animate={{
-                top: i * 25,
-                scale: 1 - i * 0.06,
-                zIndex: cards.length - i,
-                opacity: 1 - i * 0.15,
-                rotate: i % 2 === 0 ? i * 2 : -i * 1.5,
-              }}
-              exit={{ opacity: 0, scale: 0.5, y: 100 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="absolute w-[280px] md:w-[300px] h-[380px] md:h-[400px] left-1/2 -ml-[140px] md:-ml-[150px] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-200 bg-white"
-            >
-              <img src={src} className="w-full h-full object-cover" alt="Portfolio" />
-              {i === 0 && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center p-6 pb-8">
-                  <div className="text-white flex items-center gap-2 font-medium bg-black/40 px-5 py-2.5 rounded-full backdrop-blur-md border border-white/20 text-sm shadow-xl">
-                    Tap to deal next <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+    <div className="relative w-full max-w-sm mx-auto flex flex-col items-center">
+      <div 
+        className="relative w-full h-[400px] md:h-[480px] cursor-pointer perspective-1000"
+        onClick={dealNext}
+      >
+        <AnimatePresence>
+          {cards.map((src, i) => {
+            if (i > 3) return null;
+            
+            return (
+              <motion.div
+                key={src}
+                layout
+                initial={{ scale: 0.8, opacity: 0, y: -50 }}
+                animate={{
+                  top: i * 25,
+                  scale: 1 - i * 0.06,
+                  zIndex: cards.length - i,
+                  opacity: 1 - i * 0.15,
+                  rotate: i % 2 === 0 ? i * 2 : -i * 1.5,
+                }}
+                exit={{ opacity: 0, scale: 0.5, y: 100 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="absolute w-[260px] md:w-[300px] h-[360px] md:h-[400px] left-1/2 -ml-[130px] md:-ml-[150px] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-200 bg-white"
+              >
+                <img src={src} className="w-full h-full object-cover" alt="Portfolio" />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+      
+      <div className="mt-8 z-20">
+        <Button onClick={dealNext} variant="outline" className="rounded-full shadow-sm text-amber-700 border-amber-200 hover:bg-amber-50">
+          Next Book <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
     </div>
   );
 };

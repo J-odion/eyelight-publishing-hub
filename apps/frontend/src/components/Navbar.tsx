@@ -3,11 +3,12 @@ import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo.jpeg";
 
 const navLinks = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Testimonials", href: "#testimonials" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Home", href: "/" },
+  { label: "Books", href: "/catalogue" },
+  { label: "Store", href: "/store" },
+  { label: "About", href: "/#about" },
+  { label: "Services", href: "/#services" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 const Navbar = () => {
