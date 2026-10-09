@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { BooksApi } from '../lib/api.js';
+import { useCartStore } from '../lib/useCartStore.js';
 
 import audacityOfFaith from "@/assets/books/audacity-of-faith.jpg";
 import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
@@ -27,7 +28,7 @@ const staticBooks = [
 export default function Storefront() {
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<any[]>([]);
+  const { items: cart, addItem, getCartCount } = useCartStore();
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const navigate = useNavigate();
 
@@ -40,20 +41,10 @@ export default function Storefront() {
       .finally(() => setLoading(false));
   }, []);
 
-  const addToCart = (book: any, e?: React.MouseEvent) => {
+  const handleAddToCart = (book: any, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setCart([...cart, book]);
+    addItem(book);
     toast.success(`${book.title} added to cart!`);
-  };
-
-  const handleCheckout = () => {
-    if (cart.length === 0) return toast.error('Your cart is empty');
-    toast.loading('Redirecting to Paystack securely...');
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success('Payment Successful! Redirecting to orders...', { duration: 4000 });
-      setCart([]);
-    }, 2000);
   };
 
   return (
@@ -84,10 +75,10 @@ export default function Storefront() {
             <p className="text-gray-300 text-xs">Returns</p>
             <p className="font-bold">& Orders</p>
           </div>
-          <div className="flex items-end cursor-pointer hover:text-[#febd69]" onClick={handleCheckout}>
+          <div className="flex items-end cursor-pointer hover:text-[#febd69]" onClick={() => navigate('/cart')}>
             <div className="relative">
               <ShoppingCart className="w-8 h-8" />
-              <span className="absolute -top-1 left-3.5 text-[#f08804] font-bold text-sm bg-[#131921] px-1 rounded-full">{cart.length}</span>
+              <span className="absolute -top-1 left-3.5 text-[#f08804] font-bold text-sm bg-[#131921] px-1 rounded-full">{getCartCount()}</span>
             </div>
             <span className="font-bold text-sm mb-1 hidden md:block">Cart</span>
           </div>
@@ -148,13 +139,13 @@ export default function Storefront() {
                 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button 
-                    onClick={() => addToCart(selectedBook)}
+                    onClick={() => handleAddToCart(selectedBook)}
                     className="flex-1 bg-[#ffd814] hover:bg-[#f7ca00] text-gray-900 font-medium rounded-full h-12"
                   >
                     Add to Cart
                   </Button>
                   <Button 
-                    onClick={() => { addToCart(selectedBook); handleCheckout(); }}
+                    onClick={() => { handleAddToCart(selectedBook); navigate('/cart'); }}
                     className="flex-1 bg-[#ffa41c] hover:bg-[#fa8900] text-gray-900 font-medium rounded-full h-12"
                   >
                     Buy Now
@@ -222,7 +213,7 @@ export default function Storefront() {
                     </div>
                     
                     <Button 
-                      onClick={(e) => addToCart(book, e)}
+                      onClick={(e) => handleAddToCart(book, e)}
                       className="w-full mt-auto bg-[#ffd814] hover:bg-[#f7ca00] text-gray-900 font-medium rounded-full text-xs md:text-sm h-8 md:h-10"
                     >
                       Add to Cart
