@@ -31,6 +31,112 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import { LeadsApi } from "@/lib/api";
+import { motion, AnimatePresence } from "framer-motion";
+
+const ZoomCarousel = ({ images }: { images: string[] }) => {
+  const [index, setIndex] = useState(0);
+
+  const next = () => setIndex((i) => (i + 1) % images.length);
+  const prev = () => setIndex((i) => (i - 1 + images.length) % images.length);
+
+  return (
+    <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden py-10">
+      <div className="flex items-center justify-center relative w-full h-full max-w-5xl mx-auto">
+        <AnimatePresence mode="popLayout">
+          {images.map((img, i) => {
+            const isActive = i === index;
+            let offset = i - index;
+            if (offset < -1) offset += images.length;
+            if (offset > 1) offset -= images.length;
+            
+            if (Math.abs(offset) > 1) return null;
+
+            return (
+              <motion.div
+                key={img}
+                initial={{ opacity: 0, scale: 0.8, x: offset * 300 }}
+                animate={{ 
+                  opacity: isActive ? 1 : 0.4, 
+                  scale: isActive ? 1.05 : 0.8,
+                  x: offset * (typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 300),
+                  zIndex: isActive ? 10 : 0,
+                  rotateY: isActive ? 0 : offset * -15 
+                }}
+                exit={{ opacity: 0, scale: 0.8, x: offset * 300 }}
+                transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                className="absolute w-[220px] md:w-[320px] aspect-[4/5] rounded-xl overflow-hidden shadow-2xl cursor-pointer border-4 border-slate-900 bg-slate-800"
+                onClick={() => setIndex(i)}
+                style={{ perspective: 1000 }}
+              >
+                <img src={img} className="w-full h-full object-cover" alt="Gallery" />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+      
+      <button onClick={prev} className="absolute left-2 md:left-10 z-20 w-12 h-12 rounded-full bg-slate-900/50 backdrop-blur-md border border-slate-700 flex items-center justify-center text-white hover:bg-slate-800 transition-colors">
+        <ArrowRight className="w-6 h-6 rotate-180" />
+      </button>
+      <button onClick={next} className="absolute right-2 md:right-10 z-20 w-12 h-12 rounded-full bg-slate-900/50 backdrop-blur-md border border-slate-700 flex items-center justify-center text-white hover:bg-slate-800 transition-colors">
+        <ArrowRight className="w-6 h-6" />
+      </button>
+    </div>
+  );
+};
+
+const DeckCarousel = ({ images }: { images: string[] }) => {
+  const [cards, setCards] = useState(images);
+  
+  const dealNext = () => {
+    setCards((prev) => {
+      const newCards = [...prev];
+      const first = newCards.shift();
+      if(first) newCards.push(first);
+      return newCards;
+    });
+  };
+
+  return (
+    <div 
+      className="relative w-full max-w-sm mx-auto h-[480px] cursor-pointer"
+      onClick={dealNext}
+    >
+      <AnimatePresence>
+        {cards.map((src, i) => {
+          if (i > 3) return null;
+          
+          return (
+            <motion.div
+              key={src}
+              layout
+              initial={{ scale: 0.8, opacity: 0, y: -50 }}
+              animate={{
+                top: i * 25,
+                scale: 1 - i * 0.06,
+                zIndex: cards.length - i,
+                opacity: 1 - i * 0.15,
+                rotate: i % 2 === 0 ? i * 2 : -i * 1.5,
+              }}
+              exit={{ opacity: 0, scale: 0.5, y: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="absolute w-[280px] md:w-[300px] h-[380px] md:h-[400px] left-1/2 -ml-[140px] md:-ml-[150px] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-200 bg-white"
+            >
+              <img src={src} className="w-full h-full object-cover" alt="Portfolio" />
+              {i === 0 && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center p-6 pb-8">
+                  <div className="text-white flex items-center gap-2 font-medium bg-black/40 px-5 py-2.5 rounded-full backdrop-blur-md border border-white/20 text-sm shadow-xl">
+                    Tap to deal next <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default function EditorSchool() {
   const [timeLeft, setTimeLeft] = useState("");
@@ -125,48 +231,66 @@ export default function EditorSchool() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 font-sans selection:bg-amber-200 selection:text-amber-900">
+    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 font-sans selection:bg-amber-200 selection:text-amber-900 relative">
       
+      {/* Top Navbar for previewing main pages */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] bg-slate-950/90 backdrop-blur-md border-b border-slate-800 text-white px-6 py-4">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <a href="/" className="font-serif font-bold text-xl text-amber-500 tracking-tight">Eyelight.</a>
+          <div className="hidden md:flex gap-8 text-sm font-medium text-slate-300">
+            <a href="/" className="hover:text-white transition-colors">Home</a>
+            <a href="/catalogue" className="hover:text-white transition-colors">Books</a>
+            <a href="/store" className="hover:text-white transition-colors">Store</a>
+            <a href="mailto:hello@eyelight.com" className="hover:text-white transition-colors">Contact</a>
+          </div>
+          <Button onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold h-9 text-xs rounded-sm">
+            REGISTER NOW
+          </Button>
+        </div>
+      </nav>
+
       {/* 1. Hero Section */}
-      <section className="relative pt-24 pb-32 overflow-hidden border-b border-amber-100">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] opacity-30 mix-blend-multiply pointer-events-none"></div>
-        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium mb-8">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+      <section className="relative pt-40 pb-32 overflow-hidden bg-slate-950 text-white">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/50 border border-slate-700 text-amber-400 text-sm font-medium mb-10 shadow-xl backdrop-blur-sm">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]"></span>
             Enrollment open for December 2026 Cohort
           </div>
-          <h1 className="text-5xl md:text-7xl font-serif font-medium leading-tight mb-6 text-slate-900 tracking-tight">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-medium leading-[1.1] mb-8 text-white tracking-tight drop-shadow-sm">
             The Book Editor <br className="hidden md:block"/> Business School
           </h1>
-          <p className="text-xl md:text-2xl text-slate-600 mb-4 max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-xl md:text-2xl text-slate-300 mb-6 max-w-2xl mx-auto font-light leading-relaxed">
             Editing books is a skill. Building a business around that skill is a completely different game.
           </p>
-          <p className="text-lg text-slate-500 mb-10 max-w-2xl mx-auto font-medium">
-            You can spend 70 hours inside somebody’s manuscript, save their book from disaster, make their ideas clearer... and still be the person they negotiate down to ₦10,000. That ends here.
+          <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-3xl mx-auto font-medium leading-relaxed bg-slate-900/50 p-6 rounded-lg border border-slate-800">
+            You can spend 70 hours inside somebody’s manuscript, save their book from disaster, make their ideas clearer... and still be the person they negotiate down to ₦10,000. <strong className="text-amber-400">That ends here.</strong>
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-            <Button size="lg" onClick={handleCTA} className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-base h-14 px-8 rounded-none transition-all hover:translate-y-[-2px] shadow-lg">
-              SAVE YOUR SEAT FOR THE BOOK EDITOR BUSINESS SCHOOL
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            <Button size="lg" onClick={handleCTA} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 text-base h-16 px-10 rounded-sm transition-all hover:-translate-y-1 shadow-[0_10px_40px_-10px_rgba(245,158,11,0.5)] font-bold tracking-wide">
+              SAVE YOUR SEAT NOW
             </Button>
           </div>
           
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-slate-500 mt-8 font-medium">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-slate-400 mt-8 font-medium">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600" />
+              <Clock className="w-4 h-4 text-amber-500" />
               <span>3-Day Programme: Dec 4–6, 2026</span>
             </div>
-            <div className="hidden md:block w-1 h-1 rounded-full bg-slate-300"></div>
+            <div className="hidden md:block w-1 h-1 rounded-full bg-slate-700"></div>
             <div className="flex items-center gap-2">
               {isDiscountActive && (
-                <span className="line-through text-slate-400 mr-2">₦33,500</span>
+                <span className="line-through text-slate-500 mr-2">₦33,500</span>
               )}
-              <span className="font-semibold text-slate-800 text-base">{currentPriceNaira} / {currentPriceUsd}</span>
+              <span className="font-semibold text-white text-base">{currentPriceNaira} / {currentPriceUsd}</span>
             </div>
             {timeLeft && (
                <>
-                 <div className="hidden md:block w-1 h-1 rounded-full bg-slate-300"></div>
-                 <div className="text-amber-700 bg-amber-50 px-3 py-1.5 rounded font-mono font-bold tracking-tight border border-amber-200">
+                 <div className="hidden md:block w-1 h-1 rounded-full bg-slate-700"></div>
+                 <div className="text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded font-mono font-bold tracking-tight border border-amber-500/20">
                    {timeLeft}
                  </div>
                </>
@@ -262,78 +386,35 @@ export default function EditorSchool() {
       </section>
 
       {/* 3.5. Instructor Gallery Slider */}
-      <section className="py-24 bg-white overflow-hidden border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-serif text-slate-900 mb-4">Meet Your Instructor</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
+      <section className="py-24 bg-slate-950 overflow-hidden border-b border-slate-900 text-center relative">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="mb-8">
+            <h2 className="text-3xl md:text-5xl font-serif text-white mb-6">Meet Your Instructor</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
               Grace is the Founder of Eyelight Publishing, having scaled her editorial business from the ground up to serve hundreds of authors globally.
             </p>
           </div>
           
-          <Carousel 
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full max-w-5xl mx-auto"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {[1, 2, 3, 4, 5, 6].map((num) => (
-                <CarouselItem key={num} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <div className="p-1 h-full">
-                    <img 
-                      src={`/editor-school/${num}.jpg`} 
-                      alt={`Grace - Eyelight Publishing Founder ${num}`} 
-                      className="w-full h-[400px] object-cover rounded-sm shadow-md transition-transform duration-300 hover:scale-[1.02]" 
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious className="-left-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
-              <CarouselNext className="-right-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
-            </div>
-          </Carousel>
+          <ZoomCarousel 
+            images={[1, 2, 3, 4, 5, 6].map(num => `/editor-school/${num}.jpg`)} 
+          />
         </div>
       </section>
 
       {/* 3.6. Books Edited Gallery */}
-      <section className="py-24 bg-slate-50 overflow-hidden border-b border-slate-200">
+      <section className="py-32 bg-slate-50 overflow-hidden border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-serif text-slate-900 mb-4">Select Editorial Work</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
+          <div className="mb-16 text-center">
+            <h2 className="text-3xl md:text-5xl font-serif text-slate-900 mb-6">Select Editorial Work</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto text-lg">
               A glimpse at some of the titles shaped and polished by Grace during the early stages of building Eyelight Publishing.
             </p>
           </div>
           
-          <Carousel 
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full max-w-5xl mx-auto"
-          >
-            <CarouselContent className="-ml-4 md:-ml-8 items-center">
-              {[1, 2, 3, 4, 5].map((num) => (
-                <CarouselItem key={num} className="pl-4 md:pl-8 sm:basis-1/2 md:basis-1/3">
-                  <div className="p-2 transition-transform duration-300 hover:-translate-y-2">
-                    <img 
-                      src={`/editor-school/books/Image ${num}.png`} 
-                      alt={`Book edited by Grace ${num}`} 
-                      className="w-full h-auto object-contain drop-shadow-xl max-h-[400px]" 
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious className="-left-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
-              <CarouselNext className="-right-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
-            </div>
-          </Carousel>
+          <DeckCarousel 
+            images={[1, 2, 3, 4, 5].map(num => `/editor-school/books/Image ${num}.png`)} 
+          />
         </div>
       </section>
 
@@ -364,36 +445,100 @@ export default function EditorSchool() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { title: "01. THE EDITORIAL PROCESS", desc: "How to take a book from manuscript receipt to final delivery without wondering what you're supposed to do next." },
-              { title: "02. THE FOUR TYPES OF BOOK EDITING", desc: "What they are, how they differ and, more importantly, which ones you should actually be selling." },
-              { title: "03. MANUSCRIPT ASSESSMENT", desc: "The top things you should look for before touching a manuscript so you don't walk blindly into a project." },
-              { title: "04. DEVELOPMENTAL EDITING", desc: "How to fix a book with brilliant ideas but terrible execution." },
-              { title: "05. WHERE YOUR EDITING ENDS", desc: "Line editing. Developmental editing. Proofreading. Where exactly should you stop? Touching everything does not make you a better editor." },
-              { title: "06. EDITING DIFFERENT GENRES", desc: "How to work across genres without flattening every author's voice into your own." },
-              { title: "07. EDITORIAL JUDGEMENT", desc: "What to change. What to confirm. What to question. What to leave alone. This separates editors from grammar checkers." },
-              { title: "08. AUTHOR FEEDBACK", desc: "How to tell an author that something is not working without starting a war." },
-              { title: "09. PRICING YOUR SERVICES", desc: "Stop pulling prices from thin air. Learn how to think about your fees professionally." },
-              { title: "10. CALCULATING YOUR EDITING FEE", desc: "How to calculate your fee from the manuscript itself. Not from desperation or what your friend charges." },
-              { title: "11. GETTING CLIENTS", desc: "How to get your first editing clients without begging people on WhatsApp to 'please patronise me.'" },
-              { title: "12. YOUR EDITING WORKFLOW", desc: "Build a process from manuscript receipt to final delivery." },
-              { title: "13. PROTECTING YOURSELF", desc: "Contracts. Briefs. Boundaries. Revisions. Because 'just one more little change' has destroyed many an editor's peace." },
-              { title: "14. DIFFICULT AUTHORS & DEADLINES", desc: "How to deal with clients who want everything yesterday and another 17 changes today." },
-              { title: "15. PROFESSIONAL POSITIONING", desc: "How to position yourself as a professional editor even when you're still building your track record." },
-              { title: "16. AI VS HUMAN EDITING", desc: "What you should never blindly outsource to AI." },
-              { title: "17. AI-PROOFING YOUR BUSINESS", desc: "How to evolve your service before it becomes replaceable." },
-              { title: "18. BEYOND FREELANCING", desc: "Learn how to build an editing business that can eventually grow beyond your own two hands." },
-              { title: "19. CERTIFICATE", desc: "You will receive a certificate of participation." },
-              { title: "20. THE BEST STUDENT CASH GRANT", desc: "The outstanding student of the cohort will receive a cash grant to support the growth of their editing business." }
-            ].map((lesson, idx) => (
-              <Card key={idx} className="rounded-sm border-slate-200 shadow-sm hover:shadow-md transition-shadow bg-slate-50/50">
-                <CardContent className="p-6">
-                  <h3 className="text-sm font-bold tracking-wider text-amber-700 mb-3">{lesson.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">{lesson.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <Accordion type="single" collapsible className="w-full" defaultValue="phase-1">
+            <AccordionItem value="phase-1" className="border-slate-200 bg-slate-50 mb-4 rounded-xl px-2">
+              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-700 px-4 py-6">
+                Phase 1: The Editorial Foundation
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {[
+                    { title: "01. THE EDITORIAL PROCESS", desc: "How to take a book from manuscript receipt to final delivery without wondering what you're supposed to do next." },
+                    { title: "02. THE FOUR TYPES OF BOOK EDITING", desc: "What they are, how they differ and, more importantly, which ones you should actually be selling." },
+                    { title: "03. MANUSCRIPT ASSESSMENT", desc: "The top things you should look for before touching a manuscript so you don't walk blindly into a project." },
+                    { title: "04. DEVELOPMENTAL EDITING", desc: "How to fix a book with brilliant ideas but terrible execution." },
+                    { title: "05. WHERE YOUR EDITING ENDS", desc: "Line editing. Developmental editing. Proofreading. Where exactly should you stop? Touching everything does not make you a better editor." },
+                  ].map((lesson, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+                      <h3 className="text-sm font-bold tracking-wider text-amber-700 mb-2">{lesson.title}</h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">{lesson.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="phase-2" className="border-slate-200 bg-slate-50 mb-4 rounded-xl px-2">
+              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-700 px-4 py-6">
+                Phase 2: Execution & Judgement
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {[
+                    { title: "06. EDITING DIFFERENT GENRES", desc: "How to work across genres without flattening every author's voice into your own." },
+                    { title: "07. EDITORIAL JUDGEMENT", desc: "What to change. What to confirm. What to question. What to leave alone. This separates editors from grammar checkers." },
+                    { title: "08. AUTHOR FEEDBACK", desc: "How to tell an author that something is not working without starting a war." },
+                    { title: "09. PRICING YOUR SERVICES", desc: "Stop pulling prices from thin air. Learn how to think about your fees professionally." },
+                    { title: "10. CALCULATING YOUR EDITING FEE", desc: "How to calculate your fee from the manuscript itself. Not from desperation or what your friend charges." },
+                  ].map((lesson, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+                      <h3 className="text-sm font-bold tracking-wider text-amber-700 mb-2">{lesson.title}</h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">{lesson.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="phase-3" className="border-slate-200 bg-slate-50 mb-4 rounded-xl px-2">
+              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-700 px-4 py-6">
+                Phase 3: The Business of Editing
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {[
+                    { title: "11. GETTING CLIENTS", desc: "How to get your first editing clients without begging people on WhatsApp to 'please patronise me.'" },
+                    { title: "12. YOUR EDITING WORKFLOW", desc: "Build a process from manuscript receipt to final delivery." },
+                    { title: "13. PROTECTING YOURSELF", desc: "Contracts. Briefs. Boundaries. Revisions. Because 'just one more little change' has destroyed many an editor's peace." },
+                    { title: "14. DIFFICULT AUTHORS & DEADLINES", desc: "How to deal with clients who want everything yesterday and another 17 changes today." },
+                    { title: "15. PROFESSIONAL POSITIONING", desc: "How to position yourself as a professional editor even when you're still building your track record." },
+                  ].map((lesson, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+                      <h3 className="text-sm font-bold tracking-wider text-amber-700 mb-2">{lesson.title}</h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">{lesson.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="phase-4" className="border-slate-200 bg-slate-50 mb-4 rounded-xl px-2">
+              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-700 px-4 py-6">
+                Phase 4: Future-Proofing & Rewards
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {[
+                    { title: "16. AI VS HUMAN EDITING", desc: "What you should never blindly outsource to AI." },
+                    { title: "17. AI-PROOFING YOUR BUSINESS", desc: "How to evolve your service before it becomes replaceable." },
+                    { title: "18. BEYOND FREELANCING", desc: "Learn how to build an editing business that can eventually grow beyond your own two hands." },
+                    { title: "19. CERTIFICATE", desc: "You will receive a certificate of participation." },
+                    { title: "20. THE BEST STUDENT CASH GRANT", desc: "The outstanding student of the cohort will receive a cash grant to support the growth of their editing business." }
+                  ].map((lesson, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+                      <h3 className="text-sm font-bold tracking-wider text-amber-700 mb-2">{lesson.title}</h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">{lesson.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          <div className="mt-12 text-center">
+            <Button size="lg" onClick={handleCTA} className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-14 px-10 rounded-sm">
+              I WANT TO LEARN THESE
+            </Button>
           </div>
         </div>
       </section>
@@ -428,7 +573,11 @@ export default function EditorSchool() {
             <div className="pt-8 text-center text-xl font-medium text-slate-900">
               Then you start building an editing business that makes sense.<br/>
               A business with processes. Standards. Boundaries. Positioning. Better clients.<br/>
-              <span className="text-amber-600 font-serif text-3xl mt-6 block">And, yes... Better money.</span>
+              <span className="text-amber-600 font-serif text-3xl mt-6 block mb-10">And, yes... Better money.</span>
+              
+              <Button size="lg" onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-950 text-base h-16 px-12 rounded-sm shadow-xl font-bold transition-transform hover:-translate-y-1">
+                START BUILDING MY EDITING BUSINESS
+              </Button>
             </div>
           </div>
         </div>
@@ -717,9 +866,29 @@ export default function EditorSchool() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-white border-t border-slate-200 text-center text-slate-500 text-sm">
-        <p>© {new Date().getFullYear()} Eyelight Publishing. All rights reserved.</p>
+      <footer className="py-16 bg-slate-950 border-t border-slate-900 text-center text-slate-500 text-sm">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-amber-500 font-serif text-2xl font-bold mb-4">Eyelight Publishing</div>
+          <div className="flex justify-center gap-6 mb-8 text-slate-400">
+            <a href="mailto:hello@eyelight.com" className="hover:text-amber-400 transition-colors">hello@eyelight.com</a>
+            <a href="https://wa.me/234XXXXXXXXXX" className="hover:text-amber-400 transition-colors">WhatsApp Support</a>
+          </div>
+          <p>© {new Date().getFullYear()} Eyelight Publishing. All rights reserved.</p>
+        </div>
       </footer>
+
+      {/* Floating WhatsApp CTA */}
+      <a 
+        href="https://wa.me/234XXXXXXXXXX" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-green-500 text-white rounded-full shadow-[0_10px_25px_-5px_rgba(34,197,94,0.5)] flex items-center justify-center z-[100] hover:scale-110 hover:bg-green-600 transition-all cursor-pointer"
+        aria-label="Contact on WhatsApp"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+        </svg>
+      </a>
     </div>
   );
 }
