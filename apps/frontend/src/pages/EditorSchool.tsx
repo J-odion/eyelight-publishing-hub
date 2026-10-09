@@ -138,8 +138,11 @@ export default function EditorSchool() {
           <h1 className="text-5xl md:text-7xl font-serif font-medium leading-tight mb-6 text-slate-900 tracking-tight">
             The Book Editor <br className="hidden md:block"/> Business School
           </h1>
-          <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
-            Learn the craft. Build the business. Become harder to replace.
+          <p className="text-xl md:text-2xl text-slate-600 mb-4 max-w-2xl mx-auto font-light leading-relaxed">
+            Editing books is a skill. Building a business around that skill is a completely different game.
+          </p>
+          <p className="text-lg text-slate-500 mb-10 max-w-2xl mx-auto font-medium">
+            You can spend 70 hours inside somebody’s manuscript, save their book from disaster, make their ideas clearer... and still be the person they negotiate down to ₦10,000. That ends here.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
@@ -181,16 +184,28 @@ export default function EditorSchool() {
 
       {/* 2. The Problem */}
       <section className="py-24 bg-white relative">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-5xl font-serif mb-8 text-slate-900">
-            You can be an excellent editor and still be broke.
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-5xl font-serif mb-8 text-slate-900 leading-tight">
+            The problem is not that editors don't make money.
           </h2>
           <div className="w-16 h-px bg-amber-300 mx-auto mb-8"></div>
-          <p className="text-lg text-slate-600 leading-relaxed mb-6">
-            Many editors spend years mastering the craft of words, grammar, and story arcs. They can spot a misplaced modifier from a mile away and know exactly how to fix a sagging middle in a manuscript.
+          <p className="text-lg text-slate-600 leading-relaxed mb-6 font-medium">
+            The problem is that too many editors have never learnt how to make their skill expensive.
           </p>
-          <p className="text-lg text-slate-600 leading-relaxed font-medium">
-            But there is a massive disconnect between editing skill and business skill. Knowing how to fix a book doesn't automatically mean you know how to price your services, attract high-paying authors, or structure a sustainable career.
+          <p className="text-lg text-slate-600 leading-relaxed mb-10">
+            Authors will spend thousands designing covers. Millions printing books. Thousands running ads. Then suddenly, when it is time to edit the manuscript:
+          </p>
+          
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-10 text-left">
+            <div className="bg-slate-50 p-4 border border-slate-100 rounded-sm italic text-slate-500 text-sm">"Please, what's your final price?"</div>
+            <div className="bg-slate-50 p-4 border border-slate-100 rounded-sm italic text-slate-500 text-sm">"I have another editor that can do it for less."</div>
+            <div className="bg-slate-50 p-4 border border-slate-100 rounded-sm italic text-slate-500 text-sm">"It's just proofreading."</div>
+            <div className="bg-slate-50 p-4 border border-slate-100 rounded-sm italic text-slate-500 text-sm">"The manuscript is already written."</div>
+            <div className="bg-slate-50 p-4 border border-slate-100 rounded-sm italic text-slate-500 text-sm">"Can't you just correct the errors?"</div>
+          </div>
+          
+          <p className="text-lg text-slate-600 leading-relaxed">
+            Then, because nobody taught you how to communicate the value of what you do, you start defending your price. Then reducing it. Then apologising for it. Then accepting work that makes you resent the author. Then wondering why editing doesn't pay. <br/><br/><strong className="text-slate-900 font-serif text-xl">Editing is not the problem. Your business model might be.</strong>
           </p>
         </div>
       </section>
@@ -199,15 +214,18 @@ export default function EditorSchool() {
       <section className="py-24 bg-slate-900 text-slate-50">
         <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
           <div>
-            <div className="text-amber-400 mb-4 font-serif italic text-xl">From ₦100 to Millions</div>
+            <div className="text-amber-400 mb-4 font-serif italic text-xl">From a ₦100 Recharge Card to Millions</div>
             <h2 className="text-3xl md:text-4xl font-serif mb-6 leading-tight">
-              Editing isn't the problem.<br />Your business model might be.
+              I know what it feels like to think editing doesn't pay.
             </h2>
             <p className="text-slate-300 mb-6 leading-relaxed">
-              When I started, I was paid with a ₦100 recharge card. I thought that was just how it worked. Then I upgraded to ₦60,000, then ₦100,000. It wasn't until I shifted my mindset from "freelancer doing odd jobs" to "publishing professional running a business" that everything changed.
+              I started editing while I was in the university. People started bringing me their manuscripts. Then one day, an author paid me for editing with a ₦100 recharge card. I thought, well, at least somebody is paying me to do something I enjoy. I had no idea I was sitting on a skill that would change my life.
             </p>
-            <p className="text-slate-300 mb-8 leading-relaxed">
-              Today, I run a publishing firm that has handled hundreds of books. The craft is essential, but the business is what sustains you. I want to show you the exact frameworks I use.
+            <p className="text-slate-300 mb-6 leading-relaxed">
+              Then one author paid me ₦60,000. Another paid me ₦100,000. Those two payments changed everything. I started paying attention, figuring out how to price, position, and communicate value.
+            </p>
+            <p className="text-slate-300 mb-8 leading-relaxed font-medium text-amber-50">
+              Today, that same skill has put me behind books read by thousands. It has allowed respected authors and leaders like Apostle Femi Lazarus, Nurse Sugar, Dr. Christine, and Lilly White to trust me with their legacies.
             </p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center overflow-hidden border border-slate-600">
@@ -216,7 +234,7 @@ export default function EditorSchool() {
               </div>
               <div>
                 <div className="font-medium text-white">Grace</div>
-                <div className="text-sm text-slate-400">Founder, Eyelight Publishing</div>
+                <div className="text-sm text-slate-400">Graduate of English & Literary Studies<br/>Founder, Eyelight Publishers</div>
               </div>
             </div>
           </div>
@@ -337,75 +355,45 @@ export default function EditorSchool() {
       {/* 6. What You'll Learn */}
       <section className="py-24 bg-white border-y border-slate-200">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl md:text-5xl font-serif mb-16 text-center text-slate-900">
-            The Curriculum
-          </h2>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-serif mb-6 text-slate-900">
+              The Curriculum
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Not theory or endless grammar lectures. Business. Skill. Process. Positioning. Money.
+            </p>
+          </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="rounded-none border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <BookOpen className="w-8 h-8 text-amber-600 mb-6" />
-                <h3 className="text-xl font-serif font-medium mb-4">Editorial Mastery</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">Elevate your baseline skills from good to exceptional. Learn to spot structural flaws that others miss.</p>
-                <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                  <li>Developmental deep dives</li>
-                  <li>Line editing precision</li>
-                  <li>Author voice preservation</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-none border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <TrendingUp className="w-8 h-8 text-amber-600 mb-6" />
-                <h3 className="text-xl font-serif font-medium mb-4">Pricing & Money</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">Stop guessing your rates. Build a pricing model that reflects your expertise and guarantees profitability.</p>
-                <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                  <li>Value-based pricing</li>
-                  <li>Packaging your services</li>
-                  <li>Handling objections</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-none border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <Target className="w-8 h-8 text-amber-600 mb-6" />
-                <h3 className="text-xl font-serif font-medium mb-4">Clients & Positioning</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">Attract the right authors. Learn how to present yourself so premium clients seek you out.</p>
-                <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                  <li>Portfolio building</li>
-                  <li>Pitching strategies</li>
-                  <li>Niche dominance</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-none border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <ShieldCheck className="w-8 h-8 text-amber-600 mb-6" />
-                <h3 className="text-xl font-serif font-medium mb-4">Systems & Protection</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">Protect your time and energy. Set up the workflows that professional firms use.</p>
-                <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                  <li>Contracts that protect you</li>
-                  <li>Onboarding workflows</li>
-                  <li>Boundary setting</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-none border-slate-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-2 bg-amber-50/50 border-amber-100">
-              <CardContent className="p-8">
-                <Lightbulb className="w-8 h-8 text-amber-600 mb-6" />
-                <h3 className="text-xl font-serif font-medium mb-4">AI & Future-Proofing</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4 max-w-xl">
-                  Adapt to the new landscape. Learn how to integrate AI tools to speed up your workflow without compromising quality, while marketing your distinctly human editorial intuition.
-                </p>
-                <Button variant="link" className="px-0 text-amber-700 hover:text-amber-800">
-                  Read full syllabus <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "01. THE EDITORIAL PROCESS", desc: "How to take a book from manuscript receipt to final delivery without wondering what you're supposed to do next." },
+              { title: "02. THE FOUR TYPES OF BOOK EDITING", desc: "What they are, how they differ and, more importantly, which ones you should actually be selling." },
+              { title: "03. MANUSCRIPT ASSESSMENT", desc: "The top things you should look for before touching a manuscript so you don't walk blindly into a project." },
+              { title: "04. DEVELOPMENTAL EDITING", desc: "How to fix a book with brilliant ideas but terrible execution." },
+              { title: "05. WHERE YOUR EDITING ENDS", desc: "Line editing. Developmental editing. Proofreading. Where exactly should you stop? Touching everything does not make you a better editor." },
+              { title: "06. EDITING DIFFERENT GENRES", desc: "How to work across genres without flattening every author's voice into your own." },
+              { title: "07. EDITORIAL JUDGEMENT", desc: "What to change. What to confirm. What to question. What to leave alone. This separates editors from grammar checkers." },
+              { title: "08. AUTHOR FEEDBACK", desc: "How to tell an author that something is not working without starting a war." },
+              { title: "09. PRICING YOUR SERVICES", desc: "Stop pulling prices from thin air. Learn how to think about your fees professionally." },
+              { title: "10. CALCULATING YOUR EDITING FEE", desc: "How to calculate your fee from the manuscript itself. Not from desperation or what your friend charges." },
+              { title: "11. GETTING CLIENTS", desc: "How to get your first editing clients without begging people on WhatsApp to 'please patronise me.'" },
+              { title: "12. YOUR EDITING WORKFLOW", desc: "Build a process from manuscript receipt to final delivery." },
+              { title: "13. PROTECTING YOURSELF", desc: "Contracts. Briefs. Boundaries. Revisions. Because 'just one more little change' has destroyed many an editor's peace." },
+              { title: "14. DIFFICULT AUTHORS & DEADLINES", desc: "How to deal with clients who want everything yesterday and another 17 changes today." },
+              { title: "15. PROFESSIONAL POSITIONING", desc: "How to position yourself as a professional editor even when you're still building your track record." },
+              { title: "16. AI VS HUMAN EDITING", desc: "What you should never blindly outsource to AI." },
+              { title: "17. AI-PROOFING YOUR BUSINESS", desc: "How to evolve your service before it becomes replaceable." },
+              { title: "18. BEYOND FREELANCING", desc: "Learn how to build an editing business that can eventually grow beyond your own two hands." },
+              { title: "19. CERTIFICATE", desc: "You will receive a certificate of participation." },
+              { title: "20. THE BEST STUDENT CASH GRANT", desc: "The outstanding student of the cohort will receive a cash grant to support the growth of their editing business." }
+            ].map((lesson, idx) => (
+              <Card key={idx} className="rounded-sm border-slate-200 shadow-sm hover:shadow-md transition-shadow bg-slate-50/50">
+                <CardContent className="p-6">
+                  <h3 className="text-sm font-bold tracking-wider text-amber-700 mb-3">{lesson.title}</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">{lesson.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -414,33 +402,33 @@ export default function EditorSchool() {
       <section className="py-24 bg-[#FDFBF7]">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-5xl font-serif mb-6 text-slate-900">
-            Stop thinking like a freelancer.
+            Imagine what changes when you stop thinking like a freelancer.
           </h2>
-          <p className="text-xl text-slate-600 mb-16 font-light">
-            Start operating like a premium editorial business.
-          </p>
           
-          <div className="grid md:grid-cols-2 gap-8 text-left">
-            <div className="p-8 bg-white border border-slate-200">
-              <h3 className="text-lg font-medium text-slate-500 mb-6 uppercase tracking-wider text-center">Before</h3>
-              <ul className="space-y-4 text-slate-600">
-                <li className="flex gap-3"><XCircle className="w-5 h-5 text-slate-300 shrink-0"/> Scrambling for the next client.</li>
-                <li className="flex gap-3"><XCircle className="w-5 h-5 text-slate-300 shrink-0"/> Accepting any rate just to get the job.</li>
-                <li className="flex gap-3"><XCircle className="w-5 h-5 text-slate-300 shrink-0"/> Drowning in administrative mess.</li>
-                <li className="flex gap-3"><XCircle className="w-5 h-5 text-slate-300 shrink-0"/> Feeling threatened by AI and industry shifts.</li>
-              </ul>
+          <div className="text-left max-w-3xl mx-auto space-y-6 mt-16 text-lg text-slate-700">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 border-b border-slate-200 pb-4">
+              <span className="text-slate-400 font-medium">You stop asking:</span>
+              <span className="italic">"How much can this author afford?"</span>
+              <span className="hidden md:inline text-amber-500">→</span>
+              <span className="text-slate-900 font-medium">and start asking: "What does this project require?"</span>
             </div>
-            <div className="p-8 bg-slate-900 text-white border border-slate-900 relative shadow-xl">
-              <div className="absolute -top-4 -right-4 w-8 h-8 bg-amber-500 flex items-center justify-center rounded-full shadow-lg">
-                <CheckCircle2 className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-medium text-amber-400 mb-6 uppercase tracking-wider text-center">After</h3>
-              <ul className="space-y-4 text-slate-300">
-                <li className="flex gap-3"><CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0"/> A steady pipeline of authors seeking you out.</li>
-                <li className="flex gap-3"><CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0"/> Confidently quoting premium, value-based rates.</li>
-                <li className="flex gap-3"><CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0"/> Streamlined systems that handle the heavy lifting.</li>
-                <li className="flex gap-3"><CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0"/> Positioned as an irreplaceable human expert.</li>
-              </ul>
+            
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 border-b border-slate-200 pb-4">
+              <span className="text-slate-400 font-medium">You stop saying:</span>
+              <span className="italic">"I can edit anything."</span>
+              <span className="hidden md:inline text-amber-500">→</span>
+              <span className="text-slate-900 font-medium">and start communicating exactly what you do.</span>
+            </div>
+
+            <p className="flex items-start gap-3"><CheckCircle2 className="w-6 h-6 text-amber-500 shrink-0 mt-1"/> <span>You stop taking manuscripts through WhatsApp with no brief, no contract, no process and no boundaries.</span></p>
+            <p className="flex items-start gap-3"><CheckCircle2 className="w-6 h-6 text-amber-500 shrink-0 mt-1"/> <span>You stop calculating prices based on fear.</span></p>
+            <p className="flex items-start gap-3"><CheckCircle2 className="w-6 h-6 text-amber-500 shrink-0 mt-1"/> <span>You stop accepting authors who treat your expertise like a commodity.</span></p>
+            <p className="flex items-start gap-3"><CheckCircle2 className="w-6 h-6 text-amber-500 shrink-0 mt-1"/> <span>You stop panicking every time someone asks: "What's your price?"</span></p>
+            
+            <div className="pt-8 text-center text-xl font-medium text-slate-900">
+              Then you start building an editing business that makes sense.<br/>
+              A business with processes. Standards. Boundaries. Positioning. Better clients.<br/>
+              <span className="text-amber-600 font-serif text-3xl mt-6 block">And, yes... Better money.</span>
             </div>
           </div>
         </div>
@@ -451,32 +439,52 @@ export default function EditorSchool() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-16">
             <div>
-              <h3 className="text-2xl font-serif mb-8 text-slate-900 border-b pb-4">Who this is for</h3>
-              <ul className="space-y-6">
+              <h3 className="text-2xl font-serif mb-8 text-slate-900 border-b pb-4">This is for you if...</h3>
+              <ul className="space-y-4">
                 <li className="flex gap-4">
                   <CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0" />
-                  <span className="text-slate-600">Editors who are tired of undervaluing their work and want to structure their services for high-end clients.</span>
+                  <span className="text-slate-600 text-sm">You already edit books but feel like you're constantly underpaid.</span>
                 </li>
                 <li className="flex gap-4">
                   <CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0" />
-                  <span className="text-slate-600">Freelance writers looking to expand their offerings into developmental or line editing.</span>
+                  <span className="text-slate-600 text-sm">You are tired of authors negotiating every fee.</span>
                 </li>
                 <li className="flex gap-4">
                   <CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0" />
-                  <span className="text-slate-600">Publishing professionals who want to transition into running their own independent editorial consultancy.</span>
+                  <span className="text-slate-600 text-sm">You edit without a proper workflow and keep attracting bargain hunters.</span>
+                </li>
+                <li className="flex gap-4">
+                  <CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0" />
+                  <span className="text-slate-600 text-sm">You've been relying on referrals and don't know how to consistently find clients.</span>
+                </li>
+                <li className="flex gap-4">
+                  <CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0" />
+                  <span className="text-slate-600 text-sm">You are already using AI but don't know how to make your human expertise more valuable.</span>
+                </li>
+                <li className="flex gap-4">
+                  <CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0" />
+                  <span className="text-slate-600 text-sm">You are thinking: "I know I can do this. I just don't know how to build the business."</span>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-2xl font-serif mb-8 text-slate-900 border-b pb-4">Who this is NOT for</h3>
-              <ul className="space-y-6">
+              <h3 className="text-2xl font-serif mb-8 text-slate-900 border-b pb-4">This is NOT for you if...</h3>
+              <ul className="space-y-4">
                 <li className="flex gap-4">
                   <XCircle className="w-6 h-6 text-slate-400 shrink-0" />
-                  <span className="text-slate-600">People looking for a "get rich quick" scheme. Building a solid business takes deliberate effort.</span>
+                  <span className="text-slate-600 text-sm">You want a certificate to frame on your wall and do nothing with it.</span>
                 </li>
                 <li className="flex gap-4">
                   <XCircle className="w-6 h-6 text-slate-400 shrink-0" />
-                  <span className="text-slate-600">Those unwilling to interact with clients. This is about building a business, which requires communication and positioning.</span>
+                  <span className="text-slate-600 text-sm">You want a magic formula that will make clients appear without you doing the work.</span>
+                </li>
+                <li className="flex gap-4">
+                  <XCircle className="w-6 h-6 text-slate-400 shrink-0" />
+                  <span className="text-slate-600 text-sm">You want to remain comfortable charging whatever people are willing to give you.</span>
+                </li>
+                <li className="flex gap-4">
+                  <XCircle className="w-6 h-6 text-slate-400 shrink-0" />
+                  <span className="text-slate-600 text-sm">You think being a good editor automatically makes you a good business owner. It doesn't.</span>
                 </li>
               </ul>
             </div>
@@ -487,7 +495,10 @@ export default function EditorSchool() {
       {/* 7. Bonuses & 10. Details */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-3xl font-serif mb-12 text-center text-slate-900">Included in your enrollment</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif mb-4 text-slate-900">Included in your enrollment</h2>
+            <p className="text-slate-600">And I'm not sending you into the real world with only live classes. God forbid!</p>
+          </div>
           
           <div className="grid sm:grid-cols-2 gap-6 mb-16">
             <div className="bg-white p-6 border border-amber-100 flex gap-4 shadow-sm">
@@ -496,34 +507,36 @@ export default function EditorSchool() {
               </div>
               <div>
                 <h4 className="font-semibold text-slate-900 mb-1">The Editor's Toolkit</h4>
-                <p className="text-sm text-slate-600">Templates for style sheets, editorial letters, and manuscript assessments.</p>
+                <p className="text-sm text-slate-600 mb-2">The documents that help you look and operate like a business.</p>
+                <ul className="text-xs text-slate-500 space-y-1 list-disc list-inside">
+                  <li>Contracts & Onboarding forms</li>
+                  <li>Editing briefs & Checklists</li>
+                  <li>Style sheets</li>
+                </ul>
               </div>
             </div>
+            
             <div className="bg-white p-6 border border-amber-100 flex gap-4 shadow-sm">
               <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center shrink-0">
                 <span className="font-serif font-bold text-amber-700">2</span>
               </div>
               <div>
                 <h4 className="font-semibold text-slate-900 mb-1">Pricing & Proposal Kit</h4>
-                <p className="text-sm text-slate-600">Plug-and-play proposal templates that win high-ticket authors.</p>
+                <p className="text-sm text-slate-600 mb-2">Knowing what you charge is one thing. Presenting it professionally is another.</p>
+                <ul className="text-xs text-slate-500 space-y-1 list-disc list-inside">
+                  <li>Pricing calculator & Invoice</li>
+                  <li>Quotation & Proposal templates</li>
+                </ul>
               </div>
             </div>
-            <div className="bg-white p-6 border border-amber-100 flex gap-4 shadow-sm">
+            
+            <div className="bg-white p-6 border border-amber-100 flex gap-4 shadow-sm sm:col-span-2 md:col-span-1">
               <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center shrink-0">
                 <span className="font-serif font-bold text-amber-700">3</span>
               </div>
               <div>
                 <h4 className="font-semibold text-slate-900 mb-1">Real Manuscript Walkthrough</h4>
-                <p className="text-sm text-slate-600">Watch over the shoulder as we break down a real manuscript edit.</p>
-              </div>
-            </div>
-            <div className="bg-white p-6 border border-amber-100 flex gap-4 shadow-sm">
-              <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center shrink-0">
-                <span className="font-serif font-bold text-amber-700">4</span>
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-900 mb-1">Certification & Grant</h4>
-                <p className="text-sm text-slate-600">Certificate of completion and access to pitch for an editorial cash grant.</p>
+                <p className="text-sm text-slate-600">See the work, don't just hear about it. A real sample manuscript: Before and After. What was changed, what wasn't, and exactly why.</p>
               </div>
             </div>
           </div>
@@ -672,36 +685,33 @@ export default function EditorSchool() {
         <div className="max-w-3xl mx-auto px-6">
           <h2 className="text-3xl font-serif mb-12 text-center text-slate-900">Frequently Asked Questions</h2>
           <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1" className="border-slate-200">
-              <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700">Are the classes live or pre-recorded?</AccordionTrigger>
-              <AccordionContent className="text-slate-600 text-base leading-relaxed">
-                The core sessions are delivered live to allow for real-time Q&A and interaction. Recordings will be provided if you miss a session, but live attendance is highly recommended for the best experience.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2" className="border-slate-200">
-              <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700">Do I need prior editing experience?</AccordionTrigger>
-              <AccordionContent className="text-slate-600 text-base leading-relaxed">
-                While absolute beginners are welcome, this programme is best suited for those who already have a basic grasp of language and editing but want to formalize their skills and learn the business side of the profession.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-3" className="border-slate-200">
-              <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700">How long do I have access to the materials?</AccordionTrigger>
-              <AccordionContent className="text-slate-600 text-base leading-relaxed">
-                You will have lifetime access to the templates, toolkits, and session recordings, so you can revisit them whenever you are pitching a new client or restructuring your business.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-4" className="border-slate-200">
-              <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700">Is the certification recognized?</AccordionTrigger>
-              <AccordionContent className="text-slate-600 text-base leading-relaxed">
-                Yes, your certificate is issued by Eyelight Publishing, a recognized firm that has processed over 335 books globally. It serves as a strong credibility marker for your portfolio.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-5" className="border-slate-200">
-              <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700">What is the schedule for the 3 days?</AccordionTrigger>
-              <AccordionContent className="text-slate-600 text-base leading-relaxed">
-                Classes will run in the evenings (WAT) from December 4th to 6th to accommodate working professionals, with the graduation ceremony on December 7th. A detailed itinerary will be sent upon registration.
-              </AccordionContent>
-            </AccordionItem>
+            {[
+              { q: "How long is The Book Editor Business School?", a: "The school runs for 3 days, from December 4–6, 2026." },
+              { q: "When does the class start and end?", a: "Classes begin on December 4, 2026. Graduation is on December 7, 2026. 🎓" },
+              { q: "Will I receive a certificate?", a: "Yes. Every participant who completes the programme will receive a Certificate of Participation." },
+              { q: "Who is this school for?", a: "This school is for people who already edit books. You don't need to have 10 years of experience or 100 books edited. What matters is that you have actual experience and want to become better at the work and business." },
+              { q: "Is this for complete beginners who have never edited a book?", a: "No. This is not a beginner's 'how to become an editor' course. If you've never edited a book before, this is probably not the right place to start." },
+              { q: "I already edit books. What exactly will I gain from this?", a: "You may already know how to edit but still struggle with pricing, positioning, getting clients, contracts, boundaries, workflow, author management, revisions and building a business. That's where this school comes in." },
+              { q: "Is this just an editing skills course?", a: "No. It covers the editing craft, but the bigger focus is on helping you run your editing like a real business. You'll learn pricing, workflow, working with authors, positioning, and AI-proofing." },
+              { q: "Will you teach me how to charge more for my editing?", a: "We will teach you how to price your work properly, calculate fees from the manuscript and communicate your value. The goal isn't simply 'Charge more.' It's to understand why your work costs what it costs." },
+              { q: "Will you teach us how to get better-paying clients?", a: "Yes. We'll cover positioning and client acquisition, including how to get editing clients without constantly begging people to give you work." },
+              { q: "What if I already have clients but most of them don't pay very well?", a: "Then you're exactly the kind of person who should pay attention. Being busy is not the same as having a good business. We will help you examine your positioning so you can move towards better projects." },
+              { q: "What will you teach us about AI?", a: "We'll look at AI vs. human editing, what you should never blindly outsource, and how to AI-proof your business so you don't become replaceable." },
+              { q: "Do I need to know anything about AI before joining?", a: "No. You simply need to already have experience editing books. We'll handle the AI conversation from there." },
+              { q: "Can I join if I already have an established editing business?", a: "Absolutely. You don't have to be struggling to benefit. We can help you tighten systems, improve positioning, refine pricing and think beyond simply selling your time." },
+              { q: "Will there be a cash grant?", a: "Yes. The outstanding participant of the cohort will receive a cash grant to support the growth of their editing business." },
+              { q: "Is the programme online?", a: "Yes. The school is designed to be accessible to participants regardless of where they are located." },
+              { q: "How much does it cost?", a: "The investment is ₦33,500 or $25. That's for the complete 3-day programme, including the bonuses, certificate and graduation." },
+              { q: "Is this a university degree or diploma?", a: "No. This is a professional training programme. You will receive a Certificate of Participation. It is not a government licence or university qualification." },
+              { q: "What if I'm still unsure?", a: "If you already edit books and you've ever thought: 'I know how to do this. I just don't know how to make this business work the way I want it to.' This is probably the room you need to be in. Come with your experience. We'll work on the rest." }
+            ].map((faq, idx) => (
+              <AccordionItem key={idx} value={`item-${idx}`} className="border-slate-200">
+                <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700">{faq.q}</AccordionTrigger>
+                <AccordionContent className="text-slate-600 text-base leading-relaxed">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
           </Accordion>
         </div>
       </section>
