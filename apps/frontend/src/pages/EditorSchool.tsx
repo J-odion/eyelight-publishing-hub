@@ -23,10 +23,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel";
 import { LeadsApi } from "@/lib/api";
 
 export default function EditorSchool() {
   const [timeLeft, setTimeLeft] = useState("");
+  const [isDiscountActive, setIsDiscountActive] = useState(true);
   const { toast } = useToast();
   
   // Form State
@@ -82,27 +90,34 @@ export default function EditorSchool() {
   };
 
   useEffect(() => {
-    const targetDate = new Date("November 25, 2026 23:59:59").getTime();
+    // Discount ends on November 25, 2026
+    const discountEndDate = new Date("November 25, 2026 23:59:59").getTime();
     
     const interval = setInterval(() => {
       const now = new Date().getTime();
-      const distance = targetDate - now;
+      const distance = discountEndDate - now;
       
       if (distance < 0) {
         clearInterval(interval);
-        setTimeLeft("Price has increased");
+        setTimeLeft("");
+        setIsDiscountActive(false);
         return;
       }
       
+      setIsDiscountActive(true);
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
       
-      setTimeLeft(`${days}d ${hours}h ${minutes}m left until price change`);
+      setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s left until price change`);
     }, 1000);
     
     return () => clearInterval(interval);
   }, []);
+
+  const currentPriceNaira = isDiscountActive ? "₦15,000" : "₦33,500";
+  const currentPriceUsd = isDiscountActive ? "$12" : "$25";
 
   const handleCTA = () => {
     const el = document.getElementById("register");
@@ -140,12 +155,15 @@ export default function EditorSchool() {
             </div>
             <div className="hidden md:block w-1 h-1 rounded-full bg-slate-300"></div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-800">₦33,500 / $25</span>
+              {isDiscountActive && (
+                <span className="line-through text-slate-400 mr-2">₦33,500</span>
+              )}
+              <span className="font-semibold text-slate-800 text-base">{currentPriceNaira} / {currentPriceUsd}</span>
             </div>
             {timeLeft && (
                <>
                  <div className="hidden md:block w-1 h-1 rounded-full bg-slate-300"></div>
-                 <div className="text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                 <div className="text-amber-700 bg-amber-50 px-3 py-1.5 rounded font-mono font-bold tracking-tight border border-amber-200">
                    {timeLeft}
                  </div>
                </>
@@ -157,7 +175,7 @@ export default function EditorSchool() {
       {/* Sticky Mobile CTA */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 z-50">
         <Button onClick={handleCTA} className="w-full bg-slate-900 text-white h-12 rounded-none">
-          SAVE YOUR SEAT — ₦33,500
+          SAVE YOUR SEAT — {currentPriceNaira}
         </Button>
       </div>
 
@@ -222,6 +240,82 @@ export default function EditorSchool() {
               </li>
             </ul>
           </div>
+        </div>
+      </section>
+
+      {/* 3.5. Instructor Gallery Slider */}
+      <section className="py-24 bg-white overflow-hidden border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-serif text-slate-900 mb-4">Meet Your Instructor</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Grace is the Founder of Eyelight Publishing, having scaled her editorial business from the ground up to serve hundreds of authors globally.
+            </p>
+          </div>
+          
+          <Carousel 
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full max-w-5xl mx-auto"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {[1, 2, 3, 4, 5, 6].map((num) => (
+                <CarouselItem key={num} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                  <div className="p-1 h-full">
+                    <img 
+                      src={`/editor-school/${num}.jpg`} 
+                      alt={`Grace - Eyelight Publishing Founder ${num}`} 
+                      className="w-full h-[400px] object-cover rounded-sm shadow-md transition-transform duration-300 hover:scale-[1.02]" 
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="hidden md:block">
+              <CarouselPrevious className="-left-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
+              <CarouselNext className="-right-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
+            </div>
+          </Carousel>
+        </div>
+      </section>
+
+      {/* 3.6. Books Edited Gallery */}
+      <section className="py-24 bg-slate-50 overflow-hidden border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-serif text-slate-900 mb-4">Select Editorial Work</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              A glimpse at some of the titles shaped and polished by Grace during the early stages of building Eyelight Publishing.
+            </p>
+          </div>
+          
+          <Carousel 
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full max-w-5xl mx-auto"
+          >
+            <CarouselContent className="-ml-4 md:-ml-8 items-center">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <CarouselItem key={num} className="pl-4 md:pl-8 sm:basis-1/2 md:basis-1/3">
+                  <div className="p-2 transition-transform duration-300 hover:-translate-y-2">
+                    <img 
+                      src={`/editor-school/books/Image ${num}.png`} 
+                      alt={`Book edited by Grace ${num}`} 
+                      className="w-full h-auto object-contain drop-shadow-xl max-h-[400px]" 
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="hidden md:block">
+              <CarouselPrevious className="-left-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
+              <CarouselNext className="-right-12 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 border-slate-200" />
+            </div>
+          </Carousel>
         </div>
       </section>
 
@@ -458,8 +552,19 @@ export default function EditorSchool() {
               
               <div className="mb-8 mt-4">
                 <div className="text-slate-500 text-sm font-medium uppercase tracking-widest mb-2">Total Investment</div>
-                <div className="text-5xl font-serif font-medium text-slate-900 mb-2">₦33,500 <span className="text-2xl text-slate-400">/ $25</span></div>
-                <div className="text-amber-600 text-sm font-medium">Price increases on November 25, 2026</div>
+                
+                {isDiscountActive ? (
+                  <>
+                    <div className="text-2xl font-serif text-slate-400 line-through mb-1">₦33,500 / $25</div>
+                    <div className="text-5xl font-serif font-medium text-slate-900 mb-2">{currentPriceNaira} <span className="text-2xl text-slate-400">/ {currentPriceUsd}</span></div>
+                    <div className="text-amber-600 text-sm font-medium">Flash discount active. {timeLeft}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-5xl font-serif font-medium text-slate-900 mb-2">{currentPriceNaira} <span className="text-2xl text-slate-400">/ {currentPriceUsd}</span></div>
+                    <div className="text-slate-500 text-sm font-medium">Standard Pricing</div>
+                  </>
+                )}
               </div>
               
               <ul className="text-left space-y-4 mb-8">
@@ -548,7 +653,7 @@ export default function EditorSchool() {
                       {isSubmitting ? (
                         <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
                       ) : (
-                        "PROCEED TO PAYMENT — ₦33,500"
+                        `PROCEED TO PAYMENT — ${currentPriceNaira}`
                       )}
                     </Button>
                     <p className="text-xs text-slate-500 text-center mt-4">
