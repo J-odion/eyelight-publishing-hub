@@ -477,8 +477,19 @@ export default function EditorSchool() {
   const currentPriceUsd = isDiscountActive ? "$12" : "$25";
 
   const handleCTA = () => {
-    const el = document.getElementById("register");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    const formCard = document.getElementById("register-form");
+    if (formCard) {
+      const yOffset = -90;
+      const y = formCard.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setTimeout(() => {
+        const nameInput = document.getElementById("name") as HTMLInputElement | null;
+        if (nameInput) nameInput.focus();
+      }, 500);
+    } else {
+      const el = document.getElementById("register");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -511,17 +522,45 @@ export default function EditorSchool() {
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif mb-6 text-white leading-[1.1] tracking-tight drop-shadow-sm">The Book Editor <br className="hidden md:block"/> Business School</h1>
           
-          <p className="text-2xl md:text-3xl text-amber-400 mb-8 font-light max-w-4xl mx-auto">Editing books is a skill. <br className="hidden md:block"/><span className="font-medium text-white">Building a business around that skill is a completely different game.</span></p>
-          
-          <div className="text-lg md:text-xl text-slate-300 space-y-6 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-            <p>You can be an excellent editor and still be broke.</p>
-            <p>You can spend 70 hours inside somebody’s manuscript, save their book from disaster, make their ideas clearer, sharpen every sentence, protect their voice...<br/><span className="text-amber-200">…and still be the person they negotiate down to ₦10,000.</span></p>
-            <p>You can be the reason a book reads beautifully while somebody else gets paid like the professional in the room.</p>
-            <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-xl mt-12 shadow-2xl backdrop-blur-sm">
-              <p className="text-white font-bold text-3xl mb-4 font-serif">That ends here.</p>
-              <p className="text-amber-400 font-medium text-xl mb-4">Welcome to The Book Editor Business School.</p>
-              <p className="text-slate-300 text-base">A practical business school for editors who are exhausted from treating editing like a side hustle and are ready to build an editing business that attracts serious authors, better projects and better money.</p>
+          {/* Horizontal Realization Cards (H) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-10 text-left max-w-5xl mx-auto">
+            {/* Card 1 */}
+            <div className="bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 p-7 md:p-8 rounded-2xl backdrop-blur-sm shadow-xl flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+              <p className="text-lg md:text-xl text-slate-200 font-light leading-relaxed">
+                You can be an excellent editor and still be broke. <span className="text-amber-400 font-medium">Yes, I said that, and you know exactly what I’m talking about!</span>
+              </p>
             </div>
+
+            {/* Card 2 */}
+            <div className="bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 p-7 md:p-8 rounded-2xl backdrop-blur-sm shadow-xl flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+              <p className="text-lg md:text-xl text-slate-200 font-light leading-relaxed">
+                Knowing that you have a passion or love for editing books is one thing. <span className="text-amber-400 font-medium">Building a business around that skill, like a smart business owner, is a completely different game that you must master early.</span>
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 p-7 md:p-8 rounded-2xl backdrop-blur-sm shadow-xl flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+              <p className="text-lg md:text-xl text-slate-200 font-light leading-relaxed">
+                You can spend hours on an author’s book everyday, grammar, structure, flow, and everything, <span className="text-amber-400 font-medium">only to receive a payment that barely reflects the value of your work.</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Impact Statement */}
+          <div className="text-center my-8">
+            <h3 className="text-3xl md:text-5xl font-serif font-bold text-amber-400 tracking-tight">
+              That ends here and now!
+            </h3>
+          </div>
+
+          {/* Welcome Box */}
+          <div className="bg-slate-900/50 border border-slate-800 p-8 md:p-12 rounded-xl mt-8 mb-10 shadow-2xl backdrop-blur-sm max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl md:text-4xl font-serif font-bold text-amber-400 mb-4">
+              WELCOME TO THE BOOK EDITOR BUSINESS SCHOOL.
+            </h2>
+            <p className="text-slate-300 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              A practical business school for editors who are exhausted from treating editing like a side hustle and are ready to build an editing business that attracts serious authors, better projects and better money.
+            </p>
           </div>
           
           <div className="flex flex-col items-center justify-center gap-4">
@@ -906,7 +945,7 @@ export default function EditorSchool() {
 
       {/* Final Pitch / Form */}
       <section id="register" className="py-24 bg-slate-100 px-6">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-start">
+        <div className="max-w-6xl mx-auto flex flex-col-reverse lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div className="text-slate-900">
             <h2 className="text-5xl font-serif mb-6 uppercase leading-tight tracking-tight">THE BOOK EDITOR BUSINESS SCHOOL</h2>
             <p className="text-2xl font-medium text-amber-700 mb-10">Learn the craft. Build the business. Become harder to replace.</p>
@@ -937,7 +976,7 @@ export default function EditorSchool() {
             </div>
           </div>
           
-          <div className="bg-white p-10 md:p-14 shadow-2xl rounded-2xl border border-slate-200 sticky top-24">
+          <div id="register-form" className="bg-white p-8 sm:p-10 md:p-14 shadow-2xl rounded-2xl border-2 border-amber-500/30 sticky top-24 w-full">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold tracking-widest uppercase whitespace-nowrap shadow-md">
               Limited Slots Remaining
             </div>
@@ -1038,6 +1077,16 @@ export default function EditorSchool() {
           <p>© {new Date().getFullYear()} Eyelight Publishing. All rights reserved.</p>
         </div>
       </footer>
+      {/* Floating Mobile Register CTA Bar */}
+      <div className="fixed bottom-0 inset-x-0 z-50 p-3 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+        <div className="pl-1">
+          <div className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">December Cohort</div>
+          <div className="text-sm font-bold text-white">{currentPriceNaira} <span className="line-through text-slate-500 text-xs font-normal">₦33,500</span></div>
+        </div>
+        <Button onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs h-10 px-5 rounded shadow-lg">
+          ENROLL NOW
+        </Button>
+      </div>
     </div>
   );
 }

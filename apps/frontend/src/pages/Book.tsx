@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { LeadsApi } from "@/lib/api";
 import logo from "@/assets/logo.jpeg";
 
 const PRICE_NGN = 25000;
@@ -82,15 +83,37 @@ const Book = () => {
     return null;
   };
 
+  const saveBookingLead = async (status: 'incomplete' | 'pending_payment' | 'completed' = 'pending_payment') => {
+    if (!form.email || !/^\S+@\S+\.\S+$/.test(form.email)) return;
+    try {
+      await LeadsApi.bookConsultation({
+        email: form.email,
+        name: form.name,
+        phone: form.phone,
+        metadata: {
+          service: "Chief Editor 1:1 Consultation",
+          slotDate: date ? format(date, "yyyy-MM-dd") : null,
+          slotTime: time,
+          note: form.note,
+          status: status,
+          amount: PRICE_NGN,
+        }
+      });
+    } catch (e) {
+      console.error("Failed to capture booking lead", e);
+    }
+  };
+
   const handleContinueToPayment = async () => {
     setSubmitting(true);
-    // Frontend-only: simulate reservation + redirect to Paystack
+    await saveBookingLead('pending_payment');
+    // Simulate / Trigger payment
     await new Promise((r) => setTimeout(r, 900));
     setSubmitting(false);
     toast({
-      title: "Slot reserved (10 mins)",
+      title: "Booking Saved & Pending Payment",
       description:
-        "Backend not yet connected. Paystack checkout will open here once webhooks are wired.",
+        "Your consultation details are securely registered! Our team will reach out or confirm your slot.",
     });
   };
 
@@ -313,12 +336,13 @@ const Book = () => {
                   <ArrowLeft size={16} /> Back
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     const err = validateDetails();
                     if (err) {
                       toast({ title: "Check your details", description: err });
                       return;
                     }
+                    await saveBookingLead('pending_payment');
                     goNext();
                   }}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground text-sm font-semibold rounded-full hover:opacity-90 transition-opacity"

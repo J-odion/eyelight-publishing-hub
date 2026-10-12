@@ -1250,50 +1250,182 @@ function LeadsTab() {
 // ─── Bookings Tab ─────────────────────────────────────────────────────────────
 
 function BookingsTab() {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [allLeads, setAllLeads] = useState<any[]>([]);
+  const [filterType, setFilterType] = useState<'all' | 'Consultation' | 'CourseRegistration'>('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchLeads = useCallback(() => {
+    setLoading(true);
     LeadsApi.getAllLeads()
-      .then(r => setBookings(r.data.filter((l: any) => l.type === 'Consultation')))
-      .catch(() => toast.error('Failed to load bookings'))
+      .then(r => {
+        const sorted = (r.data || []).sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+        setAllLeads(sorted);
+      })
+      .catch(() => toast.error('Failed to load bookings and registrations'))
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetchLeads();
+  }, [fetchLeads]);
+
+  const relevantLeads = allLeads.filter((l: any) => {
+    if (filterType === 'all') return l.type === 'Consultation' || l.type === 'CourseRegistration';
+    return l.type === filterType;
+  });
+
+  const consultationsCount = allLeads.filter((l: any) => l.type === 'Consultation').length;
+  const courseCount = allLeads.filter((l: any) => l.type === 'CourseRegistration').length;
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Bookings & Schedules</h2>
-        <span className="text-sm text-muted-foreground">{bookings.length} consultations</span>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h2 className="text-xl font-semibold">Bookings & Course Registrations</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Real-time capture of all consultation bookings and course applicants (including pending & failed payments).
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={fetchLeads} className="gap-2">
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </Button>
+        </div>
       </div>
-      <div className="bg-card border rounded-xl overflow-hidden">
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+        <button
+          onClick={() => setFilterType('all')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            filterType === 'all'
+              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+              : 'bg-muted text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          All Activity ({consultationsCount + courseCount})
+        </button>
+        <button
+          onClick={() => setFilterType('Consultation')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            filterType === 'Consultation'
+              ? 'bg-amber-600 text-white'
+              : 'bg-muted text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          1:1 Consultations ({consultationsCount})
+        </button>
+        <button
+          onClick={() => setFilterType('CourseRegistration')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            filterType === 'CourseRegistration'
+              ? 'bg-amber-600 text-white'
+              : 'bg-muted text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Editor Business School ({courseCount})
+        </button>
+      </div>
+
+      <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
         <Table>
-          <TableHeader><TableRow>
-            <TableHead>Client Name</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Requested Date</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow></TableHeader>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Client Name</TableHead>
+              <TableHead>Program / Service</TableHead>
+              <TableHead>Contact (Email / Phone)</TableHead>
+              <TableHead>Captured Details</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-            ) : bookings.length === 0 ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No bookings scheduled yet.</TableCell></TableRow>
-            ) : bookings.map((b: any) => (
-              <TableRow key={b._id}>
-                <TableCell className="font-medium">{b.name || '—'}</TableCell>
-                <TableCell>
-                  <div className="text-sm">{b.email}</div>
-                  <div className="text-xs text-muted-foreground">{b.phone || '—'}</div>
-                </TableCell>
-                <TableCell className="text-sm">
-                  {b.metadata?.date ? format(new Date(b.metadata.date), 'PP p') : (b.createdAt ? format(new Date(b.createdAt), 'PP') : '—')}
-                </TableCell>
-                <TableCell>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Pending Review</span>
-                </TableCell>
-              </TableRow>
-            ))}
+              <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">Loading submissions...</TableCell></TableRow>
+            ) : relevantLeads.length === 0 ? (
+              <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">No submissions found in this category.</TableCell></TableRow>
+            ) : relevantLeads.map((b: any) => {
+              const isConsultation = b.type === 'Consultation';
+              const status = b.metadata?.status || 'pending_payment';
+              const cleanPhone = b.phone ? b.phone.replace(/[^0-9]/g, '') : '';
+              const whatsappLink = cleanPhone ? `https://wa.me/${cleanPhone.startsWith('0') ? '234' + cleanPhone.slice(1) : cleanPhone}` : null;
+
+              return (
+                <TableRow key={b._id}>
+                  <TableCell className="font-semibold">
+                    {b.name || 'Anonymous Visitor'}
+                  </TableCell>
+                  <TableCell>
+                    {isConsultation ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                        1:1 Consultation
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                        Editor School
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm font-medium">{b.email}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{b.phone || 'No phone'}</div>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {isConsultation ? (
+                      <div>
+                        {b.metadata?.slotDate && <div><strong>Date:</strong> {b.metadata.slotDate} {b.metadata?.slotTime || ''}</div>}
+                        {b.metadata?.note && <div className="italic truncate max-w-xs mt-0.5">"{b.metadata.note}"</div>}
+                      </div>
+                    ) : (
+                      <div>
+                        {b.metadata?.experience && <div><strong>Exp:</strong> {b.metadata.experience}</div>}
+                        <div><strong>Cohort:</strong> Dec 2026</div>
+                      </div>
+                    )}
+                    <div className="text-[10px] text-slate-400 mt-1">
+                      {b.createdAt ? format(new Date(b.createdAt), 'PP p') : '—'}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {status === 'complete' || status === 'completed' ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        Completed
+                      </span>
+                    ) : status === 'pending_payment' ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        Pending Payment
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                        Incomplete / Abandoned
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {whatsappLink && (
+                        <a
+                          href={whatsappLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-xs font-medium transition-colors"
+                          title="Message on WhatsApp"
+                        >
+                          WhatsApp
+                        </a>
+                      )}
+                      <a
+                        href={`mailto:${b.email}?subject=Regarding Your Registration with Eyelight Publishing`}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border hover:bg-muted text-xs font-medium transition-colors"
+                        title="Send Email"
+                      >
+                        Email
+                      </a>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
