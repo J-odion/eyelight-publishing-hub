@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, XCircle, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, Loader2, ChevronLeft, ChevronRight, Maximize2, X, History } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -123,6 +123,280 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
           Next Book <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
+    </div>
+  );
+};
+
+interface EarlyMemory {
+  src: string;
+  title: string;
+  subtitle: string;
+  tag: string;
+}
+
+const earlyMemories: EarlyMemory[] = [
+  {
+    src: "/editor-school/early-days/early-1.jpg",
+    title: "University Beginnings & Early Passion",
+    subtitle: "Editing manuscripts in university dorms between lectures purely for the love of words.",
+    tag: "University Days",
+  },
+  {
+    src: "/editor-school/early-days/early-2.jpg",
+    title: "Graduation Day",
+    subtitle: "Stepping out with an English & Literary Studies degree, about to start an unexpected journey.",
+    tag: "Graduation",
+  },
+  {
+    src: "/editor-school/early-days/early-3.jpg",
+    title: "First Manuscript Projects",
+    subtitle: "Taking on authors' books with deep devotion, before I understood business and positioning.",
+    tag: "Early Hustle",
+  },
+  {
+    src: "/editor-school/early-days/early-4.jpg",
+    title: "The ₦100 Recharge Card Era",
+    subtitle: "Honoring the craft and putting in the hours even when paid only in phone recharge cards.",
+    tag: "The Grind",
+  },
+  {
+    src: "/editor-school/early-days/early-5.jpg",
+    title: "Spring 2023 — Stepping Into Purpose",
+    subtitle: "The turning point where editing shifted from an underpriced skill into a global business.",
+    tag: "Spring 2023",
+  },
+];
+
+const EarlyDaysGallery = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const next = () => setCurrentIndex((prev) => (prev + 1) % earlyMemories.length);
+  const prev = () => setCurrentIndex((prev) => (prev - 1 + earlyMemories.length) % earlyMemories.length);
+
+  useEffect(() => {
+    if (isPaused || lightboxOpen) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % earlyMemories.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [isPaused, lightboxOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightboxOpen) return;
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxOpen]);
+
+  const current = earlyMemories[currentIndex];
+
+  return (
+    <div 
+      className="bg-amber-50/40 border border-amber-200/70 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden text-left"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Decorative ambient gradients */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-200/25 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 relative z-10">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-semibold uppercase tracking-wider mb-2 border border-amber-200">
+            <History className="w-3.5 h-3.5 text-amber-700" />
+            Early Days Gallery
+          </div>
+          <h3 className="text-2xl md:text-3xl font-serif text-slate-900 font-bold">
+            When It All Began: My Early Days As An Editor
+          </h3>
+          <p className="text-slate-600 text-sm md:text-base mt-1">
+            Real memories from my university years, graduation, and the early hustle before the breakthrough.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          <span className="text-xs font-mono font-medium text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-md border border-amber-200">
+            {currentIndex + 1} / {earlyMemories.length}
+          </span>
+          <button
+            onClick={prev}
+            aria-label="Previous Early Photo"
+            className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={next}
+            aria-label="Next Early Photo"
+            className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Feature Photo Frame */}
+      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-xl group">
+        <div className="relative h-[380px] sm:h-[430px] md:h-[480px] flex items-center justify-center overflow-hidden bg-slate-950">
+          {/* Backdrop blur effect */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center blur-2xl opacity-35 scale-110"
+            style={{ backgroundImage: `url(${current.src})` }}
+          />
+
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={current.src}
+              src={current.src}
+              alt={current.title}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.04 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="relative z-10 max-h-full max-w-full object-contain cursor-pointer transition-transform duration-500 group-hover:scale-[1.01]"
+              onClick={() => setLightboxOpen(true)}
+            />
+          </AnimatePresence>
+
+          {/* Quick Zoom / Fullscreen Button */}
+          <button
+            onClick={() => setLightboxOpen(true)}
+            className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-medium backdrop-blur-md border border-slate-700/80 shadow-lg transition-transform hover:scale-105"
+            title="Expand photo"
+          >
+            <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">View Full Photo</span>
+          </button>
+
+          {/* Bottom Caption Pill */}
+          <div className="absolute bottom-0 inset-x-0 z-20 bg-gradient-to-t from-slate-950 via-slate-950/85 to-transparent p-5 sm:p-6 text-white">
+            <div className="inline-block px-2.5 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-amber-500 text-slate-950 mb-1.5 font-mono">
+              {current.tag}
+            </div>
+            <h4 className="text-lg sm:text-xl font-bold font-serif text-white">
+              {current.title}
+            </h4>
+            <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl">
+              {current.subtitle}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Thumbnail Bar */}
+      <div className="mt-4 flex items-center gap-3 overflow-x-auto pb-2 pt-1">
+        {earlyMemories.map((item, idx) => {
+          const isActive = idx === currentIndex;
+          return (
+            <button
+              key={item.src}
+              onClick={() => setCurrentIndex(idx)}
+              className={`relative shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-300 w-16 h-16 sm:w-20 sm:h-20 ${
+                isActive
+                  ? "border-amber-500 ring-2 ring-amber-500/40 scale-105 shadow-md"
+                  : "border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-400"
+              }`}
+            >
+              <img
+                src={item.src}
+                alt={item.title}
+                className="w-full h-full object-cover"
+              />
+              <span className="absolute bottom-0 inset-x-0 text-[10px] font-mono text-center font-bold text-white bg-slate-950/80 py-0.5">
+                0{idx + 1}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Fullscreen Lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6"
+            onClick={() => setLightboxOpen(false)}
+          >
+            {/* Top Bar */}
+            <div 
+              className="absolute top-4 inset-x-4 sm:inset-x-8 flex justify-between items-center text-white z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-mono font-medium">
+                  {current.tag}
+                </span>
+                <span className="text-slate-400 text-xs font-mono">
+                  {currentIndex + 1} of {earlyMemories.length}
+                </span>
+              </div>
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors border border-slate-700"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Main Lightbox Image & Navigation */}
+            <div 
+              className="relative max-w-4xl max-h-[75vh] w-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={prev}
+                className="absolute left-2 sm:-left-14 z-10 w-11 h-11 rounded-full bg-slate-800/80 hover:bg-amber-500 hover:text-slate-950 text-white flex items-center justify-center transition-all border border-slate-700 shadow-xl"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+
+              <motion.img
+                key={`modal-${current.src}`}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                src={current.src}
+                alt={current.title}
+                className="max-h-[70vh] max-w-full rounded-lg object-contain shadow-2xl border border-slate-800"
+              />
+
+              <button
+                onClick={next}
+                className="absolute right-2 sm:-right-14 z-10 w-11 h-11 rounded-full bg-slate-800/80 hover:bg-amber-500 hover:text-slate-950 text-white flex items-center justify-center transition-all border border-slate-700 shadow-xl"
+                aria-label="Next"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Lightbox Caption */}
+            <div 
+              className="mt-4 text-center max-w-xl text-white px-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h4 className="text-xl font-serif font-bold text-amber-400">
+                {current.title}
+              </h4>
+              <p className="text-slate-300 text-sm mt-1">
+                {current.subtitle}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -268,8 +542,18 @@ export default function EditorSchool() {
 
       {/* Grace Story */}
       <section className="py-24 max-w-4xl mx-auto px-6">
-        <h2 className="text-3xl font-serif text-slate-900 mb-6 text-center">I KNOW WHAT IT FEELS LIKE TO THINK EDITING DOESN'T PAY.</h2>
-        <p className="text-center text-lg text-slate-600 mb-12">Now, I tell you my story.</p>
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-900 text-xs font-semibold uppercase tracking-wider mb-4 border border-amber-200">
+            Author Story & Beginnings
+          </div>
+          <h2 className="text-3xl md:text-5xl font-serif text-slate-900 mb-4 tracking-tight">I KNOW WHAT IT FEELS LIKE TO THINK EDITING DOESN'T PAY.</h2>
+          <p className="text-center text-lg md:text-xl text-slate-600">Now, I tell you my story.</p>
+        </div>
+
+        {/* Early Days Gallery - University & Genesis */}
+        <div className="mb-14">
+          <EarlyDaysGallery />
+        </div>
         
         <div className="bg-white p-8 md:p-12 shadow-sm border border-slate-200 rounded-xl space-y-6 text-slate-700 text-lg leading-relaxed">
           <div className="flex items-center gap-6 mb-8 border-b pb-8">
@@ -297,9 +581,13 @@ export default function EditorSchool() {
           <p>That same skill that once got me a ₦100 recharge card now pays me in millions of naira and thousands of dollars.</p>
         </div>
         
+        {/* Present Day Gallery - Recent Pictures */}
         <div className="mt-20 text-center">
-          <h3 className="text-3xl font-serif text-slate-900 mb-2">Meet Your Instructor</h3>
-          <p className="text-slate-500 mb-8">Some memories from building my career over the years.</p>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold uppercase tracking-wider mb-3 border border-slate-200">
+            Present Day
+          </div>
+          <h3 className="text-3xl md:text-4xl font-serif text-slate-900 mb-2">Meet Your Instructor Today</h3>
+          <p className="text-slate-600 mb-8 max-w-xl mx-auto">From ₦100 recharge card payments to working with bestselling authors and speaking to global audiences — more recent pictures from my journey.</p>
           <ZoomCarousel images={[1, 2, 3, 4, 5, 6].map(num => `/editor-school/${num}.jpg`)} />
         </div>
       </section>
