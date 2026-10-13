@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Popups from "./components/Popups.tsx";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Public Pages
 import Index from "./pages/Index.tsx";
@@ -33,47 +34,49 @@ import ContactProfile from "./pages/ContactProfile.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Popups />
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Index />} />
-          <Route path="/book" element={<Book />} />
-          <Route path="/submit-manuscript" element={<SubmitManuscript />} />
-          <Route path="/catalogue" element={<BookCatalogue />} />
-          <Route path="/store" element={<Storefront />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/press" element={<PressRoom />} />
-          <Route path="/help" element={<HelpDocumentation />} />
-          <Route path="/editor-school" element={<EditorSchool />} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Popups />
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<Index />} />
+            <Route path="/book" element={<Book />} />
+            <Route path="/submit-manuscript" element={<SubmitManuscript />} />
+            <Route path="/catalogue" element={<BookCatalogue />} />
+            <Route path="/store" element={<Storefront />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/press" element={<PressRoom />} />
+            <Route path="/help" element={<HelpDocumentation />} />
+            <Route path="/editor-school" element={<EditorSchool />} />
 
-          {/* Forms */}
-          <Route path="/forms/:slug" element={<PublicFormView />} />
-          <Route path="/pre-consultation-form" element={<PublicFormView defaultSlug="pre-consultation" />} />
-          <Route path="/review-form" element={<PublicFormView defaultSlug="review" />} />
+            {/* Forms */}
+            <Route path="/forms/:slug" element={<PublicFormView />} />
+            <Route path="/pre-consultation-form" element={<PublicFormView defaultSlug="pre-consultation" />} />
+            <Route path="/review-form" element={<PublicFormView defaultSlug="review" />} />
 
-          {/* Author Portal */}
-          <Route path="/portal" element={<AuthorPortal />} />
+            {/* Author Portal */}
+            <Route path="/portal" element={<AuthorPortal />} />
 
-          {/* Admin */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/crm" element={<AdminCRM />} />
-          <Route path="/admin/crm/pipeline" element={<DealsPipeline />} />
-          <Route path="/admin/crm/analytics" element={<CrmAnalytics />} />
-          <Route path="/admin/crm/contacts/:id" element={<ContactProfile />} />
-          <Route path="/admin/authors/:id" element={<AuthorProfile />} />
+            {/* Admin */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/crm" element={<AdminCRM />} />
+            <Route path="/admin/crm/pipeline" element={<DealsPipeline />} />
+            <Route path="/admin/crm/analytics" element={<CrmAnalytics />} />
+            <Route path="/admin/crm/contacts/:id" element={<ContactProfile />} />
+            <Route path="/admin/authors/:id" element={<AuthorProfile />} />
 
-          {/* Catch-all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

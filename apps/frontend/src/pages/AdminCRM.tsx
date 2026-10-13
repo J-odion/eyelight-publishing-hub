@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi, EventsApi, PressApi } from '../lib/api.js';
+import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi, EventsApi, PressApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,10 +26,10 @@ import {
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import TemplateEditor from '@/components/TemplateEditor';
-import DealsPipeline from './DealsPipeline.js';
-import CrmAnalytics from './CrmAnalytics.js';
-import CrmActivities from './CrmActivities.js';
-import CrmForms from './CrmForms.js';
+import DealsPipeline from './DealsPipeline';
+import CrmAnalytics from './CrmAnalytics';
+import CrmActivities from './CrmActivities';
+import CrmForms from './CrmForms';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
 const PRESS_CATEGORIES = [

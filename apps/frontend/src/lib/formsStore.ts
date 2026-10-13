@@ -199,18 +199,20 @@ const SUBMISSIONS_KEY = 'eyelight_form_submissions';
 
 export const FormsStore = {
   getForms(): CustomForm[] {
-    const raw = localStorage.getItem(FORMS_KEY);
-    if (!raw) {
-      localStorage.setItem(FORMS_KEY, JSON.stringify(INITIAL_FORMS));
-      return INITIAL_FORMS;
-    }
     try {
+      if (typeof window === 'undefined' || !window.localStorage) return INITIAL_FORMS;
+      const raw = localStorage.getItem(FORMS_KEY);
+      if (!raw) {
+        try { localStorage.setItem(FORMS_KEY, JSON.stringify(INITIAL_FORMS)); } catch {}
+        return INITIAL_FORMS;
+      }
       const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return INITIAL_FORMS;
       // Ensure default forms exist
-      if (!parsed.some((f: CustomForm) => f.slug === 'pre-consultation')) {
+      if (!parsed.some((f: CustomForm) => f && f.slug === 'pre-consultation')) {
         parsed.unshift(INITIAL_FORMS[0]);
       }
-      if (!parsed.some((f: CustomForm) => f.slug === 'review')) {
+      if (!parsed.some((f: CustomForm) => f && f.slug === 'review')) {
         parsed.push(INITIAL_FORMS[1]);
       }
       return parsed;
@@ -236,15 +238,19 @@ export const FormsStore = {
   },
 
   deleteForm(id: string) {
-    const forms = this.getForms().filter((f) => f.id !== id);
-    localStorage.setItem(FORMS_KEY, JSON.stringify(forms));
+    try {
+      const forms = this.getForms().filter((f) => f.id !== id);
+      localStorage.setItem(FORMS_KEY, JSON.stringify(forms));
+    } catch {}
   },
 
   getSubmissions(formId?: string): FormSubmission[] {
-    const raw = localStorage.getItem(SUBMISSIONS_KEY);
-    if (!raw) return [];
     try {
+      if (typeof window === 'undefined' || !window.localStorage) return [];
+      const raw = localStorage.getItem(SUBMISSIONS_KEY);
+      if (!raw) return [];
       const subs: FormSubmission[] = JSON.parse(raw);
+      if (!Array.isArray(subs)) return [];
       if (formId) return subs.filter((s) => s.formId === formId);
       return subs;
     } catch {
@@ -260,12 +266,16 @@ export const FormsStore = {
       submittedAt: new Date().toISOString(),
     };
     subs.unshift(newSub);
-    localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(subs));
+    try {
+      localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(subs));
+    } catch {}
     return newSub;
   },
 
   deleteSubmission(id: string) {
-    const subs = this.getSubmissions().filter((s) => s.id !== id);
-    localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(subs));
+    try {
+      const subs = this.getSubmissions().filter((s) => s.id !== id);
+      localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(subs));
+    } catch {}
   },
 };

@@ -1,3 +1,4 @@
+import { Quote } from "lucide-react";
 import tunmiseImg from "@/assets/testimonial-tunmise-apara.jpg";
 import nurseSugarImg from "@/assets/testimonia-nursesugar.png";
 import toluImg from "@/assets/testimonia-tolu-agbe.png";

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail } from 'lucide-react';
 import { toast } from 'sonner';
-import { LeadsApi } from '../lib/api.js';
+import { LeadsApi } from '../lib/api';
 
 export default function Popups() {
   const [popupType, setPopupType] = useState<'newsletter' | 'exit' | null>(null);
@@ -11,8 +11,12 @@ export default function Popups() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const hasSeenPopup = localStorage.getItem('hasSeenMarketingPopup');
-    if (hasSeenPopup) return;
+    try {
+      const hasSeenPopup = localStorage.getItem('hasSeenMarketingPopup');
+      if (hasSeenPopup) return;
+    } catch {
+      // Ignore storage access errors in private/restricted mode
+    }
 
     // Trigger newsletter popup after 5 seconds
     const timer = setTimeout(() => {
@@ -23,7 +27,13 @@ export default function Popups() {
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0) {
         setPopupType((current) => {
-          if (!current && !localStorage.getItem('hasSeenMarketingPopup')) {
+          let hasSeen = false;
+          try {
+            hasSeen = Boolean(localStorage.getItem('hasSeenMarketingPopup'));
+          } catch {
+            hasSeen = false;
+          }
+          if (!current && !hasSeen) {
             return 'exit';
           }
           return current;
@@ -41,7 +51,11 @@ export default function Popups() {
 
   const closePopup = () => {
     setPopupType(null);
-    localStorage.setItem('hasSeenMarketingPopup', 'true'); // Prevent showing again for this session/forever
+    try {
+      localStorage.setItem('hasSeenMarketingPopup', 'true');
+    } catch {
+      // Ignore storage write errors
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

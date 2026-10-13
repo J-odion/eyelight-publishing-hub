@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { services } from "./Services";
+import { services } from "@/data/servicesData";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle, Mail, ArrowLeft, CalendarCheck } from "lucide-react";
 import ConsultationDialog from "./ConsultationDialog";
