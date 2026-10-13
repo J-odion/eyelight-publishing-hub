@@ -42,11 +42,11 @@ const Footer = () => {
                 services@eyelightpublishing.com
               </a>
               <a
-                href="tel:+2349085181361"
+                href="tel:+2348146682688"
                 className="flex items-center gap-2 text-sm opacity-60 hover:opacity-100 transition-opacity"
               >
                 <Phone size={14} />
-                +234 908 518 1361
+                +234 814 668 2688
               </a>
             </div>
           </div>

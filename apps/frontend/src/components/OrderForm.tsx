@@ -221,7 +221,7 @@ const OrderForm = () => {
               <ul className="space-y-4">
                 <li>
                   <a
-                    href="https://wa.me/2349085181361"
+                    href="https://wa.me/2348146682688"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors"

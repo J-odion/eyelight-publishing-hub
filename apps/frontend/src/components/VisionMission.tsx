@@ -31,9 +31,7 @@ const VisionMission = () => {
             </div>
             <h3 className="text-lg font-bold text-foreground mb-3">Our Mission</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              To help serious authors transform their ideas into professionally published books
-              that are clear, compelling, and built to stand out, while positioning them as credible
-              voices through excellence in editing, design, and production.
+              To help global-minded authors shape their ideas into professionally published books that are compelling and built to stand out, while positioning them as credible voices through excellence in editing, design, and production.
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 
-const WHATSAPP_NUMBER = "2349085181361";
+const WHATSAPP_NUMBER = "2348146682688";
 const DEFAULT_MESSAGE = "Hello Eyelight Publishing, I came across your website and want to enquire about working together.";
 
 const WhatsAppWidget = () => {

@@ -83,7 +83,7 @@ const ConsultationDialog = ({ trigger }: Props) => {
           </Link>
           <div className="flex flex-col sm:flex-row gap-3">
             <a
-              href={`https://wa.me/2349085181361?text=${whatsappMessage}`}
+              href={`https://wa.me/2348146682688?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 border border-border text-foreground text-sm font-semibold rounded-full hover:bg-muted transition-colors"

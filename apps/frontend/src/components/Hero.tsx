@@ -4,7 +4,7 @@ import heroImage from "@/assets/hero-image.jpg";
 import ConsultationDialog from "./ConsultationDialog";
 
 const stats = [
-  { value: "335+", label: "Books & Projects Delivered" },
+  { value: "150+", label: "Books & Projects Delivered" },
   { value: "10+", label: "Years Editorial & Publishing Experience" },
   { value: "Global", label: "Authors Across Continents" },
 ];
@@ -49,14 +49,18 @@ const Hero = () => {
           >
             <motion.h1
               variants={itemVariants}
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold text-primary-foreground leading-[1.1] mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold text-primary-foreground leading-[1.15] mb-6"
             >
-
-              <span className="text-accent relative inline-block">
-                We publish premium books
-                <span className="absolute -bottom-2 left-0 w-full h-1 bg-accent/30 rounded-full"></span>
-              </span>{" "}
-              that builds you into a credible author.
+              <span className="text-accent block">We publish</span>
+              <div className="py-2.5 sm:py-3.5">
+                <span className="text-accent relative inline-block pb-2.5">
+                  premium books
+                  <span className="absolute bottom-0 left-0 w-full h-[2.5px] bg-accent/60 rounded-full"></span>
+                </span>
+              </div>
+              <span className="block text-primary-foreground">
+                that build you into a credible author.
+              </span>
             </motion.h1>
 
             <motion.p
@@ -128,21 +132,6 @@ const Hero = () => {
                 className="w-full h-[450px] lg:h-[500px] object-cover rounded-t-[40px] rounded-bl-[40px] rounded-br-[12px] shadow-2xl relative z-10 border-4 border-primary/50"
               />
 
-              {/* Glassmorphic Badge */}
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-                className="absolute top-8 right-8 z-20 backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl px-6 py-4 shadow-xl"
-              >
-                <div className="flex items-center gap-3 text-sm font-semibold text-white">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
-                  </span>
-                  The rumours are true
-                </div>
-              </motion.div>
 
 
               <motion.div

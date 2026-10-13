@@ -70,7 +70,7 @@ const About = () => {
                 your experience, and your authority.
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                Over the years, we've worked with over 335 authors, helping them move from
+                Over the years, we've worked with over 150 authors, helping them move from
                 scattered ideas to finished, published books they are proud to attach their names to.
                 We don't rush books out. We develop them properly.
               </p>
@@ -91,7 +91,7 @@ const About = () => {
                   <BookOpen size={20} className="text-accent" />
                 </div>
                 <div>
-                  <div className="text-base font-bold text-foreground mb-1">335+ Projects</div>
+                  <div className="text-base font-bold text-foreground mb-1">150+ Projects</div>
                   <div className="text-sm text-muted-foreground leading-snug">Books delivered worldwide</div>
                 </div>
               </div>

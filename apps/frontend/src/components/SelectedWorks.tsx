@@ -1,20 +1,10 @@
-import audacityOfFaith from "@/assets/books/audacity-of-faith.jpg";
 import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
 import expectedEnd from "@/assets/books/expected-end.jpg";
 import princesshood from "@/assets/books/princesshood.jpg";
 import bloom from "@/assets/books/bloom.jpg";
 import selfLeadership from "@/assets/books/self-leadership.jpg";
-import calledToCarryMen from "@/assets/books/called-to-carry-men.jpg";
 
 const works = [
-  {
-    title: "Audacity of Faith",
-    author: "Apostle Femi Lazarus",
-    description:
-      "A compelling work that teaches that faith produces more than results but largely shapes character. The book has received widespread acclaim, with readers testifying to its transformative impact.",
-    image: audacityOfFaith,
-    link: "https://www.instagram.com/thefemilazarusbooks?igsh=bjZleGR5bXJzc3Vy",
-  },
   {
     title: "Road to Bestseller",
     author: "Grace Akowe Apara",
@@ -51,13 +41,6 @@ const works = [
       "A compelling guide to self-discovery, responsibility, and purposeful living. Its success is rooted in relatable storytelling and the author's inspiring journey.",
     image: selfLeadership,
     link: "http://graceapara.com/books",
-  },
-  {
-    title: "Called to Carry Men",
-    author: "Femi Lazarus",
-    description:
-      "The Work, The Weight, The Discipline and The Wisdom of Pastoral Leadership. A monumental work spanning over two thousand pages by a truly exceptional author.",
-    image: calledToCarryMen,
   },
 ];
 

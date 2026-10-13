@@ -4,15 +4,7 @@ import toluImg from "@/assets/testimonia-tolu-agbe.png";
 import nihinImg from "@/assets/testimonial-nihin-alabi.png";
 import elizabethImg from "@/assets/testimonia-elisbeth.png";
 import lillyImg from "@/assets/testimony-author-lily.png";
-import apostleFemiImg from "@/assets/testimonial-apostle-femi.webp";
 
-const featuredTestimonial = {
-  quote:
-    "Grace didn't just write my book, she captured my voice, my heart, and my message in a way I never thought possible. Working with Eyelight Publishing was a divine experience. From start to finish, the professionalism, attention to detail, and genuine care for the project exceeded all my expectations. I wholeheartedly endorse their work.",
-  name: "Apostle Femi Lazarus",
-  location: "Abuja, Nigeria",
-  image: apostleFemiImg,
-};
 
 const testimonials = [
   {
@@ -69,38 +61,7 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Featured Testimonial - Apostle Femi Lazarus (commented out) */}
-        {/*
-        <div className="mb-10 bg-primary rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-5 items-stretch">
-            <div className="lg:col-span-2 relative">
-              <img
-                src={featuredTestimonial.image}
-                alt={featuredTestimonial.name}
-                className="w-full h-64 lg:h-full object-cover"
-              />
-            </div>
-            <div className="lg:col-span-3 p-8 lg:p-12 flex flex-col justify-center">
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={18} className="fill-accent text-accent" />
-                ))}
-              </div>
-              <p className="text-base lg:text-lg text-primary-foreground/90 leading-relaxed mb-6 italic">
-                "{featuredTestimonial.quote}"
-              </p>
-              <div>
-                <div className="text-base font-bold text-primary-foreground">
-                  {featuredTestimonial.name}
-                </div>
-                <div className="text-sm text-primary-foreground/60">
-                  {featuredTestimonial.location}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        */}
+
 
         {/* Grid Testimonials */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

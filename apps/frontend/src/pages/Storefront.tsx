@@ -7,22 +7,18 @@ import { useNavigate } from 'react-router-dom';
 import { BooksApi } from '../lib/api.js';
 import { useCartStore } from '../lib/useCartStore.js';
 
-import audacityOfFaith from "@/assets/books/audacity-of-faith.jpg";
 import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
 import expectedEnd from "@/assets/books/expected-end.jpg";
 import princesshood from "@/assets/books/princesshood.jpg";
 import bloom from "@/assets/books/bloom.jpg";
 import selfLeadership from "@/assets/books/self-leadership.jpg";
-import calledToCarryMen from "@/assets/books/called-to-carry-men.jpg";
 
 const staticBooks = [
-  { _id: 'sw1', title: "Audacity of Faith", author: "Apostle Femi Lazarus", description: "A compelling work that teaches that faith produces more than results but largely shapes character.", price: 5000, rating: 4.9, reviews: 142, coverUrl: audacityOfFaith, purchaseLinks: { amazon: "https://www.instagram.com/thefemilazarusbooks?igsh=bjZleGR5bXJzc3Vy" } },
   { _id: 'sw2', title: "Road to Bestseller", author: "Grace Akowe Apara", description: "A practical roadmap for aspiring writers.", price: 4500, rating: 4.8, reviews: 95, coverUrl: roadToBestseller, purchaseLinks: { amazon: "http://graceapara.com/books" } },
   { _id: 'sw3', title: "Expected End", author: "Barrister Peace Aaron", description: "A heartfelt memoir chronicling her life journey with honesty and inspiring vulnerability.", price: 4000, rating: 4.7, reviews: 63, coverUrl: expectedEnd },
   { _id: 'sw4', title: "Princesshood", author: "Sharon Adetola", description: "A powerful and inspiring book that explores the value of women in God's eyes.", price: 3500, rating: 4.8, reviews: 110, coverUrl: princesshood },
   { _id: 'sw5', title: "Bloom", author: "Margaret Ogbolu", description: "The Courage to Grow Beyond Survival.", price: 4000, rating: 4.6, reviews: 88, coverUrl: bloom },
   { _id: 'sw6', title: "This Thing Called Self-Leadership", author: "Grace Akowe Apara", description: "A compelling guide to self-discovery, responsibility, and purposeful living.", price: 4500, rating: 4.9, reviews: 210, coverUrl: selfLeadership, purchaseLinks: { amazon: "http://graceapara.com/books" } },
-  { _id: 'sw7', title: "Called to Carry Men", author: "Femi Lazarus", description: "The Work, The Weight, The Discipline and The Wisdom of Pastoral Leadership.", price: 5500, rating: 5.0, reviews: 340, coverUrl: calledToCarryMen },
 ];
 
 export default function Storefront() {

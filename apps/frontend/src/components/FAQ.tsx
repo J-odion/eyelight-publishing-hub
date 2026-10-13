@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "What makes your team different?",
-    a: "We combine over 10 years of experience with a hands-on, personalized approach. Every project gets dedicated attention, transparent pricing, and realistic timelines. We've successfully delivered 335+ book projects globally.",
+    a: "We combine over 10 years of experience with a hands-on, personalized approach. Every project gets dedicated attention, transparent pricing, and realistic timelines. We've successfully delivered 150+ book projects globally.",
   },
   {
     q: "Do you provide ongoing support and marketing?",

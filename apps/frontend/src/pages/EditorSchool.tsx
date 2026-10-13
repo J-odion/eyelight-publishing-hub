@@ -641,7 +641,7 @@ export default function EditorSchool() {
           <p>The same skill has put me behind books read by thousands of people.</p>
           <p>It has opened doors to work with remarkable men and women, both in Nigeria, the US, the UK, and around the world.</p>
           <p>It has allowed respected authors, leaders and professionals to trust me with their stories and legacies.</p>
-          <p>People like Apostle Femi Lazarus, Nurse Sugar, Dr. Christine, Lilly White and many other respected names have trusted my work.</p>
+          <p>People like Nurse Sugar, Dr. Christine, Lilly White and many other respected names have trusted my work.</p>
           <p>I have been behind many popular and bestselling books that NDAs would not allow me disclose.</p>
           <p>So…<br/>…I want to show you what took me years of experience, mistakes, experiments and uncomfortable lessons to figure out in just 3 days!</p>
           <p className="font-bold text-xl text-amber-600 bg-amber-50 p-6 rounded-lg mt-8 shadow-sm">Editing is NOT magic but the way you build the business around the editing is everything.</p>
@@ -1012,7 +1012,7 @@ export default function EditorSchool() {
                 <div className="space-y-3">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Option 1 · Instant WhatsApp Confirmation</p>
                   <a
-                    href={`https://wa.me/2349085181361?text=${encodeURIComponent(
+                    href={`https://wa.me/2348146682688?text=${encodeURIComponent(
                       `Hello Grace! I just registered for The Book Editor Business School (December Cohort).\n\nMy Details:\n• Name: ${formData.name}\n• Email: ${formData.email}\n• Phone: ${formData.phone || 'N/A'}\n• Experience: ${formData.experience || 'N/A'}\n\nI want to complete my payment of ${currentPriceNaira}. Please send payment confirmation / account details.`
                     )}`}
                     target="_blank"
@@ -1151,7 +1151,7 @@ export default function EditorSchool() {
           <div className="text-amber-500 font-serif text-3xl font-bold mb-6">Eyelight Publishing</div>
           <div className="flex justify-center gap-8 mb-10 text-slate-400 font-medium text-base">
             <a href="mailto:hello@eyelight.com" className="hover:text-white transition-colors">hello@eyelight.com</a>
-            <a href="https://wa.me/234XXXXXXXXXX" className="hover:text-white transition-colors">WhatsApp Support</a>
+            <a href="https://wa.me/2348146682688" className="hover:text-white transition-colors">WhatsApp Support</a>
           </div>
           <p>© {new Date().getFullYear()} Eyelight Publishing. All rights reserved.</p>
         </div>
