@@ -9,9 +9,8 @@ const CTA = () => {
           Your Book Deserves To Be{" "}
           <span className="text-accent">Done Right</span>
         </h2>
-        <p className="text-primary-foreground/70 leading-relaxed mb-4">
-          This is not about just "publishing a book." It's about producing something you
-          can confidently attach your name to.
+        <p className="text-primary-foreground/80 leading-relaxed mb-4">
+          Your book will forever have your name on it, so the work that goes into it matters. We want you to be proud of what you put out into the world.
         </p>
         <p className="text-primary-foreground/70 leading-relaxed mb-8">
           If that matters to you, we're ready when you are.

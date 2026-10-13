@@ -76,6 +76,7 @@ const Footer = () => {
               <li>Cover Design</li>
               <li>Publishing & Distribution</li>
               <li>Book Marketing</li>
+              <li>Author Website Design</li>
             </ul>
           </div>
 

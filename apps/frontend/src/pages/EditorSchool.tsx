@@ -87,9 +87,9 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
   }, []);
 
   return (
-    <div className="relative w-full max-w-sm mx-auto flex flex-col items-center my-16">
+    <div className="relative w-full max-w-sm mx-auto flex flex-col items-center my-4">
       <div 
-        className="relative w-full h-[450px] md:h-[500px] cursor-pointer perspective-1000"
+        className="relative w-full h-[400px] md:h-[430px] cursor-pointer perspective-1000"
         onClick={dealNext}
       >
         <AnimatePresence>
@@ -101,15 +101,15 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
                 layout
                 initial={{ scale: 0.8, opacity: 0, y: -50 }}
                 animate={{
-                  top: i * 25,
-                  scale: 1 - i * 0.06,
+                  top: i * 20,
+                  scale: 1 - i * 0.05,
                   zIndex: cards.length - i,
                   opacity: 1 - i * 0.15,
                   rotate: i % 2 === 0 ? i * 2 : -i * 1.5,
                 }}
                 exit={{ opacity: 0, scale: 0.5, y: 100 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="absolute w-[260px] md:w-[300px] h-[360px] md:h-[400px] left-1/2 -ml-[130px] md:-ml-[150px] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-200 bg-white"
+                className="absolute w-[260px] md:w-[290px] h-[360px] md:h-[390px] left-1/2 -ml-[130px] md:-ml-[145px] rounded-xl shadow-[0_20px_45px_rgba(0,0,0,0.12)] overflow-hidden border border-slate-200 bg-white"
               >
                 <img src={src} className="w-full h-full object-cover" alt="Portfolio" />
               </motion.div>
@@ -118,8 +118,8 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
         </AnimatePresence>
       </div>
       
-      <div className="mt-8 z-20">
-        <Button onClick={dealNext} variant="outline" className="rounded-full shadow-sm text-amber-700 border-amber-200 hover:bg-amber-50">
+      <div className="mt-3 z-20">
+        <Button onClick={dealNext} variant="outline" className="rounded-full shadow-sm text-amber-700 border-amber-200 hover:bg-amber-50 text-xs font-semibold px-5">
           Next Book <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -213,7 +213,7 @@ const EarlyDaysGallery = () => {
             <History className="w-3.5 h-3.5 text-amber-700" />
             Early Days Gallery
           </div>
-          <h3 className="text-2xl md:text-3xl font-serif text-slate-900 font-bold">
+          <h3 className="text-2xl md:text-3xl text-slate-900 font-bold">
             When It All Began: My Early Days As An Editor
           </h3>
           <p className="text-slate-600 text-sm md:text-base mt-1">
@@ -280,7 +280,7 @@ const EarlyDaysGallery = () => {
             <div className="inline-block px-2.5 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-amber-500 text-slate-950 mb-1.5 font-mono">
               {current.tag}
             </div>
-            <h4 className="text-lg sm:text-xl font-bold font-serif text-white">
+            <h4 className="text-lg sm:text-xl font-bold text-white">
               {current.title}
             </h4>
             <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl">
@@ -387,7 +387,7 @@ const EarlyDaysGallery = () => {
               className="mt-4 text-center max-w-xl text-white px-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <h4 className="text-xl font-serif font-bold text-amber-400">
+              <h4 className="text-xl font-bold text-amber-400">
                 {current.title}
               </h4>
               <p className="text-slate-300 text-sm mt-1">
@@ -473,7 +473,7 @@ export default function EditorSchool() {
     return () => clearInterval(interval);
   }, []);
 
-  const currentPriceNaira = isDiscountActive ? "₦15,000" : "₦33,500";
+  const currentPriceNaira = isDiscountActive ? "₦15,500" : "₦33,500";
   const currentPriceUsd = isDiscountActive ? "$12" : "$25";
 
   const handleCTA = () => {
@@ -496,7 +496,7 @@ export default function EditorSchool() {
     <div className="min-h-screen bg-[#FDFBF7] text-slate-900 font-sans selection:bg-amber-200 selection:text-amber-900 relative">
       <nav className="fixed top-0 left-0 right-0 z-[100] bg-slate-950/90 backdrop-blur-md border-b border-slate-800 text-white px-6 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <a href="/" className="font-serif font-bold text-xl text-amber-500 tracking-tight">Eyelight.</a>
+          <a href="/" className="font-bold text-xl text-amber-500 tracking-tight">Eyelight.</a>
           <div className="hidden md:flex gap-8 text-sm font-medium text-slate-300">
             <a href="/" className="hover:text-white transition-colors">Home</a>
             <a href="/catalogue" className="hover:text-white transition-colors">Books</a>
@@ -520,7 +520,7 @@ export default function EditorSchool() {
             Enrollment open for December 2026 Cohort
           </div>
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif mb-6 text-white leading-[1.1] tracking-tight drop-shadow-sm">The Book Editor <br className="hidden md:block"/> Business School</h1>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 text-white leading-[1.1] tracking-tight drop-shadow-sm">The Book Editor <br className="hidden md:block"/> Business School</h1>
           
           {/* Horizontal Realization Cards (H) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-10 text-left max-w-5xl mx-auto">
@@ -548,14 +548,14 @@ export default function EditorSchool() {
 
           {/* Impact Statement */}
           <div className="text-center my-8">
-            <h3 className="text-3xl md:text-5xl font-serif font-bold text-amber-400 tracking-tight">
+            <h3 className="text-3xl md:text-5xl font-bold text-amber-400 tracking-tight">
               That ends here and now!
             </h3>
           </div>
 
           {/* Welcome Box */}
           <div className="bg-slate-900/50 border border-slate-800 p-8 md:p-12 rounded-xl mt-8 mb-10 shadow-2xl backdrop-blur-sm max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-amber-400 mb-4">
+            <h2 className="text-2xl md:text-4xl font-bold text-amber-400 mb-4">
               WELCOME TO THE BOOK EDITOR BUSINESS SCHOOL.
             </h2>
             <p className="text-slate-300 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
@@ -585,7 +585,7 @@ export default function EditorSchool() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-900 text-xs font-semibold uppercase tracking-wider mb-4 border border-amber-200">
             Author Story & Beginnings
           </div>
-          <h2 className="text-3xl md:text-5xl font-serif text-slate-900 mb-4 tracking-tight">I KNOW WHAT IT FEELS LIKE TO THINK EDITING DOESN'T PAY.</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">I KNOW WHAT IT FEELS LIKE TO THINK EDITING DOESN'T PAY.</h2>
           <p className="text-center text-lg md:text-xl text-slate-600">Now, I tell you my story.</p>
         </div>
 
@@ -596,11 +596,11 @@ export default function EditorSchool() {
         
         <div className="bg-white p-8 md:p-12 shadow-sm border border-slate-200 rounded-xl space-y-6 text-slate-700 text-lg leading-relaxed">
           <div className="mb-8 border-b pb-6">
-            <p className="font-bold text-2xl font-serif text-slate-900">Hi, I'm Grace</p>
+            <p className="font-bold text-2xl text-slate-900">Hi, I'm Grace</p>
             <p className="text-sm md:text-base text-slate-500 mt-1">A graduate of English and Literary Studies, a book editor, publisher and the founder of Eyelight Publishers.</p>
           </div>
           <p className="leading-relaxed">
-            <span className="float-left font-serif text-6xl md:text-7xl font-bold text-amber-600 mr-3.5 leading-[0.8] pt-1 select-none">
+            <span className="float-left font-bold text-6xl md:text-7xl text-amber-600 mr-3.5 leading-[0.8] pt-1 select-none">
               I
             </span>
             started editing while I was in the university.
@@ -625,47 +625,113 @@ export default function EditorSchool() {
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold uppercase tracking-wider mb-3 border border-slate-200">
             Present Day
           </div>
-          <h3 className="text-3xl md:text-4xl font-serif text-slate-900 mb-2">Meet Your Instructor Today</h3>
-          <p className="text-slate-600 mb-8 max-w-xl mx-auto">From ₦100 recharge card payments to working with bestselling authors and speaking to global audiences — more recent pictures from my journey.</p>
+          <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Meet Your Instructor Today</h3>
+          <p className="text-slate-600 mb-8 max-w-xl mx-auto">From ₦100 recharge card payments to working with bestselling authors and speaking to global audiences.</p>
           <ZoomCarousel images={[1, 2, 3, 4, 5, 6].map(num => `/editor-school/${num}.jpg`)} />
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="py-20 bg-slate-50 text-center px-6 border-y border-slate-200">
-        <h3 className="text-3xl font-serif text-slate-900 mb-4 max-w-2xl mx-auto leading-tight">Some of the books I edited at the early stage of building my career</h3>
-        
-        <DeckCarousel images={[1, 2, 3, 4, 5].map(num => `/editor-school/books/Image ${num}.png`)} />
-        
-        <div className="max-w-3xl mx-auto text-lg text-slate-700 space-y-6 mt-16">
-          <p>The same skill has put me behind books read by thousands of people.</p>
-          <p>It has opened doors to work with remarkable men and women, both in Nigeria, the US, the UK, and around the world.</p>
-          <p>It has allowed respected authors, leaders and professionals to trust me with their stories and legacies.</p>
-          <p>People like Nurse Sugar, Dr. Christine, Lilly White and many other respected names have trusted my work.</p>
-          <p>I have been behind many popular and bestselling books that NDAs would not allow me disclose.</p>
-          <p>So…<br/>…I want to show you what took me years of experience, mistakes, experiments and uncomfortable lessons to figure out in just 3 days!</p>
-          <p className="font-bold text-xl text-amber-600 bg-amber-50 p-6 rounded-lg mt-8 shadow-sm">Editing is NOT magic but the way you build the business around the editing is everything.</p>
+      {/* Early Books Section */}
+      <section className="py-12 sm:py-16 bg-slate-50 text-center px-6 border-y border-slate-200">
+        <div className="max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-semibold uppercase tracking-wider mb-3 border border-amber-200">
+            Early Portfolio
+          </div>
+          <h3 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2 leading-tight">
+            Some of the books I edited at the early stage of building my career
+          </h3>
+          <p className="text-sm md:text-base text-slate-500 mb-4">
+            Real covers and projects that laid the groundwork for my publishing career.
+          </p>
+          
+          <DeckCarousel images={[1, 2, 3, 4, 5].map(num => `/editor-school/books/Image ${num}.png`)} />
+          
+          {/* Organized Card matching "About Grace" layout */}
+          <div className="bg-white p-8 md:p-12 shadow-sm border border-slate-200 rounded-xl space-y-6 text-slate-700 text-lg leading-relaxed text-left mt-8">
+            <div className="border-b border-slate-100 pb-4">
+              <h4 className="font-bold text-xl md:text-2xl text-slate-900">
+                From University Projects to Global Authors
+              </h4>
+              <p className="text-sm text-slate-500 mt-1">
+                The exact evolution that turned an underpriced skill into an authority-driven publishing business.
+              </p>
+            </div>
+
+            <p>
+              The same skill has put me behind books read by thousands of people.
+            </p>
+            <p>
+              It has opened doors to work with remarkable men and women, both in Nigeria, the US, the UK, and around the world.
+            </p>
+            <p>
+              It has allowed respected authors, leaders and professionals to trust me with their stories and legacies.
+            </p>
+            <p>
+              People like Nurse Sugar, Dr. Christine, Lilly White and many other respected names have trusted my work.
+            </p>
+            <p>
+              I have been behind many popular and bestselling books that NDAs would not allow me disclose.
+            </p>
+            <p className="pt-2">
+              So…<br/>
+              …I want to show you what took me years of experience, mistakes, experiments and uncomfortable lessons to figure out in just 3 days!
+            </p>
+            
+            <div className="font-bold text-lg md:text-xl text-amber-800 bg-amber-50 p-5 md:p-6 rounded-xl border border-amber-200/80 shadow-sm mt-6">
+              Editing is NOT magic but the way you build the business around the editing is everything.
+            </div>
+          </div>
         </div>
       </section>
 
       {/* The Problem */}
-      <section className="py-24 max-w-5xl mx-auto px-6 text-center">
-        <h2 className="text-3xl md:text-5xl font-serif text-slate-900 mb-10 uppercase tracking-wide">THE PROBLEM IS NOT THAT EDITORS DON'T MAKE MONEY.</h2>
+      <section className="py-20 max-w-5xl mx-auto px-6 text-center">
+        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-8 uppercase tracking-wide">THE PROBLEM IS NOT THAT EDITORS DON'T MAKE MONEY.</h2>
         <div className="space-y-6 text-lg text-slate-700 text-left max-w-4xl mx-auto">
           <p>The problem is that too many editors have never learnt how to make their skill expensive.</p>
           <p>I am going to be honest with you. There is a strange way the world treats editors. Everyone wants a good editor. Nobody wants to pay for one.</p>
           <p>Authors will spend thousands designing covers. Millions printing books. Thousands running ads. Thousands buying courses on marketing. Then suddenly, when it is time to edit the manuscript:</p>
           
-          <div className="grid sm:grid-cols-2 gap-4 mb-10 text-left mt-10">
-            <div className="bg-slate-50 p-6 border border-slate-100 rounded-lg italic text-slate-500 shadow-sm">"Please, what's your final price?"</div>
-            <div className="bg-slate-50 p-6 border border-slate-100 rounded-lg italic text-slate-500 shadow-sm">"I have another editor that can do it for less."</div>
-            <div className="bg-slate-50 p-6 border border-slate-100 rounded-lg italic text-slate-500 shadow-sm">"It's just proofreading."</div>
-            <div className="bg-slate-50 p-6 border border-slate-100 rounded-lg italic text-slate-500 shadow-sm">"The manuscript is already written."</div>
-            <div className="bg-slate-50 p-6 border border-slate-100 rounded-lg italic text-slate-500 shadow-sm sm:col-span-2">"Can't you just correct the errors?"</div>
+          {/* One Major High-Contrast Card */}
+          <div className="bg-slate-950 text-white border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl my-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-400 mb-6">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                What authors say when it is time to edit the manuscript:
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-slate-900/90 border border-slate-800/80 rounded-xl px-5 py-4 flex items-center gap-4 text-slate-100 text-base sm:text-lg font-medium shadow-sm hover:border-amber-500/40 transition-colors">
+                  <span className="text-amber-400 text-2xl font-bold leading-none select-none">“</span>
+                  <span className="flex-1">Please, what's your final price?</span>
+                </div>
+
+                <div className="bg-slate-900/90 border border-slate-800/80 rounded-xl px-5 py-4 flex items-center gap-4 text-slate-100 text-base sm:text-lg font-medium shadow-sm hover:border-amber-500/40 transition-colors">
+                  <span className="text-amber-400 text-2xl font-bold leading-none select-none">“</span>
+                  <span className="flex-1">I have another editor that can do it for less.</span>
+                </div>
+
+                <div className="bg-slate-900/90 border border-slate-800/80 rounded-xl px-5 py-4 flex items-center gap-4 text-slate-100 text-base sm:text-lg font-medium shadow-sm hover:border-amber-500/40 transition-colors">
+                  <span className="text-amber-400 text-2xl font-bold leading-none select-none">“</span>
+                  <span className="flex-1">It's just proofreading.</span>
+                </div>
+
+                <div className="bg-slate-900/90 border border-slate-800/80 rounded-xl px-5 py-4 flex items-center gap-4 text-slate-100 text-base sm:text-lg font-medium shadow-sm hover:border-amber-500/40 transition-colors">
+                  <span className="text-amber-400 text-2xl font-bold leading-none select-none">“</span>
+                  <span className="flex-1">The manuscript is already written.</span>
+                </div>
+
+                <div className="bg-slate-900/90 border border-slate-800/80 rounded-xl px-5 py-4 flex items-center gap-4 text-slate-100 text-base sm:text-lg font-medium shadow-sm hover:border-amber-500/40 transition-colors">
+                  <span className="text-amber-400 text-2xl font-bold leading-none select-none">“</span>
+                  <span className="flex-1">Can't you just correct the errors?</span>
+                </div>
+              </div>
+            </div>
           </div>
           
           <p>Then, because nobody taught you how to communicate the value of what you do, you start defending your price. Then reducing it. Then apologising for it. Then accepting work that makes you resent the author. Then wondering why editing doesn't pay.</p>
-          <p className="font-bold text-3xl text-center pt-10 font-serif text-slate-900">Editing is not the problem.<br/>Your business model might be.</p>
+          <p className="font-bold text-2xl sm:text-3xl text-center pt-8 text-slate-900">Editing is not the problem.<br/>Your business model might be.</p>
         </div>
         
         <div className="mt-16 bg-slate-900 p-10 rounded-2xl shadow-xl flex flex-col items-center border border-slate-800">
@@ -680,7 +746,7 @@ export default function EditorSchool() {
       {/* You don't need another class */}
       <section className="py-24 bg-amber-50 px-6 border-y border-amber-100">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-serif text-slate-900 mb-8 text-center uppercase tracking-wide leading-tight">YOU DON'T NEED ANOTHER <br className="hidden sm:block"/> “HOW TO EDIT” CLASS.</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center uppercase tracking-wide leading-tight">YOU DON'T NEED ANOTHER <br className="hidden sm:block"/> “HOW TO EDIT” CLASS.</h2>
           <div className="space-y-6 text-lg text-slate-700 text-center max-w-3xl mx-auto">
             <p>You need to understand what happens after you know how to edit.</p>
             <p>Being able to spot a weak paragraph is one skill. Knowing what to charge for fixing it is another.</p>
@@ -693,7 +759,7 @@ export default function EditorSchool() {
 
       {/* AI */}
       <section className="py-24 px-6 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-slate-900 mb-8 text-center uppercase">THEN AI SHOWED UP.</h2>
+        <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center uppercase">THEN AI SHOWED UP.</h2>
         <div className="space-y-6 text-lg text-slate-700 text-left">
           <p>Maybe you've been watching what is happening with AI and quietly wondering: <br/><strong className="italic">“Is editing still going to be a thing?”</strong></p>
           <p>You should be asking that question because AI is changing the industry. Authors are generating manuscripts with AI. They are rewriting paragraphs with AI. They are asking AI to improve their grammar. They are asking AI to “make this sound human.” They are asking AI to critique their chapters.</p>
@@ -720,7 +786,7 @@ export default function EditorSchool() {
       <section className="py-24 bg-slate-900 text-white px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-serif mb-6 uppercase leading-tight">THIS SCHOOL WILL TEACH YOU HOW TO DO EXACTLY THAT.</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 uppercase leading-tight">THIS SCHOOL WILL TEACH YOU HOW TO DO EXACTLY THAT.</h2>
             <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">Not theory or endless grammar lectures. In fact, not even a collection of editing definitions you will forget next week.</p>
             <p className="text-2xl font-bold text-amber-400 mt-6 tracking-wide">Business. Skill. Process. Positioning. Money.</p>
             <p className="text-slate-400 mt-4 uppercase tracking-widest text-sm font-medium">You will learn:</p>
@@ -728,7 +794,7 @@ export default function EditorSchool() {
 
           <Accordion type="single" collapsible className="w-full" defaultValue="phase-1">
             <AccordionItem value="phase-1" className="border-slate-800 bg-slate-800/50 mb-4 rounded-xl px-2">
-              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-400 px-4 py-6">
+              <AccordionTrigger className="text-left font-semibold text-xl hover:text-amber-400 px-4 py-6">
                 Phase 1: The Editorial Foundation
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-6">
@@ -750,7 +816,7 @@ export default function EditorSchool() {
             </AccordionItem>
             
             <AccordionItem value="phase-2" className="border-slate-800 bg-slate-800/50 mb-4 rounded-xl px-2">
-              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-400 px-4 py-6">
+              <AccordionTrigger className="text-left font-semibold text-xl hover:text-amber-400 px-4 py-6">
                 Phase 2: Execution & Judgement
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-6">
@@ -772,7 +838,7 @@ export default function EditorSchool() {
             </AccordionItem>
 
             <AccordionItem value="phase-3" className="border-slate-800 bg-slate-800/50 mb-4 rounded-xl px-2">
-              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-400 px-4 py-6">
+              <AccordionTrigger className="text-left font-semibold text-xl hover:text-amber-400 px-4 py-6">
                 Phase 3: The Business of Editing
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-6">
@@ -794,7 +860,7 @@ export default function EditorSchool() {
             </AccordionItem>
 
             <AccordionItem value="phase-4" className="border-slate-800 bg-slate-800/50 mb-4 rounded-xl px-2">
-              <AccordionTrigger className="text-left font-serif text-xl hover:text-amber-400 px-4 py-6">
+              <AccordionTrigger className="text-left font-semibold text-xl hover:text-amber-400 px-4 py-6">
                 Phase 4: Future-Proofing & Rewards
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-6">
@@ -826,7 +892,7 @@ export default function EditorSchool() {
 
       {/* Bonuses */}
       <section className="py-24 bg-white px-6 text-center border-b border-slate-200">
-        <h2 className="text-3xl font-serif text-slate-900 mb-2 uppercase">…and I'M NOT SENDING YOU INTO THE REAL WORLD WITH ONLY LIVE CLASSES</h2>
+        <h2 className="text-3xl font-bold text-slate-900 mb-2 uppercase">…and I'M NOT SENDING YOU INTO THE REAL WORLD WITH ONLY LIVE CLASSES</h2>
         <p className="text-xl text-amber-700 font-bold mb-16">God forbid! YOU GET THE EDITOR'S TOOLKIT.</p>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto text-left">
@@ -864,7 +930,7 @@ export default function EditorSchool() {
 
       {/* Imagine */}
       <section className="py-32 bg-slate-100 px-6 text-center">
-        <h2 className="text-4xl md:text-5xl font-serif text-slate-900 mb-16 max-w-5xl mx-auto leading-tight">IMAGINE WHAT CHANGES WHEN YOU STOP THINKING LIKE A FREELANCER.</h2>
+        <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-16 max-w-5xl mx-auto leading-tight">IMAGINE WHAT CHANGES WHEN YOU STOP THINKING LIKE A FREELANCER.</h2>
         <div className="max-w-2xl mx-auto space-y-6 text-xl text-slate-700">
           <p>You stop asking: “How much can this author afford?”<br/>and start asking: <strong className="text-amber-700 bg-amber-100 px-2 rounded">“What does this project require?”</strong></p>
           <p>You stop saying: “I can edit anything.”<br/>and start communicating <strong className="text-amber-700 bg-amber-100 px-2 rounded">exactly what you do.</strong></p>
@@ -875,7 +941,7 @@ export default function EditorSchool() {
           <div className="mt-16 bg-white p-12 rounded-2xl shadow-xl border border-slate-200">
             <p className="font-bold text-2xl text-slate-900 mb-6">Then you start building an editing business that makes sense.</p>
             <p className="mb-8 text-lg font-medium text-slate-600">A business with processes. Standards. Boundaries. Positioning. Better clients.</p>
-            <p className="text-5xl font-serif text-amber-600 font-bold">And, yes... Better money.</p>
+            <p className="text-4xl md:text-5xl text-amber-600 font-bold">And, yes... Better money.</p>
           </div>
         </div>
       </section>
@@ -884,7 +950,7 @@ export default function EditorSchool() {
       <section className="py-24 bg-white px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
           <div className="bg-amber-50 p-10 border border-amber-100 rounded-2xl shadow-sm">
-            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-8 uppercase border-b border-amber-200 pb-4">THIS IS FOR YOU IF...</h3>
+            <h3 className="text-3xl font-bold text-slate-900 mb-8 uppercase border-b border-amber-200 pb-4">THIS IS FOR YOU IF...</h3>
             <ul className="space-y-5 text-slate-700 text-lg">
               <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You already edit books but feel like you're constantly underpaid.</li>
               <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You are tired of authors negotiating every fee.</li>
@@ -902,7 +968,7 @@ export default function EditorSchool() {
           </div>
           
           <div className="bg-slate-50 p-10 border border-slate-200 rounded-2xl shadow-sm">
-            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-8 uppercase border-b border-slate-200 pb-4">THIS IS NOT FOR YOU IF...</h3>
+            <h3 className="text-3xl font-bold text-slate-900 mb-8 uppercase border-b border-slate-200 pb-4">THIS IS NOT FOR YOU IF...</h3>
             <ul className="space-y-6 text-slate-700 text-lg">
               <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You want a certificate to frame on your wall and do nothing with it.</li>
               <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You want a magic formula that will make clients appear without you doing the work.</li>
@@ -918,15 +984,15 @@ export default function EditorSchool() {
       {/* I have made the mistakes */}
       <section className="py-32 bg-slate-900 text-white px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-10 text-xl font-light">
-          <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-wider mb-8">I HAVE MADE THE MISTAKES ALREADY.</h2>
+          <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-wider mb-8">I HAVE MADE THE MISTAKES ALREADY.</h2>
           <p>I have spent years learning this through actual manuscripts, actual authors, actual deadlines, actual money, actual difficult conversations and actual mistakes.</p>
           <p>I did not wake up one morning with a business plan. Gradually, the girl who once received a ₦100 recharge card for editing became the editor whose skill now commands millions of naira.</p>
           <p>I don't want you to spend the next ten years learning every lesson the hard way.</p>
           <p className="font-bold text-3xl text-amber-400">Take the shortcut. Learn from someone who has already walked into the walls.</p>
           
           <div className="py-16">
-            <h2 className="text-4xl md:text-5xl font-serif uppercase text-amber-500 leading-tight drop-shadow">THE WORLD DOES NOT NEED MORE PEOPLE WHO CAN CORRECT GRAMMAR.</h2>
-            <h2 className="text-4xl md:text-5xl font-serif uppercase text-white mt-6 leading-tight drop-shadow">IT NEEDS EDITORS WHO KNOW WHAT THEY ARE DOING.</h2>
+            <h2 className="text-4xl md:text-5xl font-bold uppercase text-amber-500 leading-tight drop-shadow">THE WORLD DOES NOT NEED MORE PEOPLE WHO CAN CORRECT GRAMMAR.</h2>
+            <h2 className="text-4xl md:text-5xl font-bold uppercase text-white mt-6 leading-tight drop-shadow">IT NEEDS EDITORS WHO KNOW WHAT THEY ARE DOING.</h2>
           </div>
           
           <p className="text-2xl font-medium max-w-3xl mx-auto">Editors who can run a business. Editors who can make money from the thing they are already good at. That is the editor I want to help you become.</p>
@@ -947,7 +1013,7 @@ export default function EditorSchool() {
       <section id="register" className="py-24 bg-slate-100 px-6">
         <div className="max-w-6xl mx-auto flex flex-col-reverse lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div className="text-slate-900">
-            <h2 className="text-5xl font-serif mb-6 uppercase leading-tight tracking-tight">THE BOOK EDITOR BUSINESS SCHOOL</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 uppercase leading-tight tracking-tight">THE BOOK EDITOR BUSINESS SCHOOL</h2>
             <p className="text-2xl font-medium text-amber-700 mb-10">Learn the craft. Build the business. Become harder to replace.</p>
             
             <ul className="space-y-5 text-xl font-medium mb-10">
@@ -971,7 +1037,7 @@ export default function EditorSchool() {
               <p className="font-bold mb-4 uppercase text-slate-900 tracking-widest text-sm">One more thing.</p>
               <p className="mb-4">Please don't buy this because you like me. Don't buy it because I told you editing can make money.</p>
               <p>Buy it because you have looked at your current editing business and admitted:</p>
-              <p className="text-4xl font-serif italic my-8 text-slate-900 text-center">“I can do better than this.”</p>
+              <p className="text-3xl md:text-4xl font-semibold italic my-8 text-slate-900 text-center">“I can do better than this.”</p>
               <p className="font-bold text-3xl text-amber-700 text-center">You can. Let's build it.</p>
             </div>
           </div>
@@ -980,7 +1046,7 @@ export default function EditorSchool() {
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold tracking-widest uppercase whitespace-nowrap shadow-md">
               Limited Slots Remaining
             </div>
-            <h3 className="text-3xl font-serif text-slate-900 mb-4 uppercase text-center mt-4">SECURE YOUR SEAT</h3>
+            <h3 className="text-3xl font-bold text-slate-900 mb-4 uppercase text-center mt-4">SECURE YOUR SEAT</h3>
             
             <div className="flex flex-col items-center justify-center mb-10 bg-slate-50 p-6 rounded-xl border border-slate-100">
               <div className="text-5xl font-bold text-slate-900 mb-2">{currentPriceNaira}</div>
@@ -998,7 +1064,7 @@ export default function EditorSchool() {
                   <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
                     <CheckCircle2 className="w-9 h-9" />
                   </div>
-                  <h4 className="text-2xl font-serif font-bold text-slate-900">Seat Reserved, {formData.name.split(" ")[0]}!</h4>
+                  <h4 className="text-2xl font-bold text-slate-900">Seat Reserved, {formData.name.split(" ")[0]}!</h4>
                   <p className="text-slate-600 text-sm mt-1">Your applicant details are logged in our system. Complete payment to secure your seat.</p>
                   
                   <div className="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg text-amber-900 text-sm font-semibold">
@@ -1108,7 +1174,7 @@ export default function EditorSchool() {
       {/* FAQ */}
       <section className="py-24 bg-white px-6 border-t border-slate-200">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-serif mb-16 text-center text-slate-900 uppercase tracking-widest">FREQUENTLY ASKED QUESTIONS</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center text-slate-900 uppercase tracking-widest">FREQUENTLY ASKED QUESTIONS</h2>
           <Accordion type="single" collapsible className="w-full">
             {[
               { q: "1. How long is The Book Editor Business School?", a: "The school runs for 3 days, from December 4–6, 2026." },
@@ -1135,7 +1201,7 @@ export default function EditorSchool() {
               { q: "28. What if I'm still unsure?", a: "If you already edit books and you've ever thought: “I know how to do this. I just don't know how to make this business work the way I want it to.” This is probably the room you need to be in. Come with your experience. We'll work on the rest." }
             ].map((faq, idx) => (
               <AccordionItem key={idx} value={`item-${idx}`} className="border-slate-100 mb-2">
-                <AccordionTrigger className="text-left font-serif text-lg hover:text-amber-700 bg-slate-50 px-6 py-4 rounded-lg hover:bg-slate-100 transition-colors">{faq.q}</AccordionTrigger>
+                <AccordionTrigger className="text-left font-semibold text-lg hover:text-amber-700 bg-slate-50 px-6 py-4 rounded-lg hover:bg-slate-100 transition-colors">{faq.q}</AccordionTrigger>
                 <AccordionContent className="text-slate-600 text-base leading-relaxed px-6 pt-4 pb-6">
                   {faq.a}
                 </AccordionContent>
@@ -1148,7 +1214,7 @@ export default function EditorSchool() {
       {/* Footer */}
       <footer className="py-20 bg-slate-950 text-center text-slate-500 text-sm">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="text-amber-500 font-serif text-3xl font-bold mb-6">Eyelight Publishing</div>
+          <div className="text-amber-500 text-3xl font-bold mb-6">Eyelight Publishing</div>
           <div className="flex justify-center gap-8 mb-10 text-slate-400 font-medium text-base">
             <a href="mailto:hello@eyelight.com" className="hover:text-white transition-colors">hello@eyelight.com</a>
             <a href="https://wa.me/2348146682688" className="hover:text-white transition-colors">WhatsApp Support</a>

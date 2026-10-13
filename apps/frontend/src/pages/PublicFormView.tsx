@@ -145,7 +145,7 @@ export default function PublicFormView({ defaultSlug }: { defaultSlug?: string }
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle2 size={32} />
             </div>
-            <h2 className="text-3xl font-serif font-bold text-slate-900 mb-3">Response Recorded</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Response Recorded</h2>
             <p className="text-sm text-slate-600 max-w-md mx-auto mb-8 leading-relaxed">
               Thank you for taking the time to share these details. Your responses have been forwarded directly to our Chief Editor and publishing team.
             </p>
@@ -173,7 +173,7 @@ export default function PublicFormView({ defaultSlug }: { defaultSlug?: string }
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Form Banner Card */}
             <div className="bg-white rounded-2xl border-t-8 border-t-amber-500 border-x border-b border-slate-200 p-8 shadow-sm">
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-3">{form.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">{form.title}</h1>
               <div className="text-sm text-slate-600 whitespace-pre-line leading-relaxed mb-4">
                 {form.description}
               </div>

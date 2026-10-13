@@ -9,6 +9,7 @@ import {
   Palette,
   Users,
   Megaphone,
+  Laptop,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ServiceCard from "./ServiceCard";
@@ -158,6 +159,20 @@ export const services = [
       "Campaign strategy",
       "Content creation",
       "Promotion planning",
+    ],
+  },
+  {
+    id: "author-website",
+    title: "Author Website Design",
+    description: "A sleek, conversion-driven personal website that establishes your authority and showcases your books.",
+    price: "$300 / ₦360,000",
+    priceNote: "flat rate",
+    amount: 300,
+    icon: Laptop,
+    features: [
+      "Custom responsive design & book showcase",
+      "Direct sales, newsletter & booking integration",
+      "Author media kit & search engine optimization (SEO)",
     ],
   },
 ];
