@@ -31,8 +31,7 @@ const ConsultationDialog = ({ trigger }: Props) => {
             <span className="text-accent">Chief Editor</span>
           </DialogTitle>
           <DialogDescription>
-            A focused 45-minute session to review your project, clarify your
-            direction, and map out your next steps.
+            A 45-minutes session where we’ll look at where you are with your book, what needs attention, and what it will take to get your book ready for the readers you have in mind.
           </DialogDescription>
         </DialogHeader>
 
@@ -43,7 +42,7 @@ const ConsultationDialog = ({ trigger }: Props) => {
                 <DollarSign size={14} /> Fee
               </div>
               <p className="text-sm font-semibold text-foreground">
-                ₦25,000
+                $30 / ₦25,000
               </p>
               <p className="text-xs text-muted-foreground mt-1">per session</p>
             </div>

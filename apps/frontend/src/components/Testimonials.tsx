@@ -1,4 +1,4 @@
-import { Quote, Star } from "lucide-react";
+import tunmiseImg from "@/assets/testimonial-tunmise-apara.jpg";
 import nurseSugarImg from "@/assets/testimonia-nursesugar.png";
 import toluImg from "@/assets/testimonia-tolu-agbe.png";
 import nihinImg from "@/assets/testimonial-nihin-alabi.png";
@@ -7,6 +7,13 @@ import lillyImg from "@/assets/testimony-author-lily.png";
 
 
 const testimonials = [
+  {
+    quote:
+      "Working with Eyelight Publishers on A Fish Out of Water was a good decision for me as an author. Writing a book is one thing. Getting it properly edited and published is another. You can have a message you believe in and still need the right people to help you bring it together as a book you can confidently put out there. Eyelight Publishers handled the editing and publishing of my book, and I appreciated having a team that understood the work involved. If you're an author looking for people to handle your book professionally, I would recommend Eyelight Publishers.",
+    name: "Tunmise Apara",
+    location: "Author of 'A Fish Out of Water'",
+    image: tunmiseImg,
+  },
   {
     quote:
       "Worked on my GuideBook of over 400 pages and not a single complaint afterwards. No regrets working together!",

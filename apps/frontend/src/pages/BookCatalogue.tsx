@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { BookOpen, ShoppingCart } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import fishOutOfWater from "@/assets/books/a-fish-out-of-water.jpg";
+import powerPivot from "@/assets/books/the-power-pivot.jpg";
 import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
 import expectedEnd from "@/assets/books/expected-end.jpg";
 import princesshood from "@/assets/books/princesshood.jpg";
@@ -12,6 +14,8 @@ import bloom from "@/assets/books/bloom.jpg";
 import selfLeadership from "@/assets/books/self-leadership.jpg";
 
 const staticBooks = [
+  { _id: 'sw-fish', title: "A Fish Out of Water", author: "Tunmise Apara", description: "A transformative exploration of purpose, resilience, and thriving in unfamiliar waters.", coverUrl: fishOutOfWater },
+  { _id: 'sw-pivot', title: "The Power Pivot", author: "Prisca Ndifor", description: "Cultural Intelligence for Global Influence. A masterclass in identity, culture, mindset, and confidence.", coverUrl: powerPivot },
   { _id: 'sw2', title: "Road to Bestseller", author: "Grace Akowe Apara", description: "A practical roadmap for aspiring writers.", coverUrl: roadToBestseller, purchaseLinks: { amazon: "http://graceapara.com/books" } },
   { _id: 'sw3', title: "Expected End", author: "Barrister Peace Aaron", description: "A heartfelt memoir chronicling her life journey with honesty and inspiring vulnerability.", coverUrl: expectedEnd },
   { _id: 'sw4', title: "Princesshood", author: "Sharon Adetola", description: "A powerful and inspiring book that explores the value of women in God's eyes.", coverUrl: princesshood },

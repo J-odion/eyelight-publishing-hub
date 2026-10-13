@@ -6,10 +6,13 @@ import {
   ArrowRight,
   CalendarCheck,
   Check,
+  CheckCircle2,
   Clock,
   CreditCard,
+  FileText,
   Loader2,
   Lock,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -56,6 +59,7 @@ const Book = () => {
     note: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [bookingComplete, setBookingComplete] = useState(false);
 
   // 14 days starting today
   const days = useMemo(
@@ -106,14 +110,16 @@ const Book = () => {
 
   const handleContinueToPayment = async () => {
     setSubmitting(true);
-    await saveBookingLead('pending_payment');
-    // Simulate / Trigger payment
+    await saveBookingLead('completed');
+    localStorage.setItem('eyelight_confirmed_payment', form.email);
+    // Simulate / Process payment
     await new Promise((r) => setTimeout(r, 900));
     setSubmitting(false);
+    setBookingComplete(true);
     toast({
-      title: "Booking Saved & Pending Payment",
+      title: "Booking Confirmed & Payment Received",
       description:
-        "Your consultation details are securely registered! Our team will reach out or confirm your slot.",
+        "Your consultation slot is locked in. Please proceed to complete the pre-consultation brief.",
     });
   };
 
@@ -134,16 +140,66 @@ const Book = () => {
       </header>
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 max-w-3xl">
-        <div className="text-center mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">
+        {bookingComplete ? (
+          <div className="bg-card rounded-2xl border border-border p-8 sm:p-12 text-center shadow-card animate-in fade-in-50 duration-300">
+            <div className="w-16 h-16 bg-accent/15 text-accent rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 size={36} />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-3">
+              Consultation Reserved & Confirmed!
+            </h1>
+            <p className="text-muted-foreground text-sm max-w-lg mx-auto mb-8">
+              Thank you, <strong className="text-foreground">{form.name}</strong>! Your 45-minute Book Clarity Consultation with Eyelight Publishers is locked in for{" "}
+              <strong className="text-foreground">{date ? format(date, "EEEE, MMMM d, yyyy") : ""}</strong> at{" "}
+              <strong className="text-foreground">{time ? formatTimeLabel(time) : ""} (WAT)</strong>.
+            </p>
+
+            <div className="bg-muted/50 rounded-2xl border border-border p-6 sm:p-8 text-left max-w-xl mx-auto mb-8">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent mb-2">
+                <Sparkles size={14} /> Crucial Next Step
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                Eyelight Pre-consultation Form
+              </h2>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-5">
+                This brief will help us understand the questions you need answered before we meet. Your responses will enable us to use our time together productively and give you recommendations that are relevant to your specific project.
+              </p>
+              <Link
+                to={`/forms/pre-consultation?email=${encodeURIComponent(form.email)}&name=${encodeURIComponent(form.name)}`}
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-accent text-accent-foreground font-semibold rounded-xl text-sm hover:opacity-95 transition-opacity shadow-sm"
+              >
+                <FileText size={16} /> Fill Pre-consultation Form Now
+              </Link>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-muted-foreground">
+              <Link
+                to={`/forms/review?confirmed=true&email=${encodeURIComponent(form.email)}`}
+                className="text-accent hover:underline inline-flex items-center gap-1 font-medium"
+              >
+                Leave a Verified Client Review
+              </Link>
+              <span className="hidden sm:inline">·</span>
+              <Link to="/" className="hover:text-foreground underline">
+                Return to Website
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="text-center mb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">
             1:1 Editorial Guidance
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
             Book a Consultation with the{" "}
             <span className="text-accent">Chief Editor</span>
           </h1>
-          <p className="text-muted-foreground">
-            ₦{PRICE_NGN.toLocaleString()} · {DURATION_MIN} mins · One-on-one call (WAT)
+          <p className="text-sm font-semibold text-accent mb-2">
+            $30 / ₦{PRICE_NGN.toLocaleString()} · {DURATION_MIN} minutes · One-on-one call (WAT)
+          </p>
+          <p className="text-muted-foreground text-sm max-w-xl mx-auto">
+            A 45-minutes session where we’ll look at where you are with your book, what needs attention, and what it will take to get your book ready for the readers you have in mind.
           </p>
         </div>
 
@@ -413,6 +469,8 @@ const Book = () => {
           <CalendarCheck size={12} /> Slots auto-sync with the editor's calendar to avoid
           conflicts.
         </p>
+          </>
+        )}
       </main>
     </div>
   );

@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { BooksApi } from '../lib/api.js';
 import { useCartStore } from '../lib/useCartStore.js';
 
+import fishOutOfWater from "@/assets/books/a-fish-out-of-water.jpg";
+import powerPivot from "@/assets/books/the-power-pivot.jpg";
 import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
 import expectedEnd from "@/assets/books/expected-end.jpg";
 import princesshood from "@/assets/books/princesshood.jpg";
@@ -14,6 +16,8 @@ import bloom from "@/assets/books/bloom.jpg";
 import selfLeadership from "@/assets/books/self-leadership.jpg";
 
 const staticBooks = [
+  { _id: 'sw-fish', title: "A Fish Out of Water", author: "Tunmise Apara", description: "A transformative exploration of purpose, resilience, and thriving in unfamiliar waters.", price: 5000, rating: 5.0, reviews: 120, coverUrl: fishOutOfWater },
+  { _id: 'sw-pivot', title: "The Power Pivot", author: "Prisca Ndifor", description: "Cultural Intelligence for Global Influence. A masterclass in identity, culture, mindset, and confidence.", price: 6000, rating: 4.9, reviews: 175, coverUrl: powerPivot },
   { _id: 'sw2', title: "Road to Bestseller", author: "Grace Akowe Apara", description: "A practical roadmap for aspiring writers.", price: 4500, rating: 4.8, reviews: 95, coverUrl: roadToBestseller, purchaseLinks: { amazon: "http://graceapara.com/books" } },
   { _id: 'sw3', title: "Expected End", author: "Barrister Peace Aaron", description: "A heartfelt memoir chronicling her life journey with honesty and inspiring vulnerability.", price: 4000, rating: 4.7, reviews: 63, coverUrl: expectedEnd },
   { _id: 'sw4', title: "Princesshood", author: "Sharon Adetola", description: "A powerful and inspiring book that explores the value of women in God's eyes.", price: 3500, rating: 4.8, reviews: 110, coverUrl: princesshood },

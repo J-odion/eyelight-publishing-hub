@@ -2,9 +2,11 @@ import { Check } from "lucide-react";
 import differentiatorImage from "@/assets/differentiator-image.jpg";
 
 const points = [
-  "Refine your message",
-  "Strengthen your delivery",
-  "Produce a book that holds its weight",
+  "Shape your ideas into a clear, well-structured manuscript with a message worth putting into the world.",
+  "Get the right editorial attention to your content, argument, structure and writing before your book goes to print.",
+  "Position your book to speak to the right readers and establish your authority in your field.",
+  "Navigate editing, design, production and publishing with a team that understands what each stage demands.",
+  "Build a book that represents the quality of your ideas and the reputation you are working to establish.",
 ];
 
 const Differentiator = () => {
@@ -36,21 +38,20 @@ const Differentiator = () => {
               That's where we come in.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              We don't operate as a basic service provider. We work as a partner in your
-              process, helping you:
+              We work with you to make sure every part of your book is properly thought through, from the first idea to publishing and beyond. We help you:
             </p>
 
             <ul className="space-y-3 mb-6">
               {points.map((point) => (
-                <li key={point} className="flex items-center gap-3 text-sm text-foreground">
-                  <Check size={16} className="text-accent shrink-0" />
-                  {point}
+                <li key={point} className="flex items-start gap-3 text-sm text-foreground">
+                  <Check size={16} className="text-accent shrink-0 mt-0.5" />
+                  <span>{point}</span>
                 </li>
               ))}
             </ul>
 
             <p className="text-muted-foreground leading-relaxed italic">
-              Because anything less is a disservice to what you're trying to say.
+              …because anything less is a disservice to your name and your legacy
             </p>
           </div>
         </div>

@@ -9,7 +9,7 @@ import {
   Users, Mail, BookOpen, CalendarDays, LayoutDashboard, Send,
   LogOut, Plus, ChevronDown, X, Check, RefreshCw, ExternalLink,
   Upload, Download, Search, Zap, Eye, Trash2, Edit2, UserPlus,
-  List as ListIcon, AtSign, Tags
+  List as ListIcon, AtSign, Tags, FileText
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Papa from 'papaparse';
@@ -29,6 +29,7 @@ import TemplateEditor from '@/components/TemplateEditor';
 import DealsPipeline from './DealsPipeline.js';
 import CrmAnalytics from './CrmAnalytics.js';
 import CrmActivities from './CrmActivities.js';
+import CrmForms from './CrmForms.js';
 
 const PROJECT_STATUSES = ['Received', 'Editing', 'Cover Design', 'Proofreading', 'Published'];
 const PRESS_CATEGORIES = [
@@ -1897,6 +1898,7 @@ const TABS = [
   { id: 'automations', label: 'Automations', icon: Zap },
   { id: 'leads', label: 'Audience & Leads', icon: Users },
   { id: 'bookings', label: 'Bookings', icon: CalendarDays },
+  { id: 'forms', label: 'Forms & Briefs', icon: FileText },
   { id: 'production', label: 'Production Board', icon: BookOpen },
   { id: 'authors', label: 'Author Directory', icon: LayoutDashboard },
   { id: 'events', label: 'Events', icon: CalendarDays },
@@ -1961,6 +1963,7 @@ export default function AdminCRM() {
           {activeTab === 'automations' && <AutomationsTab />}
           {activeTab === 'leads' && <LeadsTab />}
           {activeTab === 'bookings' && <BookingsTab />}
+          {activeTab === 'forms' && <CrmForms />}
           {activeTab === 'production' && <ProductionTab />}
           {activeTab === 'authors' && <AuthorsTab />}
           {activeTab === 'events' && <EventsTab />}

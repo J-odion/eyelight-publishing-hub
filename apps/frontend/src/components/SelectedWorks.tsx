@@ -1,15 +1,38 @@
+import fishOutOfWater from "@/assets/books/a-fish-out-of-water.jpg";
+import powerPivot from "@/assets/books/the-power-pivot.jpg";
+import bloom from "@/assets/books/bloom.jpg";
 import roadToBestseller from "@/assets/books/road-to-bestseller.jpg";
 import expectedEnd from "@/assets/books/expected-end.jpg";
 import princesshood from "@/assets/books/princesshood.jpg";
-import bloom from "@/assets/books/bloom.jpg";
 import selfLeadership from "@/assets/books/self-leadership.jpg";
 
 const works = [
   {
+    title: "A Fish Out of Water",
+    author: "Tunmise Apara",
+    description:
+      "A transformative exploration of purpose, resilience, and thriving in unfamiliar waters. Eyelight Publishers managed the editing and complete publishing production.",
+    image: fishOutOfWater,
+  },
+  {
+    title: "The Power Pivot",
+    author: "Prisca Ndifor",
+    description:
+      "Cultural Intelligence for Global Influence. A groundbreaking guide for owning your voice, turning identity into presence, and mastering global influence.",
+    image: powerPivot,
+  },
+  {
+    title: "Bloom",
+    author: "Margaret Ogbolu",
+    description:
+      "The Courage to Grow Beyond Survival. Eyelight Service is proud to have contributed to the development and presentation of this impactful work.",
+    image: bloom,
+  },
+  {
     title: "Road to Bestseller",
     author: "Grace Akowe Apara",
     description:
-      "A practical roadmap for aspiring writers. Now available in paperback, the book provides actionable steps and strategic insights into the publishing process.",
+      "A practical roadmap for aspiring writers. Providing actionable steps and strategic insights into the publishing process.",
     image: roadToBestseller,
     link: "http://graceapara.com/books",
   },
@@ -28,17 +51,10 @@ const works = [
     image: princesshood,
   },
   {
-    title: "Bloom",
-    author: "Margaret Ogbolu",
-    description:
-      "The Courage to Grow Beyond Survival. Eyelight Service is proud to have contributed to the development and presentation of this impactful work.",
-    image: bloom,
-  },
-  {
     title: "This Thing Called Self-Leadership",
     author: "Grace Akowe Apara",
     description:
-      "A compelling guide to self-discovery, responsibility, and purposeful living. Its success is rooted in relatable storytelling and the author's inspiring journey.",
+      "A compelling guide to self-discovery, responsibility, and purposeful living. Its success is rooted in relatable storytelling and author wisdom.",
     image: selfLeadership,
     link: "http://graceapara.com/books",
   },
