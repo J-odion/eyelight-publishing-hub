@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, XCircle, ArrowRight, Loader2, ChevronLeft, ChevronRight, Maximize2, X, History } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, Loader2, ChevronLeft, ChevronRight, Maximize2, X, History, MessageCircle, Copy, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -448,8 +448,8 @@ export default function EditorSchool() {
     setTimeout(() => {
       setIsSubmitting(false);
       setHasSubmitted(true);
-      toast({ title: "Registration received!", description: "Redirecting to payment gateway..." });
-    }, 1000);
+      toast({ title: "Registration details saved!", description: "Complete your payment below to secure your seat." });
+    }, 600);
   };
 
   useEffect(() => {
@@ -595,16 +595,16 @@ export default function EditorSchool() {
         </div>
         
         <div className="bg-white p-8 md:p-12 shadow-sm border border-slate-200 rounded-xl space-y-6 text-slate-700 text-lg leading-relaxed">
-          <div className="flex items-center gap-6 mb-8 border-b pb-8">
-            <div className="w-24 h-24 rounded-full bg-slate-200 overflow-hidden shrink-0 border-2 border-slate-100">
-               <img src="/editor-school/1.jpg" alt="Grace" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
-            </div>
-            <div>
-              <p className="font-bold text-xl text-slate-900">Hi, I'm Grace</p>
-              <p className="text-sm text-slate-500">A graduate of English and Literary Studies, a book editor, publisher and the founder of Eyelight Publishers.</p>
-            </div>
+          <div className="mb-8 border-b pb-6">
+            <p className="font-bold text-2xl font-serif text-slate-900">Hi, I'm Grace</p>
+            <p className="text-sm md:text-base text-slate-500 mt-1">A graduate of English and Literary Studies, a book editor, publisher and the founder of Eyelight Publishers.</p>
           </div>
-          <p>I started editing while I was in the university.</p>
+          <p className="leading-relaxed">
+            <span className="float-left font-serif text-6xl md:text-7xl font-bold text-amber-600 mr-3.5 leading-[0.8] pt-1 select-none">
+              I
+            </span>
+            started editing while I was in the university.
+          </p>
           <p>I loved it. I was good at it.</p>
           <p className="font-semibold text-amber-700 bg-amber-50 p-4 border-l-4 border-amber-500 rounded-r">People started bringing me their manuscripts, and I was doing it for free only for the love of the work and directionless!</p>
           <p>Then one day, an author paid me for editing with a ₦100 recharge card.</p>
@@ -993,10 +993,89 @@ export default function EditorSchool() {
             </div>
             
             {hasSubmitted ? (
-              <div className="py-12 text-center bg-green-50 border border-green-100 rounded-xl">
-                <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-4" />
-                <h4 className="text-2xl text-slate-900 font-bold mb-2">Registration initiated!</h4>
-                <p className="text-slate-600 text-lg">Redirecting to payment gateway...</p>
+              <div className="py-6 text-left space-y-6">
+                <div className="text-center pb-4 border-b border-slate-100">
+                  <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <CheckCircle2 className="w-9 h-9" />
+                  </div>
+                  <h4 className="text-2xl font-serif font-bold text-slate-900">Seat Reserved, {formData.name.split(" ")[0]}!</h4>
+                  <p className="text-slate-600 text-sm mt-1">Your applicant details are logged in our system. Complete payment to secure your seat.</p>
+                  
+                  <div className="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg text-amber-900 text-sm font-semibold">
+                    <span>Total Due:</span>
+                    <span className="text-xl font-bold font-mono text-amber-700">{currentPriceNaira}</span>
+                    <span className="line-through text-slate-400 text-xs">₦33,500</span>
+                  </div>
+                </div>
+
+                {/* Primary Option: Instant WhatsApp Confirmation (Zero Failures) */}
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Option 1 · Instant WhatsApp Confirmation</p>
+                  <a
+                    href={`https://wa.me/2349085181361?text=${encodeURIComponent(
+                      `Hello Grace! I just registered for The Book Editor Business School (December Cohort).\n\nMy Details:\n• Name: ${formData.name}\n• Email: ${formData.email}\n• Phone: ${formData.phone || 'N/A'}\n• Experience: ${formData.experience || 'N/A'}\n\nI want to complete my payment of ${currentPriceNaira}. Please send payment confirmation / account details.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba59] text-white py-4 px-6 rounded-xl font-bold text-base shadow-lg transition-transform hover:-translate-y-0.5 text-center"
+                  >
+                    <MessageCircle className="w-6 h-6 fill-white shrink-0" />
+                    Complete & Confirm on WhatsApp
+                  </a>
+                  <p className="text-xs text-slate-500 text-center">Chat directly with Grace and our team to send proof of payment and receive your cohort access link immediately.</p>
+                </div>
+
+                {/* Option 2: Direct Bank Transfer */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <CreditCard className="w-4 h-4 text-amber-600" /> Option 2 · Direct Bank Transfer
+                    </p>
+                    <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">Instant</span>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-slate-700 pt-1 border-t border-slate-200">
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-slate-500">Account Name:</span>
+                      <span className="font-semibold text-slate-900 text-right">Eyelight Publishing Services</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-slate-500">Bank Name:</span>
+                      <span className="font-semibold text-slate-900 text-right">Access Bank / Moniepoint</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 bg-amber-50/80 px-3 rounded-lg border border-amber-200">
+                      <span className="text-slate-600 text-xs">Account Number:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-base text-slate-900">0123456789</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText("0123456789");
+                            toast({ title: "Account copied!", description: "Account number copied to clipboard." });
+                          }}
+                          className="p-1 hover:bg-amber-200 rounded text-amber-800 transition-colors"
+                          title="Copy account number"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 italic text-center">
+                    After transfer, send your receipt via WhatsApp above to activate your enrollment immediately.
+                  </p>
+                </div>
+
+                {/* Edit Details */}
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setHasSubmitted(false)}
+                    className="text-xs text-slate-400 hover:text-slate-600 underline"
+                  >
+                    Need to change your name or email? Click here to edit
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
