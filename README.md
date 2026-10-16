@@ -26,6 +26,6 @@ Eyelight Publishing Hub is a modern, full-stack application built for a publishi
 ## Current Integrations
 - **Payment Processing (Paystack Live)**: Fully integrated with Paystack for end-to-end payments across Consultation Bookings (`/book`), Book Storefront Cart (`/cart`), Editor Business School tuition (`/editor-school`), and Author Portal invoices (`/portal`).
   - **Live Webhook URL**: `https://eyelight-publishing-hub.onrender.com/webhooks/paystack` (and `/payments/webhook`) with HMAC-SHA512 signature validation.
-  - **Live Callback URL**: `https://eyelight-publishing-hub.vercel.app/payment/callback` with automatic server-side verification and context-aware success flows.
+  - **Live Callback URL**: `https://eyelightpublishers.com/payment/callback` (or `https://eyelight-publishing-hub.vercel.app/payment/callback`) with automatic server-side verification and context-aware success flows.
 - **State Management**: Zustand and local React state.
 - **Routing**: React Router DOM.

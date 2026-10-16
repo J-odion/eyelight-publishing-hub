@@ -58,7 +58,7 @@ export class PaymentsService {
     const finalCallbackUrl =
       callbackUrl ||
       this.configService.get<string>('PAYSTACK_CALLBACK_URL') ||
-      'https://eyelight-publishing-hub.vercel.app/payment/callback';
+      'https://eyelightpublishers.com/payment/callback';
 
     // Persist pending payment record in database
     const payment = new this.paymentModel({
