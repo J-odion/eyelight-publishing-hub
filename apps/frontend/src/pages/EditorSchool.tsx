@@ -31,19 +31,19 @@ const ZoomCarousel = ({ images }: { images: string[] }) => {
             let offset = i - index;
             if (offset < -1) offset += images.length;
             if (offset > 1) offset -= images.length;
-            
+
             if (Math.abs(offset) > 1) return null;
 
             return (
               <motion.div
                 key={img}
                 initial={{ opacity: 0, scale: 0.8, x: offset * 300 }}
-                animate={{ 
-                  opacity: isActive ? 1 : 0.4, 
+                animate={{
+                  opacity: isActive ? 1 : 0.4,
                   scale: isActive ? 1.05 : 0.8,
                   x: offset * (typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 300),
                   zIndex: isActive ? 10 : 0,
-                  rotateY: isActive ? 0 : offset * -15 
+                  rotateY: isActive ? 0 : offset * -15
                 }}
                 exit={{ opacity: 0, scale: 0.8, x: offset * 300 }}
                 transition={{ type: "spring", stiffness: 200, damping: 25 }}
@@ -57,7 +57,7 @@ const ZoomCarousel = ({ images }: { images: string[] }) => {
           })}
         </AnimatePresence>
       </div>
-      
+
       <button onClick={prev} className="absolute left-2 md:left-10 z-20 w-12 h-12 rounded-full bg-slate-900/50 backdrop-blur-md border border-slate-700 flex items-center justify-center text-white hover:bg-slate-800 transition-colors shadow-lg">
         <ArrowRight className="w-6 h-6 rotate-180" />
       </button>
@@ -70,12 +70,12 @@ const ZoomCarousel = ({ images }: { images: string[] }) => {
 
 const DeckCarousel = ({ images }: { images: string[] }) => {
   const [cards, setCards] = useState(images);
-  
+
   const dealNext = () => {
     setCards((prev) => {
       const newCards = [...prev];
       const first = newCards.shift();
-      if(first) newCards.push(first);
+      if (first) newCards.push(first);
       return newCards;
     });
   };
@@ -89,7 +89,7 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
 
   return (
     <div className="relative w-full max-w-sm mx-auto flex flex-col items-center my-4">
-      <div 
+      <div
         className="relative w-full h-[400px] md:h-[430px] cursor-pointer perspective-1000"
         onClick={dealNext}
       >
@@ -118,7 +118,7 @@ const DeckCarousel = ({ images }: { images: string[] }) => {
           })}
         </AnimatePresence>
       </div>
-      
+
       <div className="mt-3 z-20">
         <Button onClick={dealNext} variant="outline" className="rounded-full shadow-sm text-amber-700 border-amber-200 hover:bg-amber-50 text-xs font-semibold px-5">
           Next Book <ArrowRight className="w-4 h-4 ml-2" />
@@ -198,7 +198,7 @@ const EarlyDaysGallery = () => {
   const current = earlyMemories[currentIndex];
 
   return (
-    <div 
+    <div
       className="bg-amber-50/40 border border-amber-200/70 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden text-left"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -215,11 +215,9 @@ const EarlyDaysGallery = () => {
             Early Days Gallery
           </div>
           <h3 className="text-2xl md:text-3xl text-slate-900 font-bold">
-            When It All Began: My Early Days As An Editor
+            When It All Began
           </h3>
-          <p className="text-slate-600 text-sm md:text-base mt-1">
-            Real memories from my university years, graduation, and the early hustle before the breakthrough.
-          </p>
+
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
@@ -247,7 +245,7 @@ const EarlyDaysGallery = () => {
       <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-xl group">
         <div className="relative h-[380px] sm:h-[430px] md:h-[480px] flex items-center justify-center overflow-hidden bg-slate-950">
           {/* Backdrop blur effect */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center blur-2xl opacity-35 scale-110"
             style={{ backgroundImage: `url(${current.src})` }}
           />
@@ -299,11 +297,10 @@ const EarlyDaysGallery = () => {
             <button
               key={item.src}
               onClick={() => setCurrentIndex(idx)}
-              className={`relative shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-300 w-16 h-16 sm:w-20 sm:h-20 ${
-                isActive
+              className={`relative shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-300 w-16 h-16 sm:w-20 sm:h-20 ${isActive
                   ? "border-amber-500 ring-2 ring-amber-500/40 scale-105 shadow-md"
                   : "border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-400"
-              }`}
+                }`}
             >
               <img
                 src={item.src}
@@ -329,7 +326,7 @@ const EarlyDaysGallery = () => {
             onClick={() => setLightboxOpen(false)}
           >
             {/* Top Bar */}
-            <div 
+            <div
               className="absolute top-4 inset-x-4 sm:inset-x-8 flex justify-between items-center text-white z-10"
               onClick={(e) => e.stopPropagation()}
             >
@@ -351,7 +348,7 @@ const EarlyDaysGallery = () => {
             </div>
 
             {/* Main Lightbox Image & Navigation */}
-            <div 
+            <div
               className="relative max-w-4xl max-h-[75vh] w-full flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
@@ -384,7 +381,7 @@ const EarlyDaysGallery = () => {
             </div>
 
             {/* Lightbox Caption */}
-            <div 
+            <div
               className="mt-4 text-center max-w-xl text-white px-4"
               onClick={(e) => e.stopPropagation()}
             >
@@ -406,7 +403,7 @@ export default function EditorSchool() {
   const [timeLeft, setTimeLeft] = useState("");
   const [isDiscountActive, setIsDiscountActive] = useState(true);
   const { toast } = useToast();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -442,10 +439,10 @@ export default function EditorSchool() {
       toast({ title: "Required fields missing", description: "Please provide your name and email.", variant: "destructive" });
       return;
     }
-    
+
     setIsSubmitting(true);
     await saveLeadToCRM('complete');
-    
+
     setTimeout(() => {
       setIsSubmitting(false);
       setHasSubmitted(true);
@@ -543,15 +540,15 @@ export default function EditorSchool() {
       <section className="relative pt-32 pb-24 bg-slate-950 text-white overflow-hidden text-center px-6">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-        
+
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/50 border border-slate-700 text-amber-400 text-sm font-medium mb-10 shadow-xl backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]"></span>
             Enrollment open for December 2026 Cohort
           </div>
-          
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 text-white leading-[1.1] tracking-tight drop-shadow-sm">The Book Editor <br className="hidden md:block"/> Business School</h1>
-          
+
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 text-white leading-[1.1] tracking-tight drop-shadow-sm">The Book Editor <br className="hidden md:block" /> Business School</h1>
+
           {/* Horizontal Realization Cards (H) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-10 text-left max-w-5xl mx-auto">
             {/* Card 1 */}
@@ -592,7 +589,7 @@ export default function EditorSchool() {
               A practical business school for editors who are exhausted from treating editing like a side hustle and are ready to build an editing business that attracts serious authors, better projects and better money.
             </p>
           </div>
-          
+
           <div className="flex flex-col items-center justify-center gap-4">
             <Button size="lg" onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-950 text-base h-16 px-12 rounded-sm font-bold shadow-[0_10px_40px_-10px_rgba(245,158,11,0.5)] transition-transform hover:-translate-y-1 tracking-wide">
               REGISTER NOW!
@@ -623,7 +620,7 @@ export default function EditorSchool() {
         <div className="mb-14">
           <EarlyDaysGallery />
         </div>
-        
+
         <div className="bg-white p-8 md:p-12 shadow-sm border border-slate-200 rounded-xl space-y-6 text-slate-700 text-lg leading-relaxed">
           <div className="mb-8 border-b pb-6">
             <p className="font-bold text-2xl text-slate-900">Hi, I'm Grace</p>
@@ -642,14 +639,14 @@ export default function EditorSchool() {
           <p>At the time, I didn't think much of it. I simply thought, well, at least somebody is paying me to do something I enjoy.</p>
           <p>I had no idea that I was sitting on a skill that would eventually change my life.</p>
           <p className="font-bold text-slate-900 pt-4">Then something changed.</p>
-          <p>One author paid me ₦60,000.<br/>Another paid me ₦100,000.</p>
-          <p>Voila! Those two payments did something to my brain. They made me stop and ask:<br/><strong className="italic text-slate-900 text-xl block mt-2">“Wait. How much can this thing actually pay?”</strong></p>
+          <p>One author paid me ₦60,000.<br />Another paid me ₦100,000.</p>
+          <p>Voila! Those two payments did something to my brain. They made me stop and ask:<br /><strong className="italic text-slate-900 text-xl block mt-2">“Wait. How much can this thing actually pay?”</strong></p>
           <p className="mt-4">That question changed everything. I started paying attention, learning non-stop, experimenting, figuring out how to price. How to position. How to communicate value. How to work with authors. How to structure projects. How to create systems. How to protect myself. How to attract better clients.</p>
           <p>How to stop treating editing like something I did because I loved books and start treating it like the business that it was.</p>
           <p className="font-bold text-slate-900 pt-4">And today?</p>
           <p>That same skill that once got me a ₦100 recharge card now pays me in millions of naira and thousands of dollars.</p>
         </div>
-        
+
         {/* Present Day Gallery - Recent Pictures */}
         <div className="mt-20 text-center">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold uppercase tracking-wider mb-3 border border-slate-200">
@@ -673,9 +670,9 @@ export default function EditorSchool() {
           <p className="text-sm md:text-base text-slate-500 mb-4">
             Real covers and projects that laid the groundwork for my publishing career.
           </p>
-          
+
           <DeckCarousel images={[1, 2, 3, 4, 5].map(num => `/editor-school/books/Image ${num}.png`)} />
-          
+
           {/* Organized Card matching "About Grace" layout */}
           <div className="bg-white p-8 md:p-12 shadow-sm border border-slate-200 rounded-xl space-y-6 text-slate-700 text-lg leading-relaxed text-left mt-8">
             <div className="border-b border-slate-100 pb-4">
@@ -703,10 +700,10 @@ export default function EditorSchool() {
               I have been behind many popular and bestselling books that NDAs would not allow me disclose.
             </p>
             <p className="pt-2">
-              So…<br/>
+              So…<br />
               …I want to show you what took me years of experience, mistakes, experiments and uncomfortable lessons to figure out in just 3 days!
             </p>
-            
+
             <div className="font-bold text-lg md:text-xl text-amber-800 bg-amber-50 p-5 md:p-6 rounded-xl border border-amber-200/80 shadow-sm mt-6">
               Editing is NOT magic but the way you build the business around the editing is everything.
             </div>
@@ -721,7 +718,7 @@ export default function EditorSchool() {
           <p>The problem is that too many editors have never learnt how to make their skill expensive.</p>
           <p>I am going to be honest with you. There is a strange way the world treats editors. Everyone wants a good editor. Nobody wants to pay for one.</p>
           <p>Authors will spend thousands designing covers. Millions printing books. Thousands running ads. Thousands buying courses on marketing. Then suddenly, when it is time to edit the manuscript:</p>
-          
+
           {/* One Major High-Contrast Card */}
           <div className="bg-slate-950 text-white border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl my-8 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -759,11 +756,11 @@ export default function EditorSchool() {
               </div>
             </div>
           </div>
-          
+
           <p>Then, because nobody taught you how to communicate the value of what you do, you start defending your price. Then reducing it. Then apologising for it. Then accepting work that makes you resent the author. Then wondering why editing doesn't pay.</p>
-          <p className="font-bold text-2xl sm:text-3xl text-center pt-8 text-slate-900">Editing is not the problem.<br/>Your business model might be.</p>
+          <p className="font-bold text-2xl sm:text-3xl text-center pt-8 text-slate-900">Editing is not the problem.<br />Your business model might be.</p>
         </div>
-        
+
         <div className="mt-16 bg-slate-900 p-10 rounded-2xl shadow-xl flex flex-col items-center border border-slate-800">
           <Button size="lg" onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-900 h-16 px-12 rounded-sm font-bold text-base shadow-lg hover:-translate-y-1 transition-transform tracking-wide">
             REGISTER NOW!
@@ -776,13 +773,13 @@ export default function EditorSchool() {
       {/* You don't need another class */}
       <section className="py-24 bg-amber-50 px-6 border-y border-amber-100">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center uppercase tracking-wide leading-tight">YOU DON'T NEED ANOTHER <br className="hidden sm:block"/> “HOW TO EDIT” CLASS.</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center uppercase tracking-wide leading-tight">YOU DON'T NEED ANOTHER <br className="hidden sm:block" /> “HOW TO EDIT” CLASS.</h2>
           <div className="space-y-6 text-lg text-slate-700 text-center max-w-3xl mx-auto">
             <p>You need to understand what happens after you know how to edit.</p>
             <p>Being able to spot a weak paragraph is one skill. Knowing what to charge for fixing it is another.</p>
             <p>Knowing how to explain that value to an author is another. Knowing how to structure the project is another. Knowing where your responsibility ends is another. Knowing how to handle revisions is another. Knowing how to deal with a difficult author is another. Knowing how to get clients without begging for work is another.</p>
             <p>Knowing how to build systems so that every new client doesn't throw your entire life into chaos?</p>
-            <p className="font-bold text-2xl text-amber-700 pt-6">Another skill entirely.<br/>That is what I will be teaching.</p>
+            <p className="font-bold text-2xl text-amber-700 pt-6">Another skill entirely.<br />That is what I will be teaching.</p>
           </div>
         </div>
       </section>
@@ -791,18 +788,18 @@ export default function EditorSchool() {
       <section className="py-24 px-6 max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center uppercase">THEN AI SHOWED UP.</h2>
         <div className="space-y-6 text-lg text-slate-700 text-left">
-          <p>Maybe you've been watching what is happening with AI and quietly wondering: <br/><strong className="italic">“Is editing still going to be a thing?”</strong></p>
+          <p>Maybe you've been watching what is happening with AI and quietly wondering: <br /><strong className="italic">“Is editing still going to be a thing?”</strong></p>
           <p>You should be asking that question because AI is changing the industry. Authors are generating manuscripts with AI. They are rewriting paragraphs with AI. They are asking AI to improve their grammar. They are asking AI to “make this sound human.” They are asking AI to critique their chapters.</p>
           <p>Some editors, including you, are responding by pretending none of this is happening.</p>
           <p className="font-bold text-slate-900 text-xl border-l-4 border-amber-500 pl-4 py-2 bg-slate-50">I wouldn't. Because AI is not going away.</p>
-          <p>The question is not: “How do I compete with AI?”<br/>The better one to ask is: <strong className="text-amber-700">“How do I become more valuable because AI exists?”</strong></p>
+          <p>The question is not: “How do I compete with AI?”<br />The better one to ask is: <strong className="text-amber-700">“How do I become more valuable because AI exists?”</strong></p>
           <p>Here is something interesting. AI may actually create more opportunities for good editors. Why?</p>
           <p>Because authors can generate words. What they still struggle with is knowing whether those words actually sound like them. Whether the book makes sense as a whole. Whether the argument holds. Whether the ideas are properly developed. Whether the story has a pulse. Whether the voice is consistent. Whether the manuscript is saying what the author actually means. Whether the book is worth publishing in the first place.</p>
           <p>Not to hurt you but authors who are already using AI don't necessarily need another person to tell ChatGPT: “Humanize this more.” NO! They can do that themselves.</p>
           <p>They need someone who understands books, people, language, ideas, context, voice and editorial judgement.</p>
           <p className="font-bold text-xl text-center bg-slate-900 text-white p-8 rounded-xl mt-10 shadow-lg">That person can be you IF you know how to position yourself for where the industry is going.</p>
         </div>
-        
+
         <div className="mt-16 text-center">
           <Button size="lg" onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-900 h-16 px-12 rounded-sm font-bold text-base shadow-xl hover:-translate-y-1 transition-transform">
             REGISTER NOW!
@@ -844,7 +841,7 @@ export default function EditorSchool() {
                 </div>
               </AccordionContent>
             </AccordionItem>
-            
+
             <AccordionItem value="phase-2" className="border-slate-800 bg-slate-800/50 mb-4 rounded-xl px-2">
               <AccordionTrigger className="text-left font-semibold text-xl hover:text-amber-400 px-4 py-6">
                 Phase 2: Execution & Judgement
@@ -924,31 +921,31 @@ export default function EditorSchool() {
       <section className="py-24 bg-white px-6 text-center border-b border-slate-200">
         <h2 className="text-3xl font-bold text-slate-900 mb-2 uppercase">…and I'M NOT SENDING YOU INTO THE REAL WORLD WITH ONLY LIVE CLASSES</h2>
         <p className="text-xl text-amber-700 font-bold mb-16">God forbid! YOU GET THE EDITOR'S TOOLKIT.</p>
-        
+
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto text-left">
           <div className="bg-slate-50 p-10 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <h3 className="font-bold text-xl text-slate-900 mb-4 border-b border-slate-200 pb-4">BONUS 1: THE EDITOR'S TOOLKIT</h3>
             <ul className="space-y-3 text-slate-600 mb-8 font-medium">
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Contracts.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Onboarding forms.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Editing briefs.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Style sheets.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Checklists.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Contracts.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Onboarding forms.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Editing briefs.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Style sheets.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Checklists.</li>
             </ul>
             <p className="text-sm font-bold text-slate-800 pt-4 bg-slate-200/50 p-4 rounded text-center">The documents that help you look and operate like a business.</p>
           </div>
-          
+
           <div className="bg-slate-50 p-10 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <h3 className="font-bold text-xl text-slate-900 mb-4 border-b border-slate-200 pb-4">BONUS 2: THE PRICING & PROPOSAL KIT</h3>
             <ul className="space-y-3 text-slate-600 mb-8 font-medium">
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Pricing calculator.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Quotation template.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Proposal template.</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0"/> Invoice.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Pricing calculator.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Quotation template.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Proposal template.</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-amber-500 shrink-0" /> Invoice.</li>
             </ul>
             <p className="text-sm font-bold text-slate-800 pt-4 bg-slate-200/50 p-4 rounded text-center">Because knowing what you charge is one thing. Being able to present that price professionally is another.</p>
           </div>
-          
+
           <div className="bg-slate-50 p-10 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <h3 className="font-bold text-xl text-slate-900 mb-4 border-b border-slate-200 pb-4">BONUS 3: REAL MANUSCRIPT WALKTHROUGH</h3>
             <p className="text-slate-600 mb-4 font-medium leading-relaxed">I don't want you finishing this course thinking: "Okay...but what does professional editing actually look like?"</p>
@@ -962,8 +959,8 @@ export default function EditorSchool() {
       <section className="py-32 bg-slate-100 px-6 text-center">
         <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-16 max-w-5xl mx-auto leading-tight">IMAGINE WHAT CHANGES WHEN YOU STOP THINKING LIKE A FREELANCER.</h2>
         <div className="max-w-2xl mx-auto space-y-6 text-xl text-slate-700">
-          <p>You stop asking: “How much can this author afford?”<br/>and start asking: <strong className="text-amber-700 bg-amber-100 px-2 rounded">“What does this project require?”</strong></p>
-          <p>You stop saying: “I can edit anything.”<br/>and start communicating <strong className="text-amber-700 bg-amber-100 px-2 rounded">exactly what you do.</strong></p>
+          <p>You stop asking: “How much can this author afford?”<br />and start asking: <strong className="text-amber-700 bg-amber-100 px-2 rounded">“What does this project require?”</strong></p>
+          <p>You stop saying: “I can edit anything.”<br />and start communicating <strong className="text-amber-700 bg-amber-100 px-2 rounded">exactly what you do.</strong></p>
           <p>You stop taking manuscripts through WhatsApp with no brief, no contract, no process and no boundaries.</p>
           <p>You stop calculating prices based on fear.</p>
           <p>You stop accepting authors who treat your expertise like a commodity.</p>
@@ -982,29 +979,29 @@ export default function EditorSchool() {
           <div className="bg-amber-50 p-10 border border-amber-100 rounded-2xl shadow-sm">
             <h3 className="text-3xl font-bold text-slate-900 mb-8 uppercase border-b border-amber-200 pb-4">THIS IS FOR YOU IF...</h3>
             <ul className="space-y-5 text-slate-700 text-lg">
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You already edit books but feel like you're constantly underpaid.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You are tired of authors negotiating every fee.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You know you're good but don't know how to position yourself.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You have no idea what to charge.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You edit without a proper workflow.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You keep attracting authors who want premium work for bargain prices.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You want to start editing professionally but don't know where to begin.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You've been relying on referrals and don't know how to consistently find clients.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You are scared that AI is going to take your work.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You are already using AI but don't know how to make your human expertise more valuable.</li>
-              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1"/> You want to move from freelance editor to editing business owner.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You already edit books but feel like you're constantly underpaid.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You are tired of authors negotiating every fee.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You know you're good but don't know how to position yourself.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You have no idea what to charge.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You edit without a proper workflow.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You keep attracting authors who want premium work for bargain prices.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You want to start editing professionally but don't know where to begin.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You've been relying on referrals and don't know how to consistently find clients.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You are scared that AI is going to take your work.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You are already using AI but don't know how to make your human expertise more valuable.</li>
+              <li className="flex gap-4"><CheckCircle2 className="w-6 h-6 text-amber-600 shrink-0 mt-1" /> You want to move from freelance editor to editing business owner.</li>
             </ul>
             <p className="mt-8 font-bold text-slate-900 italic text-xl border-t border-amber-200 pt-6">Or perhaps you're simply thinking: “I know I can do this. I just don't know how to build the business.” Then you are exactly who I built this for.</p>
           </div>
-          
+
           <div className="bg-slate-50 p-10 border border-slate-200 rounded-2xl shadow-sm">
             <h3 className="text-3xl font-bold text-slate-900 mb-8 uppercase border-b border-slate-200 pb-4">THIS IS NOT FOR YOU IF...</h3>
             <ul className="space-y-6 text-slate-700 text-lg">
-              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You want a certificate to frame on your wall and do nothing with it.</li>
-              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You want a magic formula that will make clients appear without you doing the work.</li>
-              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You want to remain comfortable charging whatever people are willing to give you.</li>
-              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You don't want to learn the business side of editing.</li>
-              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1"/> You think being a good editor automatically makes you a good business owner.</li>
+              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1" /> You want a certificate to frame on your wall and do nothing with it.</li>
+              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1" /> You want a magic formula that will make clients appear without you doing the work.</li>
+              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1" /> You want to remain comfortable charging whatever people are willing to give you.</li>
+              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1" /> You don't want to learn the business side of editing.</li>
+              <li className="flex gap-4"><XCircle className="w-6 h-6 text-slate-400 shrink-0 mt-1" /> You think being a good editor automatically makes you a good business owner.</li>
             </ul>
             <p className="mt-8 font-bold text-slate-900 italic text-xl border-t border-slate-200 pt-6">It doesn't, and I would rather tell you that now than collect your money and flatter you.</p>
           </div>
@@ -1019,14 +1016,14 @@ export default function EditorSchool() {
           <p>I did not wake up one morning with a business plan. Gradually, the girl who once received a ₦100 recharge card for editing became the editor whose skill now commands millions of naira.</p>
           <p>I don't want you to spend the next ten years learning every lesson the hard way.</p>
           <p className="font-bold text-3xl text-amber-400">Take the shortcut. Learn from someone who has already walked into the walls.</p>
-          
+
           <div className="py-16">
             <h2 className="text-4xl md:text-5xl font-bold uppercase text-amber-500 leading-tight drop-shadow">THE WORLD DOES NOT NEED MORE PEOPLE WHO CAN CORRECT GRAMMAR.</h2>
             <h2 className="text-4xl md:text-5xl font-bold uppercase text-white mt-6 leading-tight drop-shadow">IT NEEDS EDITORS WHO KNOW WHAT THEY ARE DOING.</h2>
           </div>
-          
+
           <p className="text-2xl font-medium max-w-3xl mx-auto">Editors who can run a business. Editors who can make money from the thing they are already good at. That is the editor I want to help you become.</p>
-          
+
           <div className="text-slate-400 italic py-12 border-y border-slate-800 my-12 bg-slate-950/30 rounded-xl px-8 shadow-inner">
             <p className="mb-4">Maybe yours wasn't a recharge card.</p>
             <p className="mb-4">Maybe it was: <span className="text-slate-300">"Please help me edit this one. I'll pay you later."</span></p>
@@ -1034,7 +1031,7 @@ export default function EditorSchool() {
             <p className="mb-4">Maybe you've edited entire books for money that made you embarrassed to tell anyone what you charged.</p>
             <p className="mb-4">Maybe you've sat at your laptop for hours thinking: <span className="text-slate-300">"There has to be more to this."</span></p>
           </div>
-          
+
           <p className="font-bold text-4xl text-amber-400">There is. I know because I found it and now I'm opening the door.</p>
         </div>
       </section>
@@ -1045,24 +1042,24 @@ export default function EditorSchool() {
           <div className="text-slate-900">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 uppercase leading-tight tracking-tight">THE BOOK EDITOR BUSINESS SCHOOL</h2>
             <p className="text-2xl font-medium text-amber-700 mb-10">Learn the craft. Build the business. Become harder to replace.</p>
-            
+
             <ul className="space-y-5 text-xl font-medium mb-10">
               <li className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-slate-200"><CheckCircle2 className="text-amber-500 w-8 h-8" /> 20 powerful lessons.</li>
               <li className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-slate-200"><CheckCircle2 className="text-amber-500 w-8 h-8" /> 3 practical bonuses.</li>
               <li className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-slate-200"><CheckCircle2 className="text-amber-500 w-8 h-8" /> Certificate of participation.</li>
               <li className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-slate-200"><CheckCircle2 className="text-amber-500 w-8 h-8" /> Cash grant for the outstanding student.</li>
             </ul>
-            
+
             <p className="text-xl text-slate-700 mb-6 leading-relaxed">You can spend another year figuring this out through trial and error. Or you can spend one investment learning the systems, thinking and business principles that took me years to build.</p>
             <p className="text-2xl text-slate-900 mb-10 font-bold">Your choice.</p>
-            
+
             <div className="bg-slate-900 p-8 rounded-xl shadow-lg text-slate-300 space-y-4 mb-10 text-xl font-light">
               <p>But if you already know that editing is what you want to do...</p>
               <p>If you already know you're good at it...</p>
               <p>If you already know you want better clients and better money...</p>
               <p className="font-bold text-3xl text-amber-400 pt-2 border-t border-slate-700 mt-4">Don't sit this one out.</p>
             </div>
-            
+
             <div className="border-t-2 border-slate-300 pt-10 mt-10 text-slate-700 text-xl">
               <p className="font-bold mb-4 uppercase text-slate-900 tracking-widest text-sm">One more thing.</p>
               <p className="mb-4">Please don't buy this because you like me. Don't buy it because I told you editing can make money.</p>
@@ -1071,13 +1068,13 @@ export default function EditorSchool() {
               <p className="font-bold text-3xl text-amber-700 text-center">You can. Let's build it.</p>
             </div>
           </div>
-          
+
           <div id="register-form" className="bg-white p-8 sm:p-10 md:p-14 shadow-2xl rounded-2xl border-2 border-amber-500/30 sticky top-24 w-full">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold tracking-widest uppercase whitespace-nowrap shadow-md">
               Limited Slots Remaining
             </div>
             <h3 className="text-3xl font-bold text-slate-900 mb-4 uppercase text-center mt-4">SECURE YOUR SEAT</h3>
-            
+
             <div className="flex flex-col items-center justify-center mb-10 bg-slate-50 p-6 rounded-xl border border-slate-100">
               <div className="text-5xl font-bold text-slate-900 mb-2">{currentPriceNaira}</div>
               <div className="text-xl text-slate-500 font-medium line-through mb-4">₦33,500</div>
@@ -1087,7 +1084,7 @@ export default function EditorSchool() {
                 </div>
               )}
             </div>
-            
+
             {hasSubmitted ? (
               <div className="py-6 text-left space-y-6">
                 <div className="text-center pb-4 border-b border-slate-100">
@@ -1096,7 +1093,7 @@ export default function EditorSchool() {
                   </div>
                   <h4 className="text-2xl font-bold text-slate-900">Seat Reserved, {formData.name.split(" ")[0]}!</h4>
                   <p className="text-slate-600 text-sm mt-1">Your applicant details are logged in our system. Complete payment to secure your seat.</p>
-                  
+
                   <div className="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg text-amber-900 text-sm font-semibold">
                     <span>Total Due:</span>
                     <span className="text-xl font-bold font-mono text-amber-700">{currentPriceNaira}</span>
@@ -1142,19 +1139,19 @@ export default function EditorSchool() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-3">
                   <Label htmlFor="name" className="text-base font-semibold">Full Name *</Label>
-                  <Input id="name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} onBlur={handleBlur} className="h-14 text-lg bg-slate-50" />
+                  <Input id="name" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} onBlur={handleBlur} className="h-14 text-lg bg-slate-50" />
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="email" className="text-base font-semibold">Email Address *</Label>
-                  <Input id="email" type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} onBlur={handleBlur} className="h-14 text-lg bg-slate-50" />
+                  <Input id="email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} onBlur={handleBlur} className="h-14 text-lg bg-slate-50" />
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="phone" className="text-base font-semibold">Phone Number</Label>
-                  <Input id="phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} onBlur={handleBlur} className="h-14 text-lg bg-slate-50" />
+                  <Input id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} onBlur={handleBlur} className="h-14 text-lg bg-slate-50" />
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="experience" className="text-base font-semibold">Years of Editing Experience</Label>
-                  <Input id="experience" placeholder="e.g. 2 years, none, 5+ years" value={formData.experience} onChange={(e) => setFormData({...formData, experience: e.target.value})} onBlur={handleBlur} className="h-14 text-lg bg-slate-50 placeholder:text-slate-400" />
+                  <Input id="experience" placeholder="e.g. 2 years, none, 5+ years" value={formData.experience} onChange={(e) => setFormData({ ...formData, experience: e.target.value })} onBlur={handleBlur} className="h-14 text-lg bg-slate-50 placeholder:text-slate-400" />
                 </div>
                 <Button type="submit" size="lg" disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 h-16 font-bold text-lg mt-6 shadow-xl hover:-translate-y-1 transition-transform tracking-wide">
                   {isSubmitting ? <><Loader2 className="mr-2 h-6 w-6 animate-spin" /> Processing...</> : "REGISTER NOW!"}
