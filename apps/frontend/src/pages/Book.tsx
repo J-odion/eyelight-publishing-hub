@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { LeadsApi } from "@/lib/api";
+import { LeadsApi, PaymentsApi } from "@/lib/api";
 import logo from "@/assets/logo.jpeg";
 
 const PRICE_NGN = 25000;
@@ -110,17 +110,49 @@ const Book = () => {
 
   const handleContinueToPayment = async () => {
     setSubmitting(true);
-    await saveBookingLead('completed');
-    localStorage.setItem('eyelight_confirmed_payment', form.email);
-    // Simulate / Process payment
-    await new Promise((r) => setTimeout(r, 900));
-    setSubmitting(false);
-    setBookingComplete(true);
-    toast({
-      title: "Booking Confirmed & Payment Received",
-      description:
-        "Your consultation slot is locked in. Please proceed to complete the pre-consultation brief.",
-    });
+    try {
+      await saveBookingLead('pending_payment');
+
+      const callbackUrl = `${window.location.origin}/payment/callback?type=booking&email=${encodeURIComponent(form.email)}`;
+      const response = await PaymentsApi.initialize({
+        email: form.email.trim(),
+        amount: PRICE_NGN,
+        purpose: "Chief Editor 1:1 Consultation",
+        customerName: form.name.trim(),
+        customerPhone: form.phone.trim(),
+        metadata: {
+          type: 'booking',
+          slotDate: date ? format(date, "yyyy-MM-dd") : null,
+          slotTime: time,
+          note: form.note,
+          customerName: form.name.trim(),
+          customerPhone: form.phone.trim(),
+        },
+        callbackUrl,
+      });
+
+      if (response.data?.authorization_url) {
+        localStorage.setItem('eyelight_confirmed_payment', form.email);
+        toast({
+          title: "Redirecting to Paystack...",
+          description: "Complete your payment securely to lock in your consultation slot.",
+        });
+        window.location.href = response.data.authorization_url;
+      } else {
+        throw new Error("Failed to receive payment authorization URL from Paystack.");
+      }
+    } catch (err: any) {
+      console.error("Payment initialization failed:", err);
+      setSubmitting(false);
+      toast({
+        title: "Payment Initialization Failed",
+        description:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Could not initialize Paystack checkout. Please try again or reach out on WhatsApp.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

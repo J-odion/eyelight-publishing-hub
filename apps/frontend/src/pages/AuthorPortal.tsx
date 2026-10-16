@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthorApi, AuthApi, ReferralsApi } from '../lib/api.js';
+import { AuthorApi, AuthApi, ReferralsApi, PaymentsApi } from '../lib/api.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -317,15 +317,58 @@ function PortalDashboard() {
             <h2 className="text-lg font-semibold mb-4">Payment History</h2>
             <div className="bg-card border rounded-xl divide-y">
               {payments.map((p: any) => (
-                <div key={p._id} className="p-4 flex items-center justify-between">
+                <div key={p._id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold">₦{p.amount.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">{p.purpose}</p>
+                    {p.reference && (
+                      <p className="text-[11px] font-mono text-muted-foreground mt-0.5">Ref: {p.reference}</p>
+                    )}
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium
-                    ${p.status === 'Success' ? 'bg-green-100 text-green-700' :
-                      p.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'}`}>{p.status}</span>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        p.status === 'Success'
+                          ? 'bg-green-100 text-green-700'
+                          : p.status === 'Pending'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {p.status}
+                    </span>
+                    {p.status === 'Pending' && (
+                      <Button
+                        size="sm"
+                        className="bg-[#ffa41c] hover:bg-[#fa8900] text-slate-900 font-semibold"
+                        onClick={async () => {
+                          try {
+                            toast.loading('Connecting to Paystack...');
+                            const callbackUrl = `${window.location.origin}/payment/callback?type=portal&email=${encodeURIComponent(author.email)}`;
+                            const res = await PaymentsApi.initialize({
+                              amount: p.amount,
+                              email: author.email,
+                              purpose: p.purpose || 'Author Project Milestone',
+                              userId: author._id,
+                              customerName: author.name,
+                              metadata: {
+                                type: 'portal',
+                                paymentId: p._id,
+                              },
+                              callbackUrl,
+                            });
+                            if (res.data?.authorization_url) {
+                              window.location.href = res.data.authorization_url;
+                            }
+                          } catch {
+                            toast.error('Failed to initiate Paystack payment.');
+                          }
+                        }}
+                      >
+                        <CreditCard className="w-3.5 h-3.5 mr-1.5" /> Pay with Paystack
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

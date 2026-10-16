@@ -46,8 +46,17 @@ export const LeadsApi = {
 
 // ─── Payments ────────────────────────────────────────────────
 export const PaymentsApi = {
-  initialize: (data: { amount: number; purpose: string; projectId?: string; userId: string; email: string }) =>
-    api.post('/payments/initialize', data),
+  initialize: (data: {
+    amount: number;
+    email: string;
+    purpose?: string;
+    projectId?: string;
+    userId?: string;
+    customerName?: string;
+    customerPhone?: string;
+    metadata?: Record<string, any>;
+    callbackUrl?: string;
+  }) => api.post('/payments/initialize', data),
   verify: (reference: string) =>
     api.get(`/payments/verify/${reference}`),
 };

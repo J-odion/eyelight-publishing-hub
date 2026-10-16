@@ -1,8 +1,19 @@
-import { Controller, Post, Headers, Req, Body, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Headers,
+  Req,
+  Body,
+  UnauthorizedException,
+  Logger,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Webhook } from 'svix';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PaymentsService } from '../payments/payments.service.js';
 
 @Controller('webhooks')
 export class WebhooksController {
@@ -11,7 +22,22 @@ export class WebhooksController {
   constructor(
     private configService: ConfigService,
     private eventEmitter: EventEmitter2,
+    private paymentsService: PaymentsService,
   ) {}
+
+  @Post('paystack')
+  @HttpCode(HttpStatus.OK)
+  async handlePaystackWebhook(
+    @Headers('x-paystack-signature') signature: string,
+    @Req() req: RawBodyRequest<Request>,
+    @Body() payload: any,
+  ) {
+    return this.paymentsService.handlePaystackWebhook(
+      payload,
+      signature,
+      req.rawBody,
+    );
+  }
 
   @Post('resend')
   async handleResendWebhook(
@@ -19,7 +45,7 @@ export class WebhooksController {
     @Headers('svix-timestamp') svixTimestamp: string,
     @Headers('svix-signature') svixSignature: string,
     @Req() req: RawBodyRequest<Request>,
-    @Body() payload: any
+    @Body() payload: any,
   ) {
     const webhookSecret = this.configService.get<string>('RESEND_WEBHOOK_SECRET');
     if (!webhookSecret) {
@@ -40,12 +66,12 @@ export class WebhooksController {
 
     const eventType = payload.type;
     const data = payload.data; // Resend data
-    const resendId = data.email_id; 
-    
+    const resendId = data.email_id;
+
     if (!resendId) return { received: true };
 
     this.logger.log(`Received Resend Webhook: ${eventType} for message ${resendId}`);
-    
+
     // Emit event so the CRM or EmailCampaign schemas can be updated if desired
     this.eventEmitter.emit('resend.webhook', { eventType, data });
 

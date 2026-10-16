@@ -19,6 +19,7 @@ import PressRoom from "./pages/PressRoom.tsx";
 import HelpDocumentation from "./pages/HelpDocumentation.tsx";
 import EditorSchool from "./pages/EditorSchool.tsx";
 import PublicFormView from "./pages/PublicFormView.tsx";
+import PaymentCallback from "./pages/PaymentCallback.tsx";
 
 // Author Portal
 import AuthorPortal from "./pages/AuthorPortal.tsx";
@@ -58,6 +59,10 @@ const App = () => (
             <Route path="/forms/:slug" element={<PublicFormView />} />
             <Route path="/pre-consultation-form" element={<PublicFormView defaultSlug="pre-consultation" />} />
             <Route path="/review-form" element={<PublicFormView defaultSlug="review" />} />
+
+            {/* Payment Callbacks */}
+            <Route path="/payment/callback" element={<PaymentCallback />} />
+            <Route path="/payment-callback" element={<PaymentCallback />} />
 
             {/* Author Portal */}
             <Route path="/portal" element={<AuthorPortal />} />

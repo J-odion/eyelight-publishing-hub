@@ -81,4 +81,23 @@ export class CrmListener {
       }
     }
   }
+
+  @OnEvent('payment.completed')
+  async handlePaymentCompleted(payload: { email: string; userId?: string; data: any }) {
+    if (!payload?.email) return;
+    this.logger.log(`Processing CRM customer upgrade for payment by ${payload.email}`);
+    try {
+      const contact = await this.crmService.createContact({
+        email: payload.email,
+        firstName: payload.data?.customerName?.split(' ')[0] || '',
+        lastName: payload.data?.customerName?.split(' ').slice(1).join(' ') || '',
+        tags: ['customer', 'paying-client'],
+        source: 'payment',
+      });
+      await this.crmService.updateLeadScore(contact._id.toString(), 50);
+      this.logger.log(`Added 50 CRM score points to paying client ${payload.email}`);
+    } catch (e: any) {
+      this.logger.error(`Failed to record CRM payment event for ${payload.email}: ${e.message}`);
+    }
+  }
 }
