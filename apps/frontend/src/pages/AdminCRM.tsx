@@ -502,7 +502,7 @@ function EmailTab() {
           </DialogHeader>
           <div className="mt-2 p-5 bg-white border rounded-xl shadow-sm">
             <div className="text-sm text-muted-foreground border-b pb-3 mb-4 space-y-1">
-              <div><strong>From:</strong> Grace From EyelightPublishers &lt;services@eyelightpublishers.com&gt;</div>
+              <div><strong>From:</strong> Eyelight Publishing &lt;services@eyelightpublishers.com&gt;</div>
               <div><strong>Subject:</strong> {form.subject || '(No Subject)'}</div>
             </div>
             <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.content) || '<em>No content yet...</em>' }} />

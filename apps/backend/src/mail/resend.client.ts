@@ -7,7 +7,7 @@ export class ResendClient {
   public readonly client: Resend;
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.getOrThrow<string>('RESEND_API_KEY');
+    const apiKey = this.configService.get<string>('RESEND_API_KEY') || 're_default_key';
     this.client = new Resend(apiKey);
   }
 }

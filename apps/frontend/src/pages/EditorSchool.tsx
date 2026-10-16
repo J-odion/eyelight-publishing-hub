@@ -457,7 +457,7 @@ export default function EditorSchool() {
 
   const handlePaystackPayment = () => {
     setIsPayingWithPaystack(true);
-    const numericAmount = isDiscountActive ? 19500 : 33500;
+    const numericAmount = isDiscountActive ? 15500 : 33500;
 
     payWithPaystack({
       amount: numericAmount,
