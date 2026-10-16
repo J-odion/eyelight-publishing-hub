@@ -90,7 +90,7 @@ const ConsultationDialog = ({ trigger }: Props) => {
               <MessageCircle size={16} /> WhatsApp
             </a>
             <a
-              href="mailto:services@eyelightpublishing.com?subject=Consultation%20Booking%20Request"
+              href="mailto:services@eyelightpublishers.com?subject=Consultation%20Booking%20Request"
               className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 border border-border text-foreground text-sm font-semibold rounded-full hover:bg-muted transition-colors"
             >
               <Mail size={16} /> Email

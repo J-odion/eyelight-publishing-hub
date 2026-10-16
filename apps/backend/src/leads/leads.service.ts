@@ -36,6 +36,8 @@ export class LeadsService {
         this.eventEmitter.emit('newsletter.subscribed', { email: lead.email, data: { name: lead.name } });
       } else if (lead.type === LeadType.CONSULTATION) {
         this.eventEmitter.emit('consultation.booked', { email: lead.email, data: { name: lead.name } });
+      } else if (lead.type === LeadType.COURSE_REGISTRATION) {
+        this.eventEmitter.emit('course.registered', { email: lead.email, data: { name: lead.name, phone: lead.phone, metadata: lead.metadata } });
       }
     }
 

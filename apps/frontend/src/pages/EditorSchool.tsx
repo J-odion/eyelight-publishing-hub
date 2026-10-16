@@ -528,7 +528,7 @@ export default function EditorSchool() {
             <a href="/" className="hover:text-white transition-colors">Home</a>
             <a href="/catalogue" className="hover:text-white transition-colors">Books</a>
             <a href="/store" className="hover:text-white transition-colors">Store</a>
-            <a href="mailto:hello@eyelight.com" className="hover:text-white transition-colors">Contact</a>
+            <a href="mailto:services@eyelightpublishers.com" className="hover:text-white transition-colors">Contact</a>
           </div>
           <Button onClick={handleCTA} className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold h-9 text-xs rounded-sm">
             REGISTER NOW
@@ -1208,7 +1208,7 @@ export default function EditorSchool() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-amber-500 text-3xl font-bold mb-6">Eyelight Publishing</div>
           <div className="flex justify-center gap-8 mb-10 text-slate-400 font-medium text-base">
-            <a href="mailto:hello@eyelight.com" className="hover:text-white transition-colors">hello@eyelight.com</a>
+            <a href="mailto:services@eyelightpublishers.com" className="hover:text-white transition-colors">services@eyelightpublishers.com</a>
             <a href="https://wa.me/2348146682688" className="hover:text-white transition-colors">WhatsApp Support</a>
           </div>
           <p>© {new Date().getFullYear()} Eyelight Publishing. All rights reserved.</p>

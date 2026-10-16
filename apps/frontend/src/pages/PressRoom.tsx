@@ -174,10 +174,10 @@ export default function PressRoom() {
             For interview requests, review copies, or press inquiries, contact us at:
           </p>
           <a
-            href="mailto:press@eyelightpublishing.com"
+            href="mailto:services@eyelightpublishers.com"
             className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-full font-semibold hover:opacity-90 transition-opacity"
           >
-            press@eyelightpublishing.com
+            services@eyelightpublishers.com
           </a>
         </div>
       </div>

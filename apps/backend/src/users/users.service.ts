@@ -146,23 +146,34 @@ export class UsersService {
     return { author, projects, payments };
   }
 
-  // Seed an admin user if none exists
+  // Seed admin user accounts if they don't exist
   async seedAdmin() {
-    const existing = await this.userModel.findOne({ role: Role.ADMIN });
-    if (existing) return;
-
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash('Admin@Eyelight2025', salt);
 
-    const admin = new this.userModel({
-      email: 'admin@eyelightpublishers.com',
-      name: 'Eyelight Admin',
-      phone: '',
-      role: Role.ADMIN,
-      isAuthorOnboarded: true,
-      password,
-    });
-    await admin.save();
-    console.log('✅ Admin user seeded: admin@eyelightpublishers.com / Admin@Eyelight2025');
+    const adminAccounts = [
+      { email: 'services@eyelightpublishers.com', name: 'Eyelight Publishing' },
+      { email: 'admin@eyelightpublishers.com', name: 'Eyelight Admin' },
+    ];
+
+    for (const item of adminAccounts) {
+      const existing = await this.userModel.findOne({ email: item.email });
+      if (!existing) {
+        const admin = new this.userModel({
+          email: item.email,
+          name: item.name,
+          phone: '',
+          role: Role.ADMIN,
+          isAuthorOnboarded: true,
+          password,
+        });
+        await admin.save();
+        console.log(`✅ Admin user seeded: ${item.email} / Admin@Eyelight2025`);
+      } else if (existing.role !== Role.ADMIN) {
+        existing.role = Role.ADMIN;
+        await existing.save();
+        console.log(`✅ Upgraded existing user ${item.email} to Role.ADMIN`);
+      }
+    }
   }
 }

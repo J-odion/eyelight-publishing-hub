@@ -35,11 +35,11 @@ const Footer = () => {
             </p>
             <div className="space-y-2">
               <a
-                href="mailto:services@eyelightpublishing.com"
+                href="mailto:services@eyelightpublishers.com"
                 className="flex items-center gap-2 text-sm opacity-60 hover:opacity-100 transition-opacity"
               >
                 <Mail size={14} />
-                services@eyelightpublishing.com
+                services@eyelightpublishers.com
               </a>
               <a
                 href="tel:+2348146682688"

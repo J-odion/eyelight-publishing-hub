@@ -60,6 +60,23 @@ export class CrmListener {
     }
   }
 
+  @OnEvent('course.registered')
+  async handleCourseRegistered(payload: { email: string; data: any }) {
+    try {
+      const contact = await this.crmService.createContact({
+        email: payload.email,
+        firstName: payload.data?.name?.split(' ')[0] || '',
+        lastName: payload.data?.name?.split(' ').slice(1).join(' ') || '',
+        tags: ['editor-school', 'registered-lead'],
+        source: 'course_registration',
+      });
+      await this.crmService.updateLeadScore(contact._id.toString(), 25);
+      this.logger.log(`Added 25 points to ${payload.email} for course registration`);
+    } catch (e: any) {
+      this.logger.error(`Failed to handle course registration for ${payload.email}`, e.message);
+    }
+  }
+
   @OnEvent('resend.webhook')
   async handleResendWebhook(payload: { eventType: string; data: any }) {
     const { eventType, data } = payload;

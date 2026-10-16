@@ -234,13 +234,13 @@ const OrderForm = () => {
                 </li>
                 <li>
                   <a
-                    href="mailto:services@eyelightpublishing.com"
+                    href="mailto:services@eyelightpublishers.com"
                     className="group flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-colors">
                       <Mail size={18} className="text-accent group-hover:text-white" />
                     </div>
-                    services@eyelightpublishing.com
+                    services@eyelightpublishers.com
                   </a>
                 </li>
               </ul>
