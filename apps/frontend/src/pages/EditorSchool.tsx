@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, XCircle, ArrowRight, Loader2, ChevronLeft, ChevronRight, Maximize2, X, History, MessageCircle, Copy, CreditCard } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, Loader2, ChevronLeft, ChevronRight, Maximize2, X, History, MessageCircle, Copy, CreditCard, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { LeadsApi, PaymentsApi } from "@/lib/api";
+import { LeadsApi } from "@/lib/api";
+import { payWithPaystack } from "@/lib/paystack";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ZoomCarousel = ({ images }: { images: string[] }) => {
@@ -454,48 +455,31 @@ export default function EditorSchool() {
 
   const [isPayingWithPaystack, setIsPayingWithPaystack] = useState(false);
 
-  const handlePaystackPayment = async () => {
+  const handlePaystackPayment = () => {
     setIsPayingWithPaystack(true);
-    try {
-      const numericAmount = isDiscountActive ? 19500 : 33500;
-      const callbackUrl = `${window.location.origin}/payment/callback?type=editor-school&email=${encodeURIComponent(formData.email)}`;
-      const response = await PaymentsApi.initialize({
-        amount: numericAmount,
-        email: formData.email.trim(),
-        purpose: "The Book Editor Business School (December Cohort)",
+    const numericAmount = isDiscountActive ? 19500 : 33500;
+
+    payWithPaystack({
+      amount: numericAmount,
+      email: formData.email.trim(),
+      purpose: "The Book Editor Business School (December Cohort)",
+      customerName: formData.name.trim(),
+      customerPhone: formData.phone.trim(),
+      metadata: {
+        type: 'editor-school',
+        cohort: 'December',
+        experience: formData.experience,
         customerName: formData.name.trim(),
         customerPhone: formData.phone.trim(),
-        metadata: {
-          type: 'editor-school',
-          cohort: 'December',
-          experience: formData.experience,
-          customerName: formData.name.trim(),
-          customerPhone: formData.phone.trim(),
-        },
-        callbackUrl,
-      });
-
-      if (response.data?.authorization_url) {
-        toast({
-          title: "Redirecting to Paystack...",
-          description: "Complete your payment to finalize your enrollment.",
-        });
-        window.location.href = response.data.authorization_url;
-      } else {
-        throw new Error("Unable to obtain Paystack checkout link.");
-      }
-    } catch (err: any) {
-      console.error("Paystack enrollment error:", err);
-      setIsPayingWithPaystack(false);
-      toast({
-        title: "Payment Error",
-        description:
-          err?.response?.data?.message ||
-          err?.message ||
-          "Failed to initialize Paystack checkout. Please try again or reach out on WhatsApp.",
-        variant: "destructive",
-      });
-    }
+      },
+      onSuccess: (reference) => {
+        setIsPayingWithPaystack(false);
+        window.location.href = `/payment/callback?reference=${reference}&type=editor-school`;
+      },
+      onClose: () => {
+        setIsPayingWithPaystack(false);
+      },
+    });
   };
 
   useEffect(() => {
@@ -1120,17 +1104,8 @@ export default function EditorSchool() {
                   </div>
                 </div>
 
-                {/* Primary Option: Instant Paystack Online Payment */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <CreditCard className="w-4 h-4 text-emerald-600" /> Option 1 · Instant Paystack Checkout
-                    </p>
-                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Recommended · Instant
-                    </span>
-                  </div>
-
+                {/* Paystack Online Payment */}
+                <div className="space-y-4 pt-2">
                   <Button
                     onClick={handlePaystackPayment}
                     disabled={isPayingWithPaystack}
@@ -1138,7 +1113,7 @@ export default function EditorSchool() {
                   >
                     {isPayingWithPaystack ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Connecting to Paystack...
+                        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Opening Paystack...
                       </>
                     ) : (
                       <>
@@ -1146,66 +1121,9 @@ export default function EditorSchool() {
                       </>
                     )}
                   </Button>
-                  <p className="text-xs text-slate-500 text-center">
-                    Instant seat confirmation · Accepts Cards, Bank Transfer, USSD & Apple Pay
-                  </p>
-                </div>
-
-                {/* Option 2: Instant WhatsApp Confirmation */}
-                <div className="space-y-3 pt-2">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Option 2 · WhatsApp Confirmation</p>
-                  <a
-                    href={`https://wa.me/2348146682688?text=${encodeURIComponent(
-                      `Hello Grace! I just registered for The Book Editor Business School (December Cohort).\n\nMy Details:\n• Name: ${formData.name}\n• Email: ${formData.email}\n• Phone: ${formData.phone || 'N/A'}\n• Experience: ${formData.experience || 'N/A'}\n\nI want to complete my payment of ${currentPriceNaira}. Please send payment confirmation / account details.`
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba59] text-white py-3.5 px-6 rounded-xl font-bold text-base shadow-md transition-transform hover:-translate-y-0.5 text-center"
-                  >
-                    <MessageCircle className="w-6 h-6 fill-white shrink-0" />
-                    Complete & Confirm on WhatsApp
-                  </a>
-                  <p className="text-xs text-slate-500 text-center">Chat directly with Grace and our team to send proof of payment and receive your cohort access link immediately.</p>
-                </div>
-
-                {/* Option 3: Direct Bank Transfer */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <CreditCard className="w-4 h-4 text-amber-600" /> Option 3 · Direct Bank Transfer
-                    </p>
-                    <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">Manual</span>
-                  </div>
-
-                  <div className="space-y-2 text-sm text-slate-700 pt-1 border-t border-slate-200">
-                    <div className="flex justify-between items-center py-1">
-                      <span className="text-slate-500">Account Name:</span>
-                      <span className="font-semibold text-slate-900 text-right">Eyelight Publishing Services</span>
-                    </div>
-                    <div className="flex justify-between items-center py-1">
-                      <span className="text-slate-500">Bank Name:</span>
-                      <span className="font-semibold text-slate-900 text-right">Access Bank / Moniepoint</span>
-                    </div>
-                    <div className="flex justify-between items-center py-1.5 bg-amber-50/80 px-3 rounded-lg border border-amber-200">
-                      <span className="text-slate-600 text-xs">Account Number:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-base text-slate-900">0123456789</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText("0123456789");
-                            toast({ title: "Account copied!", description: "Account number copied to clipboard." });
-                          }}
-                          className="p-1 hover:bg-amber-200 rounded text-amber-800 transition-colors"
-                          title="Copy account number"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-slate-500 italic text-center">
-                    After transfer, send your receipt via WhatsApp above to activate your enrollment immediately.
+                  <p className="text-xs text-slate-500 text-center flex items-center justify-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    Instant seat confirmation · Secured by Paystack (Card, Transfer, USSD, Apple Pay)
                   </p>
                 </div>
 

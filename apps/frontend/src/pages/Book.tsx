@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { LeadsApi, PaymentsApi } from "@/lib/api";
+import { LeadsApi } from "@/lib/api";
+import { payWithPaystack } from "@/lib/paystack";
 import logo from "@/assets/logo.jpeg";
 
 const PRICE_NGN = 25000;
@@ -112,11 +113,11 @@ const Book = () => {
     setSubmitting(true);
     try {
       await saveBookingLead('pending_payment');
+      localStorage.setItem('eyelight_confirmed_payment', form.email);
 
-      const callbackUrl = `${window.location.origin}/payment/callback?type=booking&email=${encodeURIComponent(form.email)}`;
-      const response = await PaymentsApi.initialize({
-        email: form.email.trim(),
+      payWithPaystack({
         amount: PRICE_NGN,
+        email: form.email.trim(),
         purpose: "Chief Editor 1:1 Consultation",
         customerName: form.name.trim(),
         customerPhone: form.phone.trim(),
@@ -128,28 +129,20 @@ const Book = () => {
           customerName: form.name.trim(),
           customerPhone: form.phone.trim(),
         },
-        callbackUrl,
+        onSuccess: (reference) => {
+          setSubmitting(false);
+          window.location.href = `/payment/callback?reference=${reference}&type=booking`;
+        },
+        onClose: () => {
+          setSubmitting(false);
+        },
       });
-
-      if (response.data?.authorization_url) {
-        localStorage.setItem('eyelight_confirmed_payment', form.email);
-        toast({
-          title: "Redirecting to Paystack...",
-          description: "Complete your payment securely to lock in your consultation slot.",
-        });
-        window.location.href = response.data.authorization_url;
-      } else {
-        throw new Error("Failed to receive payment authorization URL from Paystack.");
-      }
     } catch (err: any) {
       console.error("Payment initialization failed:", err);
       setSubmitting(false);
       toast({
         title: "Payment Initialization Failed",
-        description:
-          err?.response?.data?.message ||
-          err?.message ||
-          "Could not initialize Paystack checkout. Please try again or reach out on WhatsApp.",
+        description: "Could not open Paystack checkout. Please try again.",
         variant: "destructive",
       });
     }

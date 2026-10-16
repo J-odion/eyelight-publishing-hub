@@ -169,7 +169,7 @@ Please answer as openly and specifically as you can. If you are unsure about any
         label: 'Your Honest Review & Experience',
         type: 'paragraph',
         required: true,
-        helpText: 'How was your experience working with Grace and the editorial/production team?',
+        helpText: 'How was your experience working with the Eyelight editorial and production team?',
         placeholder: 'Share your thoughts, outcomes, and what other authors should know...',
       },
       {

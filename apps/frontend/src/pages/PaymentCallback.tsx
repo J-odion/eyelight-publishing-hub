@@ -311,22 +311,26 @@ export default function PaymentCallback() {
                   )}
 
                   {detectedType === 'editor-school' && (
-                    <div className="space-y-3">
-                      <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-900 text-xs sm:text-sm leading-relaxed">
-                        <strong className="font-semibold block mb-1">🎉 Welcome to the Cohort!</strong>
-                        Your seat at The Book Editor Business School is secured. Connect with Grace and the team on WhatsApp to receive the cohort access link and orientation syllabus.
+                    <div className="space-y-4">
+                      <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl text-emerald-950 text-sm leading-relaxed">
+                        <strong className="font-semibold block text-base mb-1 text-emerald-900">🎉 Enrollment Confirmed!</strong>
+                        Your seat at The Book Editor Business School is officially secured. Your full registration receipt and cohort syllabus details have been sent to <span className="font-semibold font-mono text-xs">{paymentData.customerEmail}</span>.
                       </div>
-                      <a
-                        href={`https://wa.me/2348146682688?text=${encodeURIComponent(
-                          `Hello Grace! I have completed my payment for The Book Editor Business School via Paystack.\n\n• Name: ${paymentData.customerName || 'Student'}\n• Email: ${paymentData.customerEmail}\n• Paystack Reference: ${paymentData.reference}\n• Amount: ₦${paymentData.amount.toLocaleString()}\n\nPlease add me to the December Cohort access group!`,
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white py-3.5 px-6 rounded-xl font-bold shadow-md transition-all text-center"
-                      >
-                        <MessageCircle className="w-5 h-5 fill-white" />
-                        Join Cohort WhatsApp Group
-                      </a>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                          onClick={() => navigate('/editor-school')}
+                          className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium h-12 rounded-xl"
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" /> Back to Editor School
+                        </Button>
+                        <Button
+                          onClick={() => window.print()}
+                          variant="outline"
+                          className="flex-1 border-slate-300 h-12 rounded-xl"
+                        >
+                          <Download className="w-4 h-4 mr-2" /> Print Official Receipt
+                        </Button>
+                      </div>
                     </div>
                   )}
 

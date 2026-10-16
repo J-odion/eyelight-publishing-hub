@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCartStore } from '../lib/useCartStore.js';
-import { PaymentsApi } from '../lib/api.js';
+import { payWithPaystack } from '../lib/paystack.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,9 +61,7 @@ export default function Cart() {
 
     setIsSubmitting(true);
     try {
-      const callbackUrl = `${window.location.origin}/payment/callback?type=store`;
-
-      const response = await PaymentsApi.initialize({
+      payWithPaystack({
         amount: getCartTotal(),
         email: form.email.trim(),
         purpose: `Eyelight Bookstore (${items.length} book${items.length > 1 ? 's' : ''})`,
@@ -81,23 +79,19 @@ export default function Cart() {
             quantity: item.quantity,
           })),
         },
-        callbackUrl,
+        onSuccess: (reference) => {
+          setIsSubmitting(false);
+          setIsCheckoutOpen(false);
+          window.location.href = `/payment/callback?reference=${reference}&type=store`;
+        },
+        onClose: () => {
+          setIsSubmitting(false);
+        },
       });
-
-      if (response.data?.authorization_url) {
-        toast.success('Redirecting to Paystack secure checkout...');
-        window.location.href = response.data.authorization_url;
-      } else {
-        throw new Error('Unable to generate Paystack authorization URL.');
-      }
     } catch (err: any) {
       console.error('Paystack cart checkout error:', err);
       setIsSubmitting(false);
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to initialize Paystack checkout. Please try again.',
-      );
+      toast.error('Failed to open Paystack checkout. Please try again.');
     }
   };
 
