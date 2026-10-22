@@ -60,30 +60,33 @@ export default function DealsPipeline() {
     }
   };
 
-  if (loading) return <div className="p-10">Loading pipeline...</div>;
+  if (loading) return <div className="p-6 text-center text-muted-foreground">Loading pipeline...</div>;
 
   return (
-    <div className="p-10 min-h-screen bg-gray-50">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Sales Pipeline</h1>
-        <Button onClick={() => setShowAddDeal(true)}><Plus className="w-4 h-4 mr-2" /> Add Deal</Button>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Sales Pipeline</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Track publishing deals through your pipeline stages.</p>
+        </div>
+        <Button size="sm" onClick={() => setShowAddDeal(true)}><Plus className="w-4 h-4 mr-2" /> Add Deal</Button>
       </div>
 
-      <div className="flex space-x-6 overflow-x-auto pb-4">
+      <div className="flex space-x-4 overflow-x-auto pb-4">
         {stages.map((stage) => (
-          <div key={stage} className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4">
-            <h2 className="text-lg font-semibold capitalize mb-4 text-gray-700">
+          <div key={stage} className="flex-shrink-0 w-72 sm:w-80 bg-gray-100 rounded-lg p-4">
+            <h2 className="text-base font-semibold capitalize mb-3 text-gray-700">
               {stage} ({deals.filter(d => d.stage === stage).length})
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {deals.filter(d => d.stage === stage).map(deal => (
                 <Card key={deal._id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-md">{deal.title}</CardTitle>
+                  <CardHeader className="p-3.5 pb-2">
+                    <CardTitle className="text-sm font-semibold">{deal.title}</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <p className="text-2xl font-bold text-green-600">${deal.value?.toLocaleString()}</p>
-                    <p className="text-sm text-gray-500 mt-2 truncate">
+                  <CardContent className="p-3.5 pt-0">
+                    <p className="text-xl font-bold font-mono text-emerald-600">₦{deal.value?.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
                       {deal.contactId?.firstName} {deal.contactId?.lastName}
                     </p>
                     

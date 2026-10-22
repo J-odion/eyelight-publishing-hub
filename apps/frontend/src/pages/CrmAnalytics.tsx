@@ -213,7 +213,7 @@ export default function CrmAnalytics() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
+          <table className="w-full text-xs text-left min-w-[560px]">
             <thead className="bg-slate-50 border-b text-slate-600 font-medium">
               <tr>
                 <th className="py-2.5 px-3">Applicant</th>
@@ -314,10 +314,10 @@ export default function CrmAnalytics() {
           </div>
 
           {/* Filter Pills with Embedded Counts */}
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-xs font-medium">
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-medium overflow-x-auto max-w-full">
             <button
               onClick={() => setTxFilter('all')}
-              className={`px-2.5 py-1 rounded-md transition-all ${
+              className={`shrink-0 px-2.5 py-1 rounded-md transition-all ${
                 txFilter === 'all' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -325,7 +325,7 @@ export default function CrmAnalytics() {
             </button>
             <button
               onClick={() => setTxFilter('Success')}
-              className={`px-2.5 py-1 rounded-md transition-all ${
+              className={`shrink-0 px-2.5 py-1 rounded-md transition-all ${
                 txFilter === 'Success' ? 'bg-white shadow-sm text-emerald-700 font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -333,7 +333,7 @@ export default function CrmAnalytics() {
             </button>
             <button
               onClick={() => setTxFilter('Pending')}
-              className={`px-2.5 py-1 rounded-md transition-all ${
+              className={`shrink-0 px-2.5 py-1 rounded-md transition-all ${
                 txFilter === 'Pending' ? 'bg-white shadow-sm text-blue-700 font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -341,7 +341,7 @@ export default function CrmAnalytics() {
             </button>
             <button
               onClick={() => setTxFilter('Abandoned')}
-              className={`px-2.5 py-1 rounded-md transition-all ${
+              className={`shrink-0 px-2.5 py-1 rounded-md transition-all ${
                 txFilter === 'Abandoned' ? 'bg-white shadow-sm text-amber-700 font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -349,7 +349,7 @@ export default function CrmAnalytics() {
             </button>
             <button
               onClick={() => setTxFilter('Failed')}
-              className={`px-2.5 py-1 rounded-md transition-all ${
+              className={`shrink-0 px-2.5 py-1 rounded-md transition-all ${
                 txFilter === 'Failed' ? 'bg-white shadow-sm text-rose-700 font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -359,7 +359,7 @@ export default function CrmAnalytics() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
+          <table className="w-full text-xs text-left min-w-[620px]">
             <thead className="bg-slate-50 border-b text-slate-600 font-medium">
               <tr>
                 <th className="py-2.5 px-3">Date</th>

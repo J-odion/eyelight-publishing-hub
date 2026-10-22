@@ -9,7 +9,7 @@ import {
   Users, Mail, BookOpen, CalendarDays, LayoutDashboard, Send,
   LogOut, Plus, ChevronDown, X, Check, RefreshCw, ExternalLink,
   Upload, Download, Search, Zap, Eye, Trash2, Edit2, UserPlus,
-  List as ListIcon, AtSign, Tags, FileText
+  List as ListIcon, AtSign, Tags, FileText, Menu
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Papa from 'papaparse';
@@ -241,18 +241,18 @@ function EmailTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Email Center</h2>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Email Center</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5">
             Send campaigns, direct emails, and schedule broadcasts — from <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">services@eyelightpublishers.com</span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => setShowOverallMetrics(true)}>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button variant="secondary" size="sm" onClick={() => setShowOverallMetrics(true)}>
             <Eye className="w-4 h-4 mr-2" /> View Metrics
           </Button>
-          <Button onClick={() => { resetForm(); setShowCompose(true); }}>
+          <Button size="sm" onClick={() => { resetForm(); setShowCompose(true); }}>
             <Plus className="w-4 h-4 mr-2" /> Compose Email
           </Button>
         </div>
@@ -676,80 +676,82 @@ function EmailTab() {
             <RefreshCw className="w-3 h-3" /> Refresh
           </Button>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Subject</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Audience</TableHead>
-              <TableHead>Stats</TableHead>
-              <TableHead>Scheduled / Sent</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-            ) : campaigns.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No campaigns yet. Click "Compose Email" to get started.</TableCell></TableRow>
-            ) : campaigns.map((c: any) => (
-              <TableRow key={c._id}>
-                <TableCell className="font-medium max-w-xs truncate">{c.subject}</TableCell>
-                <TableCell>{statusBadge(c.status)}</TableCell>
-                <TableCell className="text-xs text-muted-foreground max-w-[140px] truncate">
-                  {c.audienceTags?.length > 0 && `Tags: ${c.audienceTags.join(', ')}`}
-                  {c.audienceListIds?.length > 0 && `Lists: ${c.audienceListIds.length}`}
-                  {c.audienceContactIds?.length > 0 && `${c.audienceContactIds.length} contact(s)`}
-                  {!c.audienceTags?.length && !c.audienceListIds?.length && !c.audienceContactIds?.length && '—'}
-                </TableCell>
-                <TableCell>
-                  {c.stats ? (
-                    <div className="text-xs space-y-0.5">
-                      <div className="flex gap-2">
-                        <span className="text-green-600 font-medium">{c.stats.sent || 0} sent</span>
-                        <span className="text-red-500">{c.stats.failed || 0} failed</span>
-                        <span className="text-blue-600">{c.stats.queued || 0} queued</span>
-                      </div>
-                    </div>
-                  ) : '—'}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-xs">
-                  {c.status === 'Sent' && c.sentAt ? format(new Date(c.sentAt), 'PP p') :
-                    c.status === 'Scheduled' && c.scheduledFor ? format(new Date(c.scheduledFor), 'PP p') : '—'}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(c)} title="Edit"><Edit2 className="w-3.5 h-3.5" /></Button>
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)} title="Delete"><Trash2 className="w-3.5 h-3.5" /></Button>
-                    {(c.status === 'Draft' || c.status === 'Scheduled' || c.status === 'Failed') && (
-                      <Button variant="outline" size="sm" onClick={() => handleSendNow(c._id)} className="h-7 text-xs gap-1">
-                        <Send className="w-3 h-3" /> Send Now
-                      </Button>
-                    )}
-                    {c.status === 'Sending' && (
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1 text-blue-600" title="Check Resend Live Status">
-                          <RefreshCw className="w-3 h-3" /> Sync Status
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleUpdateStatus(c._id, 'Sent')} className="h-7 text-xs gap-1 text-green-700 hover:bg-green-50" title="Force mark as Sent if already delivered">
-                          Mark Sent
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleUpdateStatus(c._id, 'Draft')} className="h-7 text-xs gap-1 text-slate-700 hover:bg-slate-100" title="Reset to Draft so you can retry">
-                          Reset Draft
-                        </Button>
-                      </div>
-                    )}
-                    {c.status === 'Sent' && (
-                      <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1">
-                        <Eye className="w-3 h-3" /> Metrics
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[700px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Subject</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Audience</TableHead>
+                <TableHead>Stats</TableHead>
+                <TableHead>Scheduled / Sent</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              ) : campaigns.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No campaigns yet. Click "Compose Email" to get started.</TableCell></TableRow>
+              ) : campaigns.map((c: any) => (
+                <TableRow key={c._id}>
+                  <TableCell className="font-medium max-w-xs truncate">{c.subject}</TableCell>
+                  <TableCell>{statusBadge(c.status)}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[140px] truncate">
+                    {c.audienceTags?.length > 0 && `Tags: ${c.audienceTags.join(', ')}`}
+                    {c.audienceListIds?.length > 0 && `Lists: ${c.audienceListIds.length}`}
+                    {c.audienceContactIds?.length > 0 && `${c.audienceContactIds.length} contact(s)`}
+                    {!c.audienceTags?.length && !c.audienceListIds?.length && !c.audienceContactIds?.length && '—'}
+                  </TableCell>
+                  <TableCell>
+                    {c.stats ? (
+                      <div className="text-xs space-y-0.5">
+                        <div className="flex gap-2">
+                          <span className="text-green-600 font-medium">{c.stats.sent || 0} sent</span>
+                          <span className="text-red-500">{c.stats.failed || 0} failed</span>
+                          <span className="text-blue-600">{c.stats.queued || 0} queued</span>
+                        </div>
+                      </div>
+                    ) : '—'}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-xs">
+                    {c.status === 'Sent' && c.sentAt ? format(new Date(c.sentAt), 'PP p') :
+                      c.status === 'Scheduled' && c.scheduledFor ? format(new Date(c.scheduledFor), 'PP p') : '—'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(c)} title="Edit"><Edit2 className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)} title="Delete"><Trash2 className="w-3.5 h-3.5" /></Button>
+                      {(c.status === 'Draft' || c.status === 'Scheduled' || c.status === 'Failed') && (
+                        <Button variant="outline" size="sm" onClick={() => handleSendNow(c._id)} className="h-7 text-xs gap-1">
+                          <Send className="w-3 h-3" /> Send Now
+                        </Button>
+                      )}
+                      {c.status === 'Sending' && (
+                        <div className="flex items-center gap-1">
+                          <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1 text-blue-600" title="Check Resend Live Status">
+                            <RefreshCw className="w-3 h-3" /> Sync Status
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleUpdateStatus(c._id, 'Sent')} className="h-7 text-xs gap-1 text-green-700 hover:bg-green-50" title="Force mark as Sent if already delivered">
+                            Mark Sent
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleUpdateStatus(c._id, 'Draft')} className="h-7 text-xs gap-1 text-slate-700 hover:bg-slate-100" title="Reset to Draft so you can retry">
+                            Reset Draft
+                          </Button>
+                        </div>
+                      )}
+                      {c.status === 'Sent' && (
+                        <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1">
+                          <Eye className="w-3 h-3" /> Metrics
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
@@ -827,12 +829,12 @@ function AutomationsTab() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Email Automations</h2>
-          <p className="text-muted-foreground text-sm mt-0.5">Set up event-driven emails that fire automatically when something happens.</p>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Email Automations</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5">Set up event-driven emails that fire automatically when something happens.</p>
         </div>
-        <Button onClick={() => {
+        <Button size="sm" onClick={() => {
           setForm({ triggerEvent: '', subject: '', content: '', builderData: null, isActive: true });
           setIsEditing(false);
           setShowForm(!showForm);
@@ -842,7 +844,7 @@ function AutomationsTab() {
       </div>
 
       {showForm && (
-        <div className="bg-muted/20 border rounded-xl p-6 space-y-5">
+        <div className="bg-muted/20 border rounded-xl p-4 sm:p-6 space-y-5">
           <h3 className="font-semibold">{isEditing ? 'Edit Automation' : 'Create New Automation'}</h3>
 
           {/* Trigger selector */}
@@ -855,7 +857,7 @@ function AutomationsTab() {
                 <span className="text-xs text-muted-foreground ml-auto">Trigger locked for existing automations</span>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {TRIGGERS.map(t => (
                   <button
                     key={t.id}
@@ -959,54 +961,56 @@ function AutomationsTab() {
 
       {/* Automations Table */}
       <div className="bg-card border rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Trigger</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-            ) : automations.length === 0 ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No automations configured yet.</TableCell></TableRow>
-            ) : automations.map((a: any) => {
-              const trigger = TRIGGERS.find(t => t.id === a.triggerEvent);
-              return (
-                <TableRow key={a._id}>
-                  <TableCell>
-                    <div className="font-medium text-sm">{trigger?.label || a.triggerEvent}</div>
-                    <div className="text-xs text-muted-foreground font-mono">{a.triggerEvent}</div>
-                  </TableCell>
-                  <TableCell className="text-sm font-medium">{a.subject}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                      {a.isActive ? '● Active' : '○ Disabled'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => { setPreviewItem(a); setShowPreview(true); }}
-                        className="h-7 text-xs gap-1"
-                        title="Review Email Draft"
-                      >
-                        <Eye className="w-3 h-3" /> Review Draft
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(a)} title="Edit"><Edit2 className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(a._id)} title="Delete"><Trash2 className="w-3.5 h-3.5" /></Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[620px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Trigger</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              ) : automations.length === 0 ? (
+                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No automations configured yet.</TableCell></TableRow>
+              ) : automations.map((a: any) => {
+                const trigger = TRIGGERS.find(t => t.id === a.triggerEvent);
+                return (
+                  <TableRow key={a._id}>
+                    <TableCell>
+                      <div className="font-medium text-sm">{trigger?.label || a.triggerEvent}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{a.triggerEvent}</div>
+                    </TableCell>
+                    <TableCell className="text-sm font-medium">{a.subject}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {a.isActive ? '● Active' : '○ Disabled'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setPreviewItem(a); setShowPreview(true); }}
+                          className="h-7 text-xs gap-1"
+                          title="Review Email Draft"
+                        >
+                          <Eye className="w-3 h-3" /> Review Draft
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(a)} title="Edit"><Edit2 className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(a._id)} title="Delete"><Trash2 className="w-3.5 h-3.5" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
@@ -1103,12 +1107,12 @@ function LeadsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Audience & Leads</h2>
-          <p className="text-muted-foreground text-sm mt-0.5">{total} total contacts in your CRM</p>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Audience & Leads</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5">{total} total contacts in your CRM</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button variant="outline" size="sm" onClick={() => setShowCreateList(true)}>
             <ListIcon className="w-4 h-4 mr-2" /> New Group
           </Button>
@@ -1243,51 +1247,53 @@ function LeadsTab() {
 
       {/* Contacts Table */}
       <div className="bg-card border rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Tags</TableHead>
-              <TableHead>Score</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Source</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-            ) : contacts.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No contacts found.</TableCell></TableRow>
-            ) : contacts.map((c: any) => (
-              <TableRow key={c._id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/crm/contacts/${c._id}`)}>
-                <TableCell className="font-medium text-sm">{c.email}</TableCell>
-                <TableCell className="text-sm">{[c.firstName, c.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {c.tags?.map((t: string) => (
-                      <span key={t} className="px-1.5 py-0.5 rounded text-xs bg-muted">{t}</span>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{c.leadScore || 0}</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full" onClick={(e) => handleIncrementScore(e, c._id)}>
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${c.status === 'subscribed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                    {c.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground uppercase">{c.source}</TableCell>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[650px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Tags</TableHead>
+                <TableHead>Score</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Source</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              ) : contacts.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No contacts found.</TableCell></TableRow>
+              ) : contacts.map((c: any) => (
+                <TableRow key={c._id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/crm/contacts/${c._id}`)}>
+                  <TableCell className="font-medium text-sm">{c.email}</TableCell>
+                  <TableCell className="text-sm">{[c.firstName, c.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {c.tags?.map((t: string) => (
+                        <span key={t} className="px-1.5 py-0.5 rounded text-xs bg-muted">{t}</span>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">{c.leadScore || 0}</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full" onClick={(e) => handleIncrementScore(e, c._id)}>
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${c.status === 'subscribed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                      {c.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground uppercase">{c.source}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
@@ -1399,7 +1405,8 @@ function BookingsTab() {
       </div>
 
       <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
-        <Table>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[720px]">
           <TableHeader>
             <TableRow>
               <TableHead>Client Name</TableHead>
@@ -1510,7 +1517,8 @@ function BookingsTab() {
               );
             })}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       </div>
     </div>
   );
@@ -1992,6 +2000,7 @@ const TABS = [
 
 export default function AdminCRM() {
   const [activeTab, setActiveTab] = useState('analytics');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const admin = JSON.parse(localStorage.getItem('admin_user') || '{}');
 
@@ -2001,46 +2010,101 @@ export default function AdminCRM() {
     navigate('/admin/login');
   };
 
+  const activeTabMeta = TABS.find(t => t.id === activeTab);
+
   return (
-    <div className="min-h-screen bg-white flex text-[#111]">
-      {/* Sidebar - Resend Dark Mode */}
-      <aside className="w-[240px] border-r border-[#222] bg-black text-[#888] flex flex-col shrink-0">
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
-              <div className="w-2.5 h-2.5 bg-black rounded-sm" />
-            </div>
-            <h1 className="font-semibold text-white tracking-tight text-lg">Eyelight</h1>
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row text-[#111]">
+      {/* Mobile Top Header */}
+      <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-black text-white border-b border-[#222] sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+            <div className="w-2.5 h-2.5 bg-black rounded-sm" />
           </div>
-          <div className="mt-4 text-[11px] font-mono text-gray-400 bg-[#111] p-2 rounded-md border border-[#333] truncate">
-             services@eyelightpublishers.com
-          </div>
+          <span className="font-semibold text-sm tracking-tight">Eyelight CRM</span>
+          <span className="text-[11px] bg-[#222] text-slate-300 px-2 py-0.5 rounded-full font-medium ml-1">
+            {activeTabMeta?.label}
+          </span>
         </div>
-        <nav className="flex-1 px-3 space-y-0.5">
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-1.5 rounded-md hover:bg-[#222] text-slate-300 hover:text-white transition-colors"
+          aria-label="Toggle navigation menu"
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </header>
+
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Desktop static / Mobile slide-over drawer */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 w-[270px] bg-black text-[#888] border-r border-[#222] flex flex-col shrink-0 transition-transform duration-200 ease-in-out
+          lg:static lg:translate-x-0 lg:w-[240px]
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
+        <div className="p-5 flex items-center justify-between border-b border-[#222] lg:border-none">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+                <div className="w-2.5 h-2.5 bg-black rounded-sm" />
+              </div>
+              <h1 className="font-semibold text-white tracking-tight text-lg">Eyelight</h1>
+            </div>
+            <div className="text-[11px] font-mono text-gray-400 truncate">
+              services@eyelightpublishers.com
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="lg:hidden p-1.5 rounded-md hover:bg-[#222] text-gray-400 hover:text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
           {TABS.map(tab => {
             const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${activeTab === tab.id ? 'bg-[#222] text-white shadow-sm' : 'hover:text-white hover:bg-[#111]'}`}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${
+                  isActive ? 'bg-[#222] text-white shadow-sm font-semibold' : 'hover:text-white hover:bg-[#111]'
+                }`}
               >
-                <Icon className="w-4 h-4" strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 2} />
                 {tab.label}
               </button>
             );
           })}
         </nav>
+
         <div className="p-4 border-t border-[#222]">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium hover:text-white hover:bg-[#111] transition-colors">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium hover:text-white hover:bg-[#111] transition-colors"
+          >
             <LogOut className="w-4 h-4" /> Logout
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-[#FAFAFA]">
-        <div className="max-w-[1200px] mx-auto p-10">
+      {/* Main Content Area */}
+      <main className="flex-1 min-w-0 overflow-y-auto bg-[#FAFAFA]">
+        <div className="max-w-[1240px] mx-auto p-4 sm:p-6 lg:p-8">
           {activeTab === 'email' && <EmailTab />}
           {activeTab === 'automations' && <AutomationsTab />}
           {activeTab === 'leads' && <LeadsTab />}
@@ -2050,8 +2114,8 @@ export default function AdminCRM() {
           {activeTab === 'authors' && <AuthorsTab />}
           {activeTab === 'events' && <EventsTab />}
           {activeTab === 'press' && <PressTab />}
-          {activeTab === 'pipeline' && <div className="-m-10"><DealsPipeline /></div>}
-          {activeTab === 'analytics' && <div className="-m-10"><CrmAnalytics /></div>}
+          {activeTab === 'pipeline' && <DealsPipeline />}
+          {activeTab === 'analytics' && <CrmAnalytics />}
           {activeTab === 'activities' && <CrmActivities />}
         </div>
       </main>
