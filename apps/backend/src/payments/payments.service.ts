@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as crypto from 'crypto';
 import { Payment, PaymentStatus } from './schemas/payment.schema.js';
 import { Booking, BookingDocument, BookingStatus } from '../bookings/schemas/booking.schema.js';
+import { Lead } from '../leads/schemas/lead.schema.js';
 
 export interface InitializePaymentParams {
   email: string;
@@ -28,6 +29,7 @@ export class PaymentsService {
     private configService: ConfigService,
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
     @InjectModel(Booking.name) private bookingModel: Model<BookingDocument>,
+    @InjectModel(Lead.name) private leadModel: Model<Lead>,
     private eventEmitter: EventEmitter2,
   ) {
     this.paystackSecretKey = this.configService.get<string>('PAYSTACK_SECRET_KEY') || '';
@@ -36,7 +38,161 @@ export class PaymentsService {
     }
   }
 
-  // Generate an authorization URL using Paystack API
+  // Pre-log payment attempt so abandoned and failed attempts are 100% captured in CRM
+  async recordAttempt(params: {
+    email: string;
+    amount: number;
+    purpose?: string;
+    reference?: string;
+    customerName?: string;
+    customerPhone?: string;
+    metadata?: Record<string, any>;
+  }) {
+    const {
+      email,
+      amount,
+      purpose = 'Payment to Eyelight Publishing',
+      customerName = '',
+      customerPhone = '',
+      metadata = {},
+    } = params;
+
+    const reference = params.reference || `EYELIGHT-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+    const payment = await this.paymentModel.findOneAndUpdate(
+      { reference },
+      {
+        $set: {
+          reference,
+          amount,
+          customerEmail: email,
+          customerName,
+          customerPhone,
+          purpose,
+          metadata,
+          status: PaymentStatus.PENDING,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+
+    // If it's a 1:1 consultation booking, lock slot without collision errors
+    if (metadata?.type === 'booking' && metadata?.slotDate) {
+      try {
+        const slotDate = new Date(metadata.slotDate);
+        const slotId = metadata.slotTime || 'standard-slot';
+        const expiresAt = new Date(Date.now() + 30 * 60000);
+
+        const existingBooking = await this.bookingModel.findOne({
+          slotDate,
+          slotId,
+          status: { $in: [BookingStatus.PENDING, BookingStatus.EXPIRED, BookingStatus.FAILED] },
+        });
+
+        if (existingBooking) {
+          existingBooking.reference = reference;
+          existingBooking.amount = amount;
+          existingBooking.customerEmail = email;
+          existingBooking.status = BookingStatus.PENDING;
+          existingBooking.expiresAt = expiresAt;
+          await existingBooking.save();
+        } else {
+          await this.bookingModel.create({
+            reference,
+            slotDate,
+            slotId,
+            amount,
+            customerEmail: email,
+            expiresAt,
+            status: BookingStatus.PENDING,
+          });
+        }
+      } catch (err: any) {
+        this.logger.warn(`Could not mirror pending booking record: ${err?.message}`);
+      }
+    }
+
+    // Mirror to Lead so admin immediately sees them in Bookings & Leads
+    try {
+      const leadType = metadata?.type === 'booking' ? 'Consultation' : 'CourseRegistration';
+      await this.leadModel.findOneAndUpdate(
+        { email },
+        {
+          $set: {
+            email,
+            name: customerName,
+            phone: customerPhone,
+            type: leadType,
+            metadata: {
+              ...metadata,
+              reference,
+              amount,
+              purpose,
+              status: 'pending_payment',
+            },
+          },
+        },
+        { upsert: true, new: true },
+      );
+    } catch (e: any) {
+      this.logger.warn(`Could not update lead on payment attempt: ${e?.message}`);
+    }
+
+    return { reference, payment };
+  }
+
+  // Mark an attempt as abandoned (e.g. user closed modal) and trigger abandoned email automation
+  async abandonAttempt(reference: string, reason?: string) {
+    if (!reference) return { success: false };
+
+    const payment = await this.paymentModel.findOne({ reference });
+    if (!payment) return { success: false };
+
+    if (payment.status === PaymentStatus.SUCCESS) {
+      return { success: true, payment };
+    }
+
+    payment.status = PaymentStatus.ABANDONED;
+    if (reason) {
+      payment.metadata = { ...(payment.metadata || {}), abandonReason: reason };
+    }
+    await payment.save();
+
+    await this.bookingModel.findOneAndUpdate(
+      { reference, status: BookingStatus.PENDING },
+      { status: BookingStatus.FAILED },
+    );
+
+    if (payment.customerEmail) {
+      await this.leadModel.findOneAndUpdate(
+        { email: payment.customerEmail },
+        { $set: { 'metadata.status': 'abandoned' } },
+      );
+    }
+
+    const purposeLower = (payment.purpose || '').toLowerCase();
+    const isConsult = payment.metadata?.type === 'booking' || purposeLower.includes('consultation');
+
+    this.eventEmitter.emit('payment.abandoned', {
+      email: payment.customerEmail,
+      data: {
+        name: payment.customerName,
+        customerName: payment.customerName,
+        purpose: payment.purpose,
+        amount: payment.amount,
+        reference: payment.reference,
+        metadata: payment.metadata,
+        checkoutUrl: isConsult
+          ? 'https://eyelightpublishers.com/book'
+          : 'https://eyelightpublishers.com/editor-school#register-form',
+      },
+    });
+
+    this.logger.log(`Payment attempt marked as ABANDONED: ${reference} (${payment.customerEmail})`);
+    return { success: true, payment };
+  }
+
+  // Generate an authorization URL using Paystack API (backend redirect mode)
   async initializeTransaction(params: InitializePaymentParams) {
     const {
       email,
@@ -60,47 +216,19 @@ export class PaymentsService {
       this.configService.get<string>('PAYSTACK_CALLBACK_URL') ||
       'https://eyelightpublishers.com/payment/callback';
 
-    // Persist pending payment record in database
-    const payment = new this.paymentModel({
-      user: userId && Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : undefined,
-      project: projectId && Types.ObjectId.isValid(projectId) ? new Types.ObjectId(projectId) : undefined,
+    await this.recordAttempt({
+      email,
       amount,
+      purpose,
       reference,
-      customerEmail: email,
       customerName,
       customerPhone,
-      purpose,
       metadata: {
         ...metadata,
-        customerName,
-        customerPhone,
         userId,
         projectId,
-        purpose,
       },
-      status: PaymentStatus.PENDING,
     });
-    await payment.save();
-
-    // If metadata indicates a booking, also register pending booking record
-    if (metadata?.type === 'booking' && metadata?.slotDate) {
-      try {
-        const slotDate = new Date(metadata.slotDate);
-        const slotId = metadata.slotTime || 'standard-slot';
-        const expiresAt = new Date(Date.now() + 30 * 60000); // 30 min lock
-        await this.bookingModel.create({
-          reference,
-          slotDate,
-          slotId,
-          amount,
-          customerEmail: email,
-          expiresAt,
-          status: BookingStatus.PENDING,
-        });
-      } catch (err: any) {
-        this.logger.warn(`Could not mirror pending booking record: ${err?.message}`);
-      }
-    }
 
     if (!this.paystackSecretKey) {
       this.logger.warn('PAYSTACK_SECRET_KEY not set. Generating mock authorization URL.');
@@ -119,7 +247,7 @@ export class PaymentsService {
         },
         body: JSON.stringify({
           email,
-          amount: Math.round(amount * 100), // Paystack requires amount in kobo (cents)
+          amount: Math.round(amount * 100),
           reference,
           callback_url: finalCallbackUrl,
           metadata: {
@@ -153,14 +281,14 @@ export class PaymentsService {
     }
   }
 
-  // Verify the transaction via Paystack API and update payment status
+  // Verify the transaction via Paystack API with automatic upsert and event dispatch
   async verifyTransaction(reference: string) {
     if (!this.paystackSecretKey) {
       // Mock verification for local/offline testing
       const payment = await this.paymentModel.findOneAndUpdate(
         { reference },
         { status: PaymentStatus.SUCCESS, paidAt: new Date() },
-        { new: true },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
       ).populate('user');
 
       await this.bookingModel.findOneAndUpdate(
@@ -193,56 +321,139 @@ export class PaymentsService {
 
       const data = await response.json();
 
-      if (data.status && data.data.status === 'success') {
+      if (data.status && data.data?.status === 'success') {
+        const paystackData = data.data;
+        const amountNgn = (paystackData.amount || 0) / 100;
+        const customerEmail = paystackData.customer?.email || '';
+        const customerName =
+          paystackData.metadata?.customerName ||
+          paystackData.metadata?.custom_fields?.find((f: any) => f.variable_name === 'customer_name')?.value ||
+          '';
+        const customerPhone = paystackData.metadata?.customerPhone || paystackData.customer?.phone || '';
+        const purpose =
+          paystackData.metadata?.purpose ||
+          paystackData.metadata?.custom_fields?.find((f: any) => f.variable_name === 'purpose')?.value ||
+          'Payment to Eyelight Publishing';
+
         const payment = await this.paymentModel.findOneAndUpdate(
           { reference },
           {
-            status: PaymentStatus.SUCCESS,
-            paidAt: data.data.paid_at ? new Date(data.data.paid_at) : new Date(),
-            channel: data.data.channel,
-            paystackData: data.data,
+            $set: {
+              reference,
+              amount: amountNgn,
+              customerEmail,
+              customerName,
+              customerPhone,
+              purpose,
+              status: PaymentStatus.SUCCESS,
+              paidAt: paystackData.paid_at ? new Date(paystackData.paid_at) : new Date(),
+              channel: paystackData.channel,
+              paystackData: paystackData,
+              metadata: paystackData.metadata || {},
+            },
           },
-          { new: true },
+          { new: true, upsert: true, setDefaultsOnInsert: true },
         ).populate('user');
 
-        // Confirm booking if one exists for this reference
-        await this.bookingModel.findOneAndUpdate(
+        const booking = await this.bookingModel.findOneAndUpdate(
           { reference },
           {
-            status: BookingStatus.CONFIRMED,
-            verifiedAt: new Date(),
-            paystackData: data.data,
+            $set: {
+              status: BookingStatus.CONFIRMED,
+              verifiedAt: new Date(),
+              paystackData: paystackData,
+              customerEmail,
+              amount: amountNgn,
+            },
           },
+          { new: true },
         );
 
-        if (payment) {
-          this.eventEmitter.emit('payment.completed', {
-            email: payment.customerEmail,
-            userId: payment.user ? (payment.user as any)._id : undefined,
-            data: {
-              amount: payment.amount,
-              purpose: payment.purpose,
-              reference: payment.reference,
-              customerName: payment.customerName,
-              metadata: payment.metadata,
-            },
-          });
+        if (customerEmail) {
+          await this.leadModel.findOneAndUpdate(
+            { email: customerEmail },
+            { $set: { 'metadata.status': 'paid', 'metadata.paidAt': new Date() } },
+          );
         }
+
+        const slotDate = booking?.slotDate
+          ? new Date(booking.slotDate).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })
+          : payment.metadata?.slotDate || '';
+        const slotTime = booking?.slotId || payment.metadata?.slotTime || '';
+
+        const eventPayload = {
+          email: customerEmail,
+          userId: payment.user ? (payment.user as any)._id : undefined,
+          data: {
+            amount: amountNgn,
+            purpose,
+            reference,
+            customerName,
+            name: customerName,
+            metadata: payment.metadata,
+            slotDate,
+            slotTime,
+          },
+        };
+
+        this.eventEmitter.emit('payment.completed', eventPayload);
+
+        const purposeLower = purpose.toLowerCase();
+        const typeLower = (payment.metadata?.type || '').toLowerCase();
+        if (typeLower === 'editor-school' || purposeLower.includes('editor') || purposeLower.includes('school')) {
+          this.logger.log(`Emitting course.payment_confirmed for ${customerEmail}`);
+          this.eventEmitter.emit('course.payment_confirmed', eventPayload);
+        } else if (typeLower === 'booking' || purposeLower.includes('consultation')) {
+          this.logger.log(`Emitting consultation.booked for ${customerEmail}`);
+          this.eventEmitter.emit('consultation.booked', eventPayload);
+        }
+
         return { success: true, payment };
       } else {
         const failureStatus =
           data.data?.status === 'abandoned' ? PaymentStatus.ABANDONED : PaymentStatus.FAILED;
 
+        const paystackData = data.data || {};
+        const amountNgn = (paystackData.amount || 0) / 100;
+        const customerEmail = paystackData.customer?.email || '';
+
         const payment = await this.paymentModel.findOneAndUpdate(
           { reference },
-          { status: failureStatus, paystackData: data.data },
-          { new: true },
+          {
+            $set: {
+              reference,
+              amount: amountNgn,
+              customerEmail,
+              status: failureStatus,
+              paystackData: paystackData,
+            },
+          },
+          { new: true, upsert: true, setDefaultsOnInsert: true },
         );
 
         await this.bookingModel.findOneAndUpdate(
           { reference },
           { status: BookingStatus.FAILED, paystackData: data.data },
         );
+
+        if (customerEmail) {
+          this.eventEmitter.emit('payment.abandoned', {
+            email: customerEmail,
+            data: {
+              name: payment.customerName,
+              customerName: payment.customerName,
+              purpose: payment.purpose,
+              amount: payment.amount,
+              reference: payment.reference,
+              metadata: payment.metadata,
+            },
+          });
+        }
 
         return {
           success: false,
@@ -283,43 +494,14 @@ export class PaymentsService {
     this.logger.log(`Paystack webhook received: event=${event}, ref=${data?.reference}`);
 
     if (event === 'charge.success' && data?.reference) {
-      const reference = data.reference;
-
-      const payment = await this.paymentModel.findOneAndUpdate(
-        { reference },
-        {
-          status: PaymentStatus.SUCCESS,
-          paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
-          channel: data.channel,
-          paystackData: data,
-        },
-        { new: true },
-      ).populate('user');
-
-      await this.bookingModel.findOneAndUpdate(
-        { reference },
-        {
-          status: BookingStatus.CONFIRMED,
-          verifiedAt: new Date(),
-          paystackData: data,
-        },
-      );
-
-      if (payment) {
-        this.eventEmitter.emit('payment.completed', {
-          email: payment.customerEmail,
-          userId: payment.user ? (payment.user as any)._id : undefined,
-          data: {
-            amount: payment.amount,
-            purpose: payment.purpose,
-            reference: payment.reference,
-            customerName: payment.customerName,
-            metadata: payment.metadata,
-          },
-        });
-      }
+      await this.verifyTransaction(data.reference);
     }
 
     return { status: true };
+  }
+
+  // Get all payments for Admin CRM & Dashboard
+  async getAllPayments() {
+    return this.paymentModel.find().sort({ createdAt: -1 }).limit(100).exec();
   }
 }

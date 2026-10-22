@@ -159,6 +159,14 @@ function EmailTab() {
     } catch { toast.error('Failed to send campaign'); }
   };
 
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      await CrmApi.updateCampaign(id, { status });
+      toast.success(`Campaign status updated to ${status}`);
+      fetchAll();
+    } catch { toast.error('Failed to update campaign status'); }
+  };
+
   const handleSendDirect = async () => {
     if (!form.subject || !form.content) return toast.error('Subject and content are required');
     const recipients = [...typedEmails];
@@ -660,8 +668,13 @@ function EmailTab() {
       {/* Campaigns List */}
       <div className="bg-card border rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
-          <h3 className="font-semibold text-sm">Email Campaigns</h3>
-          <span className="text-xs text-muted-foreground">{campaigns.length} campaigns</span>
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-sm">Email Campaigns</h3>
+            <span className="text-xs text-muted-foreground">{campaigns.length} campaigns</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={fetchAll} className="h-7 text-xs gap-1">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </Button>
         </div>
         <Table>
           <TableHeader>
@@ -671,7 +684,7 @@ function EmailTab() {
               <TableHead>Audience</TableHead>
               <TableHead>Stats</TableHead>
               <TableHead>Scheduled / Sent</TableHead>
-              <TableHead />
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -705,13 +718,26 @@ function EmailTab() {
                     c.status === 'Scheduled' && c.scheduledFor ? format(new Date(c.scheduledFor), 'PP p') : '—'}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(c)}><Edit2 className="w-3.5 h-3.5" /></Button>
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(c)} title="Edit"><Edit2 className="w-3.5 h-3.5" /></Button>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(c._id)} title="Delete"><Trash2 className="w-3.5 h-3.5" /></Button>
                     {(c.status === 'Draft' || c.status === 'Scheduled' || c.status === 'Failed') && (
                       <Button variant="outline" size="sm" onClick={() => handleSendNow(c._id)} className="h-7 text-xs gap-1">
                         <Send className="w-3 h-3" /> Send Now
                       </Button>
+                    )}
+                    {c.status === 'Sending' && (
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1 text-blue-600" title="Check Resend Live Status">
+                          <RefreshCw className="w-3 h-3" /> Sync Status
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleUpdateStatus(c._id, 'Sent')} className="h-7 text-xs gap-1 text-green-700 hover:bg-green-50" title="Force mark as Sent if already delivered">
+                          Mark Sent
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleUpdateStatus(c._id, 'Draft')} className="h-7 text-xs gap-1 text-slate-700 hover:bg-slate-100" title="Reset to Draft so you can retry">
+                          Reset Draft
+                        </Button>
+                      </div>
                     )}
                     {c.status === 'Sent' && (
                       <Button variant="outline" size="sm" onClick={() => handleViewMetrics(c._id)} className="h-7 text-xs gap-1">
@@ -740,14 +766,17 @@ function AutomationsTab() {
   const [form, setForm] = useState({ triggerEvent: '', subject: '', content: '', builderData: null as any, isActive: true });
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [previewItem, setPreviewItem] = useState<any>(null);
 
   const TRIGGERS = [
+    { id: 'course.payment_confirmed', label: '🎓 Course Registration Confirmed', desc: 'Fires immediately upon payment for The Book Editor Business School' },
+    { id: 'consultation.booked', label: '📅 1:1 Consultation Confirmed', desc: 'Fires when a client books and pays for a 1:1 consultation' },
+    { id: 'payment.abandoned', label: '⏳ Abandoned Checkout Follow-up', desc: 'Fires when a prospect closes checkout without completing payment' },
+    { id: 'payment.completed', label: '💳 General Payment Completed', desc: 'Fires after any successful general store or invoice payment' },
     { id: 'newsletter.subscribed', label: '📧 Newsletter Subscribed', desc: 'Fires when someone subscribes to your newsletter' },
     { id: 'user.registered', label: '👤 User Registered', desc: 'Fires when an author account is created' },
-    { id: 'payment.completed', label: '💳 Payment Completed', desc: 'Fires after a successful payment' },
     { id: 'manuscript.submitted', label: '📝 Manuscript Submitted', desc: 'Fires when an author submits their manuscript' },
     { id: 'project.status_changed', label: '🔄 Project Status Changed', desc: 'Fires when a manuscript status is updated' },
-    { id: 'consultation.booked', label: '📅 Consultation Booked', desc: 'Fires when someone books a consultation' },
   ];
 
   const fetchAutomations = useCallback(async () => {
@@ -907,16 +936,23 @@ function AutomationsTab() {
       )}
 
       {/* Preview Dialog */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+      <Dialog open={showPreview} onOpenChange={(open) => { setShowPreview(open); if (!open) setPreviewItem(null); }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Automation Email Preview</DialogTitle></DialogHeader>
           <div className="mt-2 p-5 bg-white border rounded-xl shadow-sm">
             <div className="text-sm text-muted-foreground border-b pb-3 mb-4 space-y-1">
               <div><strong>From:</strong> Eyelight Publishing &lt;services@eyelightpublishers.com&gt;</div>
-              <div><strong>Subject:</strong> {form.subject || '(No Subject)'}</div>
-              <div><strong>Trigger:</strong> {selectedTrigger?.label || form.triggerEvent}</div>
+              <div><strong>Subject:</strong> {previewItem ? previewItem.subject : form.subject || '(No Subject)'}</div>
+              <div><strong>Trigger:</strong> {TRIGGERS.find(t => t.id === (previewItem ? previewItem.triggerEvent : form.triggerEvent))?.label || (previewItem ? previewItem.triggerEvent : form.triggerEvent)}</div>
             </div>
-            <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.content) || '<em>No content yet...</em>' }} />
+            <div
+              className="prose max-w-none text-sm"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  (previewItem ? previewItem.content : form.content) || '<em>No content yet...</em>'
+                )
+              }}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -929,7 +965,7 @@ function AutomationsTab() {
               <TableHead>Trigger</TableHead>
               <TableHead>Subject</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead />
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -945,16 +981,25 @@ function AutomationsTab() {
                     <div className="font-medium text-sm">{trigger?.label || a.triggerEvent}</div>
                     <div className="text-xs text-muted-foreground font-mono">{a.triggerEvent}</div>
                   </TableCell>
-                  <TableCell className="text-sm">{a.subject}</TableCell>
+                  <TableCell className="text-sm font-medium">{a.subject}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                       {a.isActive ? '● Active' : '○ Disabled'}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(a)}><Edit2 className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(a._id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setPreviewItem(a); setShowPreview(true); }}
+                        className="h-7 text-xs gap-1"
+                        title="Review Email Draft"
+                      >
+                        <Eye className="w-3 h-3" /> Review Draft
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(a)} title="Edit"><Edit2 className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(a._id)} title="Delete"><Trash2 className="w-3.5 h-3.5" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -1894,22 +1939,22 @@ function PressTab() {
 // ─── Main Admin CRM Shell ─────────────────────────────────────────────────────
 
 const TABS = [
+  { id: 'analytics', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'email', label: 'Email Center', icon: Mail },
   { id: 'automations', label: 'Automations', icon: Zap },
   { id: 'leads', label: 'Audience & Leads', icon: Users },
-  { id: 'bookings', label: 'Bookings', icon: CalendarDays },
+  { id: 'bookings', label: 'Bookings & Cohorts', icon: CalendarDays },
+  { id: 'pipeline', label: 'Sales Pipeline', icon: Send },
   { id: 'forms', label: 'Forms & Briefs', icon: FileText },
   { id: 'production', label: 'Production Board', icon: BookOpen },
-  { id: 'authors', label: 'Author Directory', icon: LayoutDashboard },
+  { id: 'authors', label: 'Author Directory', icon: UserPlus },
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'press', label: 'Press & Blog', icon: BookOpen },
-  { id: 'pipeline', label: 'Sales Pipeline', icon: Send },
-  { id: 'analytics', label: 'CRM Analytics', icon: LayoutDashboard },
   { id: 'activities', label: 'Activity Log', icon: ListIcon },
 ];
 
 export default function AdminCRM() {
-  const [activeTab, setActiveTab] = useState('email');
+  const [activeTab, setActiveTab] = useState('analytics');
   const navigate = useNavigate();
   const admin = JSON.parse(localStorage.getItem('admin_user') || '{}');
 

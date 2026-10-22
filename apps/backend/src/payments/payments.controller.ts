@@ -31,6 +31,29 @@ export class PaymentsController {
     });
   }
 
+  @Post('record-attempt')
+  async recordPaymentAttempt(@Body() body: any) {
+    return this.paymentsService.recordAttempt({
+      email: body.email,
+      amount: Number(body.amount),
+      purpose: body.purpose,
+      reference: body.reference,
+      customerName: body.customerName,
+      customerPhone: body.customerPhone,
+      metadata: body.metadata,
+    });
+  }
+
+  @Post('abandon')
+  async abandonPayment(@Body() body: { reference: string; reason?: string }) {
+    return this.paymentsService.abandonAttempt(body.reference, body.reason);
+  }
+
+  @Get('all')
+  async getAllPayments() {
+    return this.paymentsService.getAllPayments();
+  }
+
   @Get('verify/:reference')
   async verifyPayment(@Param('reference') reference: string) {
     return this.paymentsService.verifyTransaction(reference);

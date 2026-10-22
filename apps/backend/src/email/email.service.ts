@@ -32,6 +32,33 @@ export class EmailService {
   }
 
   async getAllCampaigns() {
+    // Auto-heal any campaigns stuck in SENDING for over 2 minutes
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const stuckCampaigns = await this.emailModel.find({
+      status: EmailStatus.SENDING,
+      updatedAt: { $lt: twoMinutesAgo },
+    });
+
+    for (const c of stuckCampaigns) {
+      if (c.resendBroadcastId) {
+        try {
+          const { data } = await this.resendClient.client.broadcasts.get(c.resendBroadcastId);
+          if (data?.status === 'sent') {
+            c.status = EmailStatus.SENT;
+            c.sentAt = new Date();
+            c.stats = { sent: 1, failed: 0, queued: 0 };
+          } else {
+            c.status = EmailStatus.DRAFT;
+          }
+        } catch {
+          c.status = EmailStatus.DRAFT;
+        }
+      } else {
+        c.status = EmailStatus.DRAFT;
+      }
+      await c.save();
+    }
+
     return this.emailModel.find().sort({ createdAt: -1 }).exec();
   }
 
@@ -41,8 +68,9 @@ export class EmailService {
     }
     if (data.scheduledFor) {
       data.status = EmailStatus.SCHEDULED;
-    } else if (data.status !== EmailStatus.SENT) {
-      data.status = EmailStatus.DRAFT;
+    } else if (data.status) {
+      // Respect explicitly passed status
+      data.status = data.status;
     }
     const campaign = await this.emailModel.findByIdAndUpdate(id, data, { new: true });
     if (!campaign) throw new NotFoundException('Campaign not found');

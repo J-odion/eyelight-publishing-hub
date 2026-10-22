@@ -59,6 +59,18 @@ export const PaymentsApi = {
   }) => api.post('/payments/initialize', data),
   verify: (reference: string) =>
     api.get(`/payments/verify/${reference}`),
+  recordAttempt: (data: {
+    amount: number;
+    email: string;
+    reference?: string;
+    purpose?: string;
+    customerName?: string;
+    customerPhone?: string;
+    metadata?: Record<string, any>;
+  }) => api.post('/payments/record-attempt', data),
+  abandon: (reference: string, reason?: string) =>
+    api.post('/payments/abandon', { reference, reason }),
+  getAll: () => api.get('/payments/all'),
 };
 
 // ─── Admin: Email Campaigns & Email Center ───────────────────

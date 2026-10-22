@@ -1,3 +1,5 @@
+import { PaymentsApi } from './api.js';
+
 export interface PaystackCheckoutOptions {
   email: string;
   amount: number; // in NGN (naira)
@@ -59,6 +61,21 @@ export async function payWithPaystack(options: PaystackCheckoutOptions) {
   const generatedRef =
     reference || `EYELIGHT-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
+  let isPaid = false;
+
+  // Pre-record pending attempt in database so abandoned attempts are 100% captured in CRM
+  try {
+    PaymentsApi.recordAttempt({
+      email: email.trim(),
+      amount,
+      reference: generatedRef,
+      purpose,
+      customerName,
+      customerPhone,
+      metadata,
+    }).catch((err) => console.warn('Could not pre-log payment attempt:', err));
+  } catch {}
+
   const handler = (window as any).PaystackPop.setup({
     key: PAYSTACK_PUBLIC_KEY,
     email: email.trim(),
@@ -75,9 +92,14 @@ export async function payWithPaystack(options: PaystackCheckoutOptions) {
       ...metadata,
     },
     callback: function (response: { reference: string }) {
+      isPaid = true;
       onSuccess(response.reference || generatedRef);
     },
     onClose: function () {
+      if (!isPaid) {
+        // If modal was closed without completing payment, record as abandoned in CRM
+        PaymentsApi.abandon(generatedRef, 'modal_closed_without_payment').catch(() => {});
+      }
       if (onClose) onClose();
     },
   });

@@ -380,6 +380,7 @@ const Book = () => {
                   label="Full name"
                   value={form.name}
                   onChange={(v) => setForm({ ...form, name: v })}
+                  onBlur={() => saveBookingLead('incomplete')}
                   placeholder="Jane Doe"
                 />
                 <Field
@@ -387,12 +388,14 @@ const Book = () => {
                   type="email"
                   value={form.email}
                   onChange={(v) => setForm({ ...form, email: v })}
+                  onBlur={() => saveBookingLead('incomplete')}
                   placeholder="jane@example.com"
                 />
                 <Field
                   label="Phone (WhatsApp)"
                   value={form.phone}
                   onChange={(v) => setForm({ ...form, phone: v })}
+                  onBlur={() => saveBookingLead('incomplete')}
                   placeholder="+234 ..."
                 />
               </div>
@@ -404,6 +407,7 @@ const Book = () => {
                   rows={4}
                   value={form.note}
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
+                  onBlur={() => saveBookingLead('incomplete')}
                   placeholder="What would you like to discuss?"
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
                 />
@@ -505,12 +509,14 @@ const Field = ({
   label,
   value,
   onChange,
+  onBlur,
   type = "text",
   placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   type?: string;
   placeholder?: string;
 }) => (
@@ -522,6 +528,7 @@ const Field = ({
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      onBlur={onBlur}
       placeholder={placeholder}
       className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
     />

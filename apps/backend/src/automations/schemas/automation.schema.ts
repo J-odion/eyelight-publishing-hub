@@ -10,6 +10,8 @@ export enum AutomationEvent {
   MANUSCRIPT_SUBMITTED = 'manuscript.submitted',
   PROJECT_STATUS_CHANGED = 'project.status_changed',
   CONSULTATION_BOOKED = 'consultation.booked',
+  COURSE_PAYMENT_CONFIRMED = 'course.payment_confirmed',
+  PAYMENT_ABANDONED = 'payment.abandoned',
 }
 
 @Schema({ timestamps: true })

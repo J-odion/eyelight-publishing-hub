@@ -33,41 +33,72 @@ export class AutomationListener {
         return;
       }
 
+      // Find or create contact
       let contact = await this.contactModel.findOne({ email: payload.email });
+      const fullName = payload.data?.customerName || payload.data?.name || '';
+      const firstName = fullName ? fullName.split(' ')[0] : (contact?.firstName || 'there');
+      const lastName = fullName ? fullName.split(' ').slice(1).join(' ') : (contact?.lastName || '');
 
-      // For newsletter.subscribed, auto-create the contact if they don't exist in CRM yet
-      if (!contact && eventName === AutomationEvent.NEWSLETTER_SUBSCRIBED) {
-        contact = await this.contactModel.create({
-          email: payload.email,
-          firstName: payload.data?.name?.split(' ')[0] || '',
-          lastName: payload.data?.name?.split(' ').slice(1).join(' ') || '',
-          tags: ['newsletter'],
-          source: 'signup',
-          status: 'subscribed',
-        });
-        this.logger.log(`Auto-created CRM contact for newsletter subscriber: ${payload.email}`);
+      if (!contact) {
+        try {
+          contact = await this.contactModel.create({
+            email: payload.email,
+            firstName: firstName !== 'there' ? firstName : '',
+            lastName,
+            tags: [eventName.split('.')[0]],
+            source: eventName,
+            status: 'subscribed',
+          });
+          this.logger.log(`Auto-created CRM contact for ${payload.email} (${eventName})`);
+        } catch (e: any) {
+          this.logger.warn(`Could not auto-create contact: ${e?.message}`);
+        }
       }
 
-      if (!contact || contact.status !== 'subscribed') {
-        this.logger.log(`Contact not found or not subscribed for email ${payload.email}. Skipping automation.`);
+      // Check unsubscribed only for newsletter events, never for transactional confirmations
+      if (contact && contact.status === 'unsubscribed' && eventName === AutomationEvent.NEWSLETTER_SUBSCRIBED) {
+        this.logger.log(`Contact ${payload.email} is unsubscribed. Skipping newsletter.`);
         return;
       }
 
-      // Instead of queueing a SendJob locally, send immediately via MailService
+      const recipientName = firstName !== 'there' ? firstName : (contact?.firstName || 'there');
+      const recipientFullName = fullName || (contact ? `${contact.firstName} ${contact.lastName}`.trim() : recipientName);
+
+      // Context variables
+      const slotDate = payload.data?.slotDate || payload.data?.metadata?.slotDate || 'Scheduled Date';
+      const slotTime = payload.data?.slotTime || payload.data?.metadata?.slotTime || 'Scheduled Time';
+      const amountFormatted = payload.data?.amount ? `₦${Number(payload.data.amount).toLocaleString()}` : '';
+      const purpose = payload.data?.purpose || 'Eyelight Publishing';
+      const reference = payload.data?.reference || '';
+      const checkoutUrl = payload.data?.checkoutUrl || (
+        purpose.toLowerCase().includes('consultation') 
+          ? 'https://eyelightpublishers.com/book' 
+          : 'https://eyelightpublishers.com/editor-school#register-form'
+      );
+
       let html = juice(automation.content);
-      html = html.replace(/\{\{firstName\}\}/g, contact.firstName || '');
-      html = html.replace(/\{\{lastName\}\}/g, contact.lastName || '');
+      html = html.replace(/\{\{name\}\}/g, recipientFullName);
+      html = html.replace(/\{\{firstName\}\}/g, recipientName);
+      html = html.replace(/\{\{lastName\}\}/g, lastName);
+      html = html.replace(/\{\{slotDate\}\}/g, slotDate);
+      html = html.replace(/\{\{slotTime\}\}/g, slotTime);
+      html = html.replace(/\{\{amount\}\}/g, amountFormatted);
+      html = html.replace(/\{\{purpose\}\}/g, purpose);
+      html = html.replace(/\{\{reference\}\}/g, reference);
+      html = html.replace(/\{\{checkoutUrl\}\}/g, checkoutUrl);
 
       let subject = automation.subject;
-      subject = subject.replace(/\{\{firstName\}\}/g, contact.firstName || '');
+      subject = subject.replace(/\{\{name\}\}/g, recipientName);
+      subject = subject.replace(/\{\{firstName\}\}/g, recipientName);
+      subject = subject.replace(/\{\{purpose\}\}/g, purpose);
 
       await this.mailService.send({
-        to: contact.email,
+        to: payload.email,
         subject,
         html,
       });
 
-      this.logger.log(`Sent automation email for ${payload.email} on event ${eventName}`);
+      this.logger.log(`Sent automation email [${subject}] to ${payload.email} for ${eventName}`);
     } catch (error) {
       this.logger.error(`Error processing automation event ${eventName}`, error);
     }
