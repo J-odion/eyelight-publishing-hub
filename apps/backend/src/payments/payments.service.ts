@@ -504,4 +504,59 @@ export class PaymentsService {
   async getAllPayments() {
     return this.paymentModel.find().sort({ createdAt: -1 }).limit(100).exec();
   }
+
+  // Admin: Manual reconciliation / mark as paid (e.g., offline bank transfer)
+  async manualMarkPaid(data: {
+    email: string;
+    name?: string;
+    phone?: string;
+    purpose?: string;
+    amount?: number;
+    type?: string;
+    sendEmail?: boolean;
+  }) {
+    const reference = `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const amount = Number(data.amount) || 15500;
+    const purpose = data.purpose || 'The Book Editor Business School (December Cohort)';
+    const type = data.type || 'editor-school';
+
+    const payment = await this.paymentModel.create({
+      reference,
+      amount,
+      customerEmail: data.email,
+      customerName: data.name || '',
+      customerPhone: data.phone || '',
+      purpose,
+      status: PaymentStatus.SUCCESS,
+      paidAt: new Date(),
+      channel: 'bank_transfer',
+      metadata: { type, manual: true },
+    });
+
+    await this.leadModel.findOneAndUpdate(
+      { email: data.email },
+      {
+        $set: {
+          'metadata.status': 'paid',
+          'metadata.paidAt': new Date(),
+          'metadata.paymentReference': reference,
+        },
+      },
+    );
+
+    if (data.sendEmail) {
+      this.eventEmitter.emit('course.payment_confirmed', {
+        email: data.email,
+        data: {
+          amount,
+          purpose,
+          reference,
+          customerName: data.name || '',
+          name: data.name || '',
+        },
+      });
+    }
+
+    return { success: true, payment };
+  }
 }

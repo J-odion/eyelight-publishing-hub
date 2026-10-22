@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi, EventsApi, PressApi } from '@/lib/api';
+import { CrmApi, LeadsApi, ProjectsApi, AuthorsApi, EventsApi, PressApi, PaymentsApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1315,6 +1315,31 @@ function BookingsTab() {
     fetchLeads();
   }, [fetchLeads]);
 
+  const handleMarkPaid = async (b: any) => {
+    const isCourse = b.type === 'CourseRegistration';
+    const amount = isCourse ? 15500 : 25000;
+    const purpose = isCourse ? 'The Book Editor Business School (December Cohort)' : '1:1 Consultation';
+    const type = isCourse ? 'editor-school' : 'booking';
+
+    if (!window.confirm(`Mark ${b.name || b.email} as PAID (₦${amount.toLocaleString()})? This will update Won Revenue and Paid Students in your Dashboard and send the confirmation email.`)) return;
+
+    try {
+      await PaymentsApi.markPaid({
+        email: b.email,
+        name: b.name,
+        phone: b.phone,
+        amount,
+        purpose,
+        type,
+        sendEmail: true,
+      });
+      toast.success(`Payment recorded for ${b.name || b.email}! Confirmation email sent.`);
+      fetchLeads();
+    } catch {
+      toast.error('Failed to mark as paid');
+    }
+  };
+
   const relevantLeads = allLeads.filter((l: any) => {
     if (filterType === 'all') return l.type === 'Consultation' || l.type === 'CourseRegistration';
     return l.type === filterType;
@@ -1393,6 +1418,7 @@ function BookingsTab() {
             ) : relevantLeads.map((b: any) => {
               const isConsultation = b.type === 'Consultation';
               const status = b.metadata?.status || 'pending_payment';
+              const isPaid = status === 'paid';
               const cleanPhone = b.phone ? b.phone.replace(/[^0-9]/g, '') : '';
               const whatsappLink = cleanPhone ? `https://wa.me/${cleanPhone.startsWith('0') ? '234' + cleanPhone.slice(1) : cleanPhone}` : null;
 
@@ -1433,22 +1459,33 @@ function BookingsTab() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {status === 'complete' || status === 'completed' ? (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        Completed
+                    {isPaid ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Paid / Confirmed
                       </span>
-                    ) : status === 'pending_payment' ? (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        Pending Payment
+                    ) : status === 'complete' || status === 'completed' || status === 'registered_unpaid' || status === 'pending_payment' ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                        Registered (Awaiting Payment)
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
                         Incomplete / Abandoned
                       </span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {!isPaid && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMarkPaid(b)}
+                          className="h-7 text-xs gap-1 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300"
+                          title="Record offline/transfer payment"
+                        >
+                          <Check className="w-3 h-3" /> Mark Paid
+                        </Button>
+                      )}
                       {whatsappLink && (
                         <a
                           href={whatsappLink}

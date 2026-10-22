@@ -71,6 +71,8 @@ export const PaymentsApi = {
   abandon: (reference: string, reason?: string) =>
     api.post('/payments/abandon', { reference, reason }),
   getAll: () => api.get('/payments/all'),
+  markPaid: (data: { email: string; name?: string; phone?: string; purpose?: string; amount?: number; type?: string; sendEmail?: boolean }) =>
+    api.post('/payments/mark-paid', data),
 };
 
 // ─── Admin: Email Campaigns & Email Center ───────────────────

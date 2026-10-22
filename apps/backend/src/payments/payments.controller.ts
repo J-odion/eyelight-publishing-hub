@@ -59,6 +59,11 @@ export class PaymentsController {
     return this.paymentsService.verifyTransaction(reference);
   }
 
+  @Post('mark-paid')
+  async markPaymentPaid(@Body() body: any) {
+    return this.paymentsService.manualMarkPaid(body);
+  }
+
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
   async handleWebhook(

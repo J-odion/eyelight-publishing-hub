@@ -413,7 +413,7 @@ export default function EditorSchool() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const saveLeadToCRM = async (status: 'incomplete' | 'complete') => {
+  const saveLeadToCRM = async (status: 'incomplete' | 'registered_unpaid' | 'paid') => {
     if (!formData.email || !formData.email.includes("@")) return;
     try {
       await LeadsApi.submitCourseRegistration({
@@ -441,7 +441,7 @@ export default function EditorSchool() {
     }
 
     setIsSubmitting(true);
-    await saveLeadToCRM('complete');
+    await saveLeadToCRM('registered_unpaid');
 
     setTimeout(() => {
       setIsSubmitting(false);
@@ -469,8 +469,9 @@ export default function EditorSchool() {
         customerName: formData.name.trim(),
         customerPhone: formData.phone.trim(),
       },
-      onSuccess: (reference) => {
+      onSuccess: async (reference) => {
         setIsPayingWithPaystack(false);
+        await saveLeadToCRM('paid');
         window.location.href = `/payment/callback?reference=${reference}&type=editor-school`;
       },
       onClose: () => {
